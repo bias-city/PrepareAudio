@@ -99,20 +99,26 @@
         <div class="ed-toolbar">
           <button class="icon-btn play" id="ed-play" title="Abspielen oder anhalten (Leertaste)" data-i18n-title="page.ed.play.title">▶</button>
           <span class="ed-time" id="ed-time">00:00:00.0</span>
-          <span class="ed-sep"></span>
+          <span class="pillgroup">
           <button class="btn small" data-op="split" title="Am Playhead trennen (S)" data-i18n-title="page.ed.split.title" data-i18n="page.ed.split">Trennen</button>
           <button class="btn small" data-op="merge" title="Mit dem nächsten Clip zusammenführen (J)" data-i18n-title="page.ed.join.title" data-i18n="page.ed.join">Zusammenführen</button>
           <button class="btn small" data-op="delete" title="Löschen oder wiederbringen (Entf)" data-i18n-title="page.ed.delete.title" data-i18n="page.ed.delete">Löschen</button>
+          </span>
+          <span class="pillgroup">
           <button class="btn small" data-op="stereo" title="Auf Stereo schieben (↑)" data-i18n-title="page.ed.stereo.title" data-i18n="page.ed.stereo">Stereo</button>
           <button class="btn small" data-op="mono" title="Auf Mono schieben (↓)" data-i18n-title="page.ed.mono.title" data-i18n="page.ed.mono">Mono</button>
-          <span class="ed-sep"></span>
+          </span>
+          <span class="pillgroup">
           <button class="icon-btn" data-op="undo" title="Rückgängig (⌘Z)" data-i18n-title="page.ed.undo.title">↶</button>
           <button class="icon-btn" data-op="redo" title="Wiederholen (⇧⌘Z)" data-i18n-title="page.ed.redo.title">↷</button>
+          </span>
           <span class="ed-grow"></span>
           <button class="btn small ghost" id="ed-reset" title="Alle Bearbeitungen verwerfen" data-i18n-title="page.ed.reset.title" data-i18n="page.ed.reset" hidden>Vorschlag wiederherstellen</button>
+          <span class="pillgroup">
           <button class="icon-btn" data-op="zoom-out" title="Verkleinern (⌘−)" data-i18n-title="page.ed.zoomOut.title">−</button>
           <button class="icon-btn" data-op="zoom-in" title="Vergrößern (⌘+)" data-i18n-title="page.ed.zoomIn.title">+</button>
           <button class="btn small ghost" data-op="fit" title="Ganzen Tag zeigen (0)" data-i18n-title="page.ed.fit.title" data-i18n="page.ed.fit">Tag</button>
+          </span>
         </div>
         <div class="ed-days" id="ed-days"></div>
         <canvas class="ed-overview" id="ed-overview" title="Übersicht: klicken oder ziehen zum Verschieben" data-i18n-title="page.ed.overview.title"></canvas>

@@ -2,6 +2,7 @@
 """Erfundenes Demo-Material für PrepareAudio: Bildschirmfotos, Tests, App-Prüfung.
 
   python3 scripts/demo-material.py <zielordner>            klein (82 MB), für die App-Prüfung
+  python3 scripts/demo-material.py <zielordner> --kurz     je Sender eine Datei von 100 s, Mastern 20 s
   python3 scripts/demo-material.py <zielordner> --gross    Teile über 100 MiB (ca. 560 MB): so
       gelten sie der App als «volle Teile» und die Liste zeigt keinen Hinweis — für Bildschirmfotos
 
@@ -28,6 +29,7 @@ from pathlib import Path
 import numpy as np
 
 GROSS = "--gross" in sys.argv
+KURZ = "--kurz" in sys.argv  # je Sender EINE Datei von 100 s: Test mit kurzen Aufnahmen
 SR = 48_000 if GROSS else 24_000
 DATUM = "2026-05-12"
 START = (10, 15, 0)  # Uhrzeit Sender 1
@@ -35,6 +37,8 @@ MIN = 60 * SR
 # gross: 32-bit float, 9,5 min je Teil = 104 MiB; klein: 16 bit, 4,5 min je Teil
 TEILE = [int(9.5 * MIN), int(9.5 * MIN), 6 * MIN] if GROSS else [int(4.5 * MIN), int(4.5 * MIN), 3 * MIN]
 GETRENNT = (10, 16) if GROSS else (5, 8)  # Minuten mit zwei getrennten Gesprächen
+if KURZ:
+    TEILE, GETRENNT = [100 * SR], (99, 99)
 VERSATZ_S = 3.9
 DRIFT = 4e-6
 
@@ -160,7 +164,7 @@ def main() -> None:
     sender(ziel / "aufnahmen", "2", mic2_eigen, start1 + VERSATZ_S)
 
     print("Mastern:")
-    stueck = slice(30 * SR, 150 * SR)
+    stueck = slice(10 * SR, 30 * SR) if KURZ else slice(30 * SR, 150 * SR)
     stereo = np.stack([mic1[stueck], mic2[stueck]], axis=1).reshape(-1)
     schreibe_wav(ziel / "mastern" / "gespraech-leise.wav", stereo * 0.12, kanaele=2)
     schreibe_wav(ziel / "mastern" / "gespraech-laut.wav", np.tanh(mic1[stueck] * 4) * 0.95)

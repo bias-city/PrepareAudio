@@ -326,3 +326,84 @@ body[data-mode="master"] .merge-only, body[data-mode="master"] .sync-only { disp
 .lang-switch button:hover { background: var(--hover); }
 .lang-switch button[aria-pressed="true"] { background: var(--active); font-weight: 600; }
 .lang-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ================= Layout nach Fenstergrösse (2026-09-19) =================
+   Leitfrage je Element: braucht es das, und wo stünde es in einer Mac-App?
+   – Der Fenstertitel nennt die App schon: Logo und Name weichen im schmalen Fenster.
+   – Moduswahl = ein zusammenhängendes Segment-Steuerelement in der Werkzeugleiste.
+   – Seltene Aktionen (neu scannen, anderer Ordner) = Symbolknöpfe mit Tooltip.
+   – Kennzahlen = eine Statuszeile statt vier Kacheln; der Inhalt beginnt oben.
+   – Listen = Zeilen mit Haarlinien über die ganze Breite, keine Einzelkarten.
+   – Bedienhinweise gehören in die Hilfe; im kleinen Fenster entfallen sie. */
+
+/* Werkzeugleiste: eine Zeile, nie umbrechen */
+.top { flex-wrap: nowrap; gap: var(--s3); }
+.brand { flex: 0 1 auto; }
+/* Rahmen statt innerem Schatten: die Fläche des aktiven Segments würde den Schatten überdecken */
+.tabs { gap: 0; margin-left: auto; height: var(--pill-h); box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 9999px; overflow: hidden; background: var(--panel); color: var(--ink); box-shadow: none; }
+.tabs button { box-shadow: none; border-radius: 0; background: transparent; padding: 0 12px 0 6px; min-width: 0; height: 100%; }
+.tabs button + button { border-left: 1.5px solid var(--ink); }
+.tabs button span:last-child { overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
+.top-actions { gap: 6px; }
+.top-actions .btn::before { content: ""; width: 13px; height: 13px; flex: none; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+.top-actions .btn[id$="rescan"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36L21 8'/%3E%3Cpath d='M21 3v5h-5'/%3E%3C/svg%3E"); }
+.top-actions .btn[id$="pick-again"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E"); }
+@media (max-width: 980px) {
+  .top-actions .btn { font-size: 0; gap: 0; width: 32px; padding: 0; }
+}
+@media (max-width: 720px) {
+  .brand h1 { display: none; }
+}
+@media (max-width: 600px) {
+  .brand { display: none; }
+  .tabs { margin-left: 0; }
+}
+
+/* Inhalt über die ganze Fensterbreite */
+.results { max-width: none; padding: var(--s3) var(--s4) var(--s5); }
+
+/* Statuszeile statt Kacheln */
+.summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--s4); margin-bottom: var(--s3); }
+.stat, .stat.lead { display: flex; align-items: baseline; gap: 5px; padding: 0; border: 0; border-radius: 0; background: none; min-width: 0; }
+.stat .n { font-size: var(--fs-2); font-weight: 650; letter-spacing: 0; white-space: nowrap; }
+.stat .of { font-size: var(--fs-1); }
+.stat .l { font-size: var(--fs-1); }
+.stat.lead .n, .stat.lead .l { color: var(--accent); }
+.roots { flex: 1 1 100%; min-width: 0; }
+
+/* Listen als Zeilen mit Haarlinien */
+.rec, .pair { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; background: transparent; padding: 9px var(--s2) 9px var(--s1); }
+.day + .rec, .section-title + .pairs .pair:first-child, .pairs .pair:first-child { border-top: 1px solid var(--line); }
+.rec.off { background: transparent; }
+.rec.active { border-color: var(--line); box-shadow: none; background: var(--accent-soft); }
+.rec.clickable:hover { background: var(--hover); }
+.pairs { gap: 0; }
+.day { margin: var(--s4) 2px 6px; }
+.extras { border-radius: var(--radius); }
+
+/* Werkzeuge der Timeline als Segmentgruppen */
+.ed-toolbar { gap: 6px 8px; }
+.ed-toolbar .ed-grow { display: none; }
+.ed-toolbar .pillgroup:last-child { margin-left: auto; } /* Zoom bleibt rechts, auch nach dem Umbruch */
+.pillgroup { display: inline-flex; height: var(--pill-h); box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 9999px; overflow: hidden; background: var(--panel); color: var(--ink); }
+.pillgroup > button { box-shadow: none; border-radius: 0; background: transparent; height: 100%; }
+.pillgroup > button + button { border-left: 1.5px solid var(--ink); }
+.pillgroup > button:hover:not(:disabled) { background: var(--hover); }
+.pillgroup > button:disabled { opacity: 1; color: var(--faint); }
+.pillgroup > .icon-btn { width: 30px; }
+.legend { font-size: 11.5px; gap: 4px 14px; margin-top: 8px; }
+
+/* Leerzustand und Abschluss: nie unter der Info-Pille, im niedrigen Fenster kompakt */
+.empty, .finished { padding: var(--s4) var(--s4) 52px; }
+@media (max-height: 640px), (max-width: 640px) {
+  .dropzone { padding: 22px 22px 18px; }
+  .illu { width: 170px; margin-bottom: 8px; }
+  .dropzone h2 { font-size: 16px; }
+  .dropzone > p { margin-bottom: 12px; font-size: var(--fs-1); }
+  .dropzone .fine { margin-top: 12px; }
+  .ed-hint { display: none; }
+  .finished-card { padding: 22px 22px 18px; }
+}
+@media (max-height: 520px) {
+  .dropzone .fine { display: none; }
+}

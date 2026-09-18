@@ -182,7 +182,7 @@
     E.summary.innerHTML = `
       <div class="stat lead"><div class="n">${signed(P.target_lufs, 0)}</div><div class="l">${esc(tr('master.stat.target', { kbps: P.bitrate_kbps, peak: signed(P.ceiling_dbtp) }))}</div></div>
       <div class="stat"><div class="n">${P.files.length}</div><div class="l">${esc(trn('master.stat.files', P.files.length, { dur: fmtDur(total) }))}</div></div>
-      <div class="stat"><div class="n" style="font-size:16px;line-height:32px">${esc(range)}</div><div class="l">${esc(tr('master.stat.range'))}</div></div>
+      <div class="stat"><div class="n">${esc(range)}</div><div class="l">${esc(tr('master.stat.range'))}</div></div>
       <div class="roots" title="${esc(P.roots.join('\n'))}">${esc(tr('master.analysed', { roots: P.roots.join(' · ') }))}</div>`;
 
     let html = '';
