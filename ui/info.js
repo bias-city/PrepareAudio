@@ -8,7 +8,10 @@
   const q = (sel) => document.querySelector(sel);
   const modal = q('#info');
   const PUBLISHER_SITE = 'https://bias.city/prepareaudio';
-  const SOURCE_URL = 'https://github.com/BenPohlBasel/PrepareAudio';
+  const SOURCE_URL = 'https://github.com/bias-city/PrepareAudio';
+  const EXCEPTION_URL = `${SOURCE_URL}/blob/main/LICENSE-EXCEPTION`;
+  const PRIVACY_URL = `${PUBLISHER_SITE}/privacy.html`;
+  let channel = 'dmg'; // 'mas' in the Mac App Store build (Rust command `channel`)
   const DEFAULT_LICENSE = 'AGPL-3.0-or-later';
   let data = null;
   let loading = null;
@@ -29,13 +32,13 @@
     q('#info-version').textContent = tr('info.version', { version: (app && app.version) || '–', license });
     q('#info-about').innerHTML = `
       <p>${esc(tr('info.about'))}</p>
-      <div class="info-links">${link(PUBLISHER_SITE, tr('info.link.site'))}${link(SOURCE_URL, tr('info.link.source'))}</div>`;
+      <div class="info-links">${link(PUBLISHER_SITE, tr('info.link.site'))}${link(SOURCE_URL, tr('info.link.source'))}${link(EXCEPTION_URL, tr('info.link.exception'))}${link(PRIVACY_URL, tr('info.link.privacy'))}</div>`;
     const cur = I18N.lang();
     q('#info-lang-section').innerHTML = `
       <h3 id="info-lang-title">${esc(tr('info.lang.heading'))}</h3>
       <div class="lang-switch" role="group" aria-labelledby="info-lang-title">${I18N.LANGS.map((l) =>
     `<button type="button" data-lang="${l}" lang="${l}" aria-pressed="${l === cur}">${esc(I18N.NAMES[l])}</button>`).join('')}</div>`;
-    q('#info-license').textContent = tr('info.license', { license });
+    q('#info-license').textContent = tr(channel === 'mas' ? 'info.license.mas' : 'info.license', { license });
   }
 
   function renderCrates(filter) {
@@ -61,7 +64,7 @@
     if (!data) return;
     q('#info-license-text').textContent = data.app.license_text;
     q('#info-third-intro').textContent = trn('info.thirdIntro', data.crates.length);
-    const notes = data.crates.filter((c) => c.note && (c.name === 'mp3lame-sys' || c.name === 'symphonia'));
+    const notes = data.crates.filter((c) => c.note && (c.name === 'LAME' || c.name === 'symphonia'));
     q('#info-notes').innerHTML = notes.length
       ? `<ul class="notes">${notes.map((c) => `<li><b>${esc(c.name)} ${esc(c.version)} (${esc(c.license)}):</b> ${esc(noteText(c))}</li>`).join('')}</ul>`
       : '';
@@ -117,4 +120,6 @@
   });
 
   renderStatic();
+  const core = window.__TAURI__ && window.__TAURI__.core;
+  if (core) core.invoke('channel').then((c) => { if (c) { channel = c; renderStatic(); } }).catch(() => {});
 })();

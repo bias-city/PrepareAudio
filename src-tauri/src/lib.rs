@@ -1,5 +1,6 @@
 pub mod decode;
 pub mod i18n;
+pub mod lame;
 pub mod master;
 pub mod merge;
 pub mod player;
@@ -350,36 +351,16 @@ fn cancel_merge(state: State<'_, AppState>) {
     state.cancel.store(true, Ordering::SeqCst);
 }
 
-/// Opens a folder, or with `select` reveals a file, in Finder / Explorer.
+/// Opens a folder, or with `select` reveals a file, in Finder / Explorer. Through the opener
+/// plugin (NSWorkspace on macOS): starting `/usr/bin/open` as a child does not work reliably
+/// inside the App Store sandbox.
 #[tauri::command]
 fn reveal(path: String, select: bool) -> Result<(), String> {
-    let p = Path::new(&path);
-    #[cfg(target_os = "macos")]
-    let mut cmd = {
-        let mut c = std::process::Command::new("open");
-        if select {
-            c.arg("-R");
-        }
-        c.arg(p);
-        c
-    };
-    #[cfg(target_os = "windows")]
-    let mut cmd = {
-        let mut c = std::process::Command::new("explorer");
-        if select {
-            c.arg(format!("/select,{}", p.display()));
-        } else {
-            c.arg(p);
-        }
-        c
-    };
-    #[cfg(all(unix, not(target_os = "macos")))]
-    let mut cmd = {
-        let mut c = std::process::Command::new("xdg-open");
-        c.arg(if select { p.parent().unwrap_or(p) } else { p });
-        c
-    };
-    cmd.spawn().map(|_| ()).map_err(|e| e.to_string())
+    if select {
+        tauri_plugin_opener::reveal_item_in_dir(Path::new(&path)).map_err(|e| e.to_string())
+    } else {
+        tauri_plugin_opener::open_path(&path, None::<&str>).map_err(|e| e.to_string())
+    }
 }
 
 /// Opens a web link from the info panel in the default browser (https only).
@@ -388,23 +369,25 @@ fn open_link(url: String) -> Result<(), String> {
     if !url.starts_with("https://") || url.chars().any(|c| c.is_whitespace()) {
         return Err(t(Msg::InvalidLink).into());
     }
-    #[cfg(target_os = "macos")]
-    let mut cmd = std::process::Command::new("open");
-    #[cfg(target_os = "windows")]
-    let mut cmd = {
-        let mut c = std::process::Command::new("cmd");
-        c.args(["/C", "start", ""]);
-        c
-    };
-    #[cfg(all(unix, not(target_os = "macos")))]
-    let mut cmd = std::process::Command::new("xdg-open");
-    cmd.arg(&url).spawn().map(|_| ()).map_err(|e| e.to_string())
+    tauri_plugin_opener::open_url(&url, None::<&str>).map_err(|e| e.to_string())
+}
+
+/// Distribution channel of this build: "mas" (Mac App Store, Cargo feature `mas`) or "dmg".
+/// The info panel words the licence per channel.
+#[tauri::command]
+fn channel() -> &'static str {
+    if cfg!(feature = "mas") {
+        "mas"
+    } else {
+        "dmg"
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
             scan_paths,
@@ -425,7 +408,8 @@ pub fn run() {
             cancel_merge,
             set_language,
             reveal,
-            open_link
+            open_link,
+            channel
         ])
         .run(tauri::generate_context!())
         .expect("PrepareAudio konnte nicht gestartet werden");

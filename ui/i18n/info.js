@@ -33,6 +33,24 @@ I18N.add({
     fr: 'Langue',
     it: 'Lingua',
   },
+  'info.license.mas': {
+    de: 'Diese Fassung stammt aus dem Mac App Store; Aktualisierungen kommen von dort. Es ist derselbe Quellcode wie auf GitHub: {license}, mit einer Zusatzerlaubnis nach §7 für den Vertrieb über den App Store. Deine Rechte am Quellcode — lesen, ändern, weitergeben — bleiben unberührt. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung.',
+    en: 'This build comes from the Mac App Store; updates arrive from there. It is the same source code as on GitHub: {license}, with an additional permission under section 7 for distribution through the App Store. Your rights to the source code — to read, modify and share it — are unaffected. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung.',
+    fr: 'Cette version provient du Mac App Store ; les mises à jour arrivent par là. C’est le même code source que sur GitHub : {license}, avec une permission additionnelle (article 7) pour la distribution via l’App Store. Tes droits sur le code source — le lire, le modifier, le partager — restent intacts. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung.',
+    it: 'Questa versione proviene dal Mac App Store; gli aggiornamenti arrivano da lì. È lo stesso codice sorgente di GitHub: {license}, con un permesso aggiuntivo (sezione 7) per la distribuzione tramite l’App Store. I tuoi diritti sul codice sorgente — leggerlo, modificarlo, condividerlo — restano intatti. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung.',
+  },
+  'info.link.exception': {
+    de: 'Zusatzerlaubnis (App Store)',
+    en: 'Additional permission (App Store)',
+    fr: 'Permission additionnelle (App Store)',
+    it: 'Permesso aggiuntivo (App Store)',
+  },
+  'info.link.privacy': {
+    de: 'Datenschutzerklärung',
+    en: 'Privacy policy',
+    fr: 'Politique de confidentialité',
+    it: 'Informativa sulla privacy',
+  },
   'info.license': {
     de: 'PrepareAudio ist freie Software unter der GNU Affero General Public License, Version 3 oder später ({license}). Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung. Der Quellcode steht auf GitHub.',
     en: 'PrepareAudio is free software under the GNU Affero General Public License, version 3 or later ({license}). Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung. The source code is on GitHub.',
@@ -88,11 +106,11 @@ I18N.add({
     it: 'vale per {crates}',
   },
   // Notes from licenses.json (generated in German) for the two packages the panel highlights.
-  'info.note.mp3lame-sys': {
-    de: 'Enthält die Quellen von LAME 3.100 (GNU LGPL), die beim Bauen statisch in die App übersetzt werden. Quellen: https://lame.sourceforge.io und das Paket selbst; die App lässt sich aus ihrem Quelltext mit einer geänderten LAME-Version neu bauen.',
-    en: 'Contains the sources of LAME 3.100 (GNU LGPL), which are compiled statically into the app during the build. Sources: https://lame.sourceforge.io and the package itself; the app can be rebuilt from its source code with a modified LAME version.',
-    fr: 'Contient les sources de LAME 3.100 (GNU LGPL), compilées statiquement dans l’app lors de la construction. Sources : https://lame.sourceforge.io et le paquet lui-même ; l’app peut être recompilée à partir de son code source avec une version modifiée de LAME.',
-    it: 'Contiene i sorgenti di LAME 3.100 (GNU LGPL), compilati staticamente nell’app durante la build. Sorgenti: https://lame.sourceforge.io e il pacchetto stesso; l’app può essere ricompilata dal suo codice sorgente con una versione modificata di LAME.',
+  'info.note.LAME': {
+    de: 'LAME 3.100 (GNU LGPL) ist dynamisch gelinkt: libmp3lame.dylib liegt im App-Paket unter Contents/Frameworks und lässt sich austauschen. Der Quellcode liegt im App-Paket (Contents/Resources/lame-3.100.tar.gz) und unter https://bias.city/prepareaudio/quellen/.',
+    en: 'LAME 3.100 (GNU LGPL) is linked dynamically: libmp3lame.dylib sits in the app bundle under Contents/Frameworks and can be replaced. Its source code is in the app bundle (Contents/Resources/lame-3.100.tar.gz) and at https://bias.city/prepareaudio/quellen/.',
+    fr: 'LAME 3.100 (GNU LGPL) est lié dynamiquement : libmp3lame.dylib se trouve dans le paquet de l’app sous Contents/Frameworks et peut être remplacé. Son code source se trouve dans le paquet de l’app (Contents/Resources/lame-3.100.tar.gz) et sur https://bias.city/prepareaudio/quellen/.',
+    it: 'LAME 3.100 (GNU LGPL) è collegato dinamicamente: libmp3lame.dylib si trova nel pacchetto dell’app in Contents/Frameworks e può essere sostituito. Il codice sorgente è nel pacchetto dell’app (Contents/Resources/lame-3.100.tar.gz) e su https://bias.city/prepareaudio/quellen/.',
   },
   'info.note.symphonia': {
     de: 'Das Paket enthält keine eigene Lizenzdatei; aufgeführt ist der Standardtext der angegebenen Lizenz. Quellcode (MPL-2.0): https://github.com/pdeljanov/Symphonia',

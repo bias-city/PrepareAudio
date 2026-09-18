@@ -36,15 +36,18 @@
       "icons/icon.ico"
     ],
     "category": "Utility",
-    "shortDescription": "DJI Mic 2: zusammenfügen, synchronisieren, mastern",
+    "shortDescription": "Aufnahme-Teile zusammenfügen, Audioquellen synchronisieren, als MP3 mastern",
     "macOS": {
       "minimumSystemVersion": "12.0",
+      "frameworks": ["frameworks/libmp3lame.dylib"],
       "signingIdentity": "A24B887F1B465B0F6767E8EF61FF12A00CAA66D1"
     },
     "copyright": "Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung. Licence: GNU AGPL v3 or later. https://bias.city/prepareaudio",
     "resources": {
       "../LICENSE": "LICENSE",
-      "../THIRD_PARTY_LICENSES.md": "THIRD_PARTY_LICENSES.md"
+      "../THIRD_PARTY_LICENSES.md": "THIRD_PARTY_LICENSES.md",
+      "../LICENSE-EXCEPTION": "LICENSE-EXCEPTION",
+      "frameworks/lame-3.100.tar.gz": "lame-3.100.tar.gz"
     }
   }
 }

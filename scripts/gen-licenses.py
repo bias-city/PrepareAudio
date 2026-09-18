@@ -8,8 +8,9 @@ writes
   THIRD_PARTY_LICENSES.md    shipped inside the app bundle and in the repository
 
 Crates that ship no license file get the standard text of their SPDX license,
-taken from another crate under the same license. LAME 3.100, which mp3lame-sys
-compiles into the app, is listed with its own COPYING file.
+taken from another crate under the same license. LAME 3.100 is no crate: it is
+linked dynamically (scripts/baue-lame.sh, src-tauri/src/lame.rs) and listed with
+the COPYING file from its source tarball in src-tauri/frameworks.
 
 usage: python3 scripts/gen-licenses.py [--target aarch64-apple-darwin]
 """
@@ -159,14 +160,6 @@ def main():
                 elif spdx in canonical:
                     ids.append(add_text(canonical[spdx], crate))
             note = "Das Paket enthält keine eigene Lizenzdatei; aufgeführt ist der Standardtext der angegebenen Lizenz."
-        if p["name"] == "mp3lame-sys":
-            lame = next((os.path.join(directory, d) for d in os.listdir(directory) if d.startswith("lame-")), None)
-            if lame:
-                for f in license_files(lame):
-                    ids.append(add_text(read(f), crate + " (LAME 3.100)"))
-                note = ("Enthält die Quellen von LAME 3.100 (GNU LGPL), die beim Bauen statisch in die App übersetzt werden. "
-                        "Quellen: https://lame.sourceforge.io und das Paket selbst; die App lässt sich aus ihrem Quelltext "
-                        "mit einer geänderten LAME-Version neu bauen.")
         if p["name"].startswith("symphonia"):
             note = (note + " " if note else "") + "Quellcode (MPL-2.0): https://github.com/pdeljanov/Symphonia"
         crates.append({
@@ -178,6 +171,23 @@ def main():
             "texts": ids,
             "note": note,
         })
+
+    # LAME: dynamisch gelinkte Bibliothek, kein Crate. Lizenztext aus dem Quell-Tarball.
+    import tarfile
+    lame_tar = os.path.join(TAURI, "frameworks", "lame-3.100.tar.gz")
+    if not os.path.exists(lame_tar):
+        sys.exit("src-tauri/frameworks/lame-3.100.tar.gz fehlt: zuerst scripts/baue-lame.sh ausführen")
+    with tarfile.open(lame_tar) as tar:
+        copying = tar.extractfile("lame-3.100/COPYING").read().decode("utf-8", "replace")
+    crates.append({
+        "name": "LAME", "version": "3.100", "license": "LGPL-2.0-or-later",
+        "repository": "https://lame.sourceforge.io", "authors": ["The LAME Project"],
+        "texts": [add_text(copying, "LAME 3.100")],
+        "note": ("LAME 3.100 (GNU LGPL) ist dynamisch gelinkt: libmp3lame.dylib liegt im App-Paket unter Contents/Frameworks "
+                 "und lässt sich austauschen. Der Quellcode liegt im App-Paket (Contents/Resources/lame-3.100.tar.gz) "
+                 "und unter https://bias.city/prepareaudio/quellen/."),
+    })
+    crates.sort(key=lambda c: c["name"].lower())
 
     app_license = read(os.path.join(ROOT, "LICENSE"))
     out = {

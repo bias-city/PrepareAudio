@@ -292,7 +292,7 @@ impl Source {
 }
 
 /// FNV-1a, 64 bit: stable across Rust versions (unlike `DefaultHasher`).
-fn fnv1a(bytes: &[u8], basis: u64) -> u64 {
+pub(crate) fn fnv1a(bytes: &[u8], basis: u64) -> u64 {
     bytes.iter().fold(basis, |h, &b| (h ^ b as u64).wrapping_mul(0x0000_0100_0000_01b3))
 }
 

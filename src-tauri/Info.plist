@@ -19,5 +19,10 @@
   </array>
   <key>CFBundleAllowMixedLocalizations</key>
   <true/>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.utilities</string>
+  <!-- Keine Verschlüsselung in der App: erspart die Export-Frage bei jedem Upload. -->
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
 </dict>
 </plist>

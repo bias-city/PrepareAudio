@@ -99,7 +99,7 @@ I18N.add({
   'sync.status.failed': { de: 'Fehler', en: 'Error', fr: 'Erreur', it: 'Errore' },
   'sync.status.cancelled': { de: 'Abgebrochen', en: 'Cancelled', fr: 'Annulé', it: 'Annullato' },
   'sync.list.empty': { de: 'Nichts auszugeben: alle Clips sind gelöscht.', en: 'Nothing to output: all clips are deleted.', fr: 'Rien à produire : tous les clips sont supprimés.', it: 'Niente da produrre: tutte le clip sono eliminate.' },
-  'sync.editState.edited': { de: 'bearbeitet · wird neben den Quellen gespeichert', en: 'edited · saved next to the sources', fr: 'modifié · enregistré à côté des sources', it: 'modificato · salvato accanto alle sorgenti' },
+  'sync.editState.edited': { de: 'bearbeitet · wird gespeichert', en: 'edited · saved', fr: 'modifié · enregistré', it: 'modificato · salvato' },
   'sync.editState.proposal': { de: 'Vorschlag der Analyse', en: 'Analysis proposal', fr: 'Proposition de l’analyse', it: 'Proposta dell’analisi' },
   'sync.unused.one': { de: '{n} Datei nicht verwendet', en: '{n} file not used', fr: '{n} fichier non utilisé', it: '{n} file non usato' },
   'sync.unused.other': { de: '{n} Dateien nicht verwendet', en: '{n} files not used', fr: '{n} fichiers non utilisés', it: '{n} file non usati' },

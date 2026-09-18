@@ -17,7 +17,7 @@ use crate::scan::Skipped;
 use crate::sync::{self, SyncProgress};
 use crate::wav;
 use ebur128::{EbuR128, Mode as R128};
-use mp3lame_encoder::{Bitrate, Builder, FlushGap, Id3Tag, InterleavedPcm, Mode as LameMode, MonoPcm, Quality, VbrMode};
+use crate::lame;
 use serde::Serialize;
 use std::collections::{HashSet, VecDeque};
 use std::fs::{self, File};
@@ -586,14 +586,19 @@ pub fn analyze(inputs: &[PathBuf], cancel: &AtomicBool, progress: &mut dyn FnMut
         bitrate_kbps: BITRATE_KBPS,
         files: out,
         ignored,
-        engine: format!("Symphonia · ebur128 · LAME {}", mp3lame_encoder::mp3lame_version()),
+        engine: format!("Symphonia · ebur128 · LAME {}", lame::version()),
     })
 }
 
 // ------------------------------------------------------------------ writing
 
-fn lame_err<E>(_: E) -> String {
-    t(Msg::EncoderSetting).to_string()
+fn lame_err(e: lame::Error) -> String {
+    match e {
+        lame::Error::Unavailable => t(Msg::EncoderUnavailable),
+        lame::Error::Setting => t(Msg::EncoderSetting),
+        lame::Error::Encoding => t(Msg::EncodingFailed),
+    }
+    .to_string()
 }
 
 /// Progress of one file across all its passes, in weighted milliseconds of audio.
@@ -707,38 +712,15 @@ fn debug(f: &AudioFile, msg: String) {
 fn encode(f: &AudioFile, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<(), String> {
     let (out_ch, out_rate) = layout(f)?;
     let stem = Path::new(&f.out_name).file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-    let mut b = Builder::new().ok_or(t(Msg::EncoderUnavailable))?;
-    b.set_num_channels(out_ch as u8).map_err(lame_err)?;
-    b.set_sample_rate(out_rate).map_err(lame_err)?;
-    b.set_vbr_mode(VbrMode::Off).map_err(lame_err)?;
-    b.set_brate(Bitrate::Kbps192).map_err(lame_err)?;
-    b.set_quality(Quality::NearBest).map_err(lame_err)?;
-    b.set_mode(if out_ch == 1 { LameMode::Mono } else { LameMode::JointStereo }).map_err(lame_err)?;
-    b.set_to_write_vbr_tag(false).map_err(lame_err)?;
     let comment = format!("PrepareAudio: {TARGET_LUFS} LUFS");
-    let _ = b.set_id3_tag(Id3Tag { title: stem.as_bytes(), artist: &[], album: &[], album_art: &[], year: &[], comment: comment.as_bytes() });
-    let mut encoder = b.build().map_err(lame_err)?;
+    let mut encoder = lame::Encoder::new(out_ch, out_rate, &stem, &comment).map_err(lame_err)?;
     let mut file = BufWriter::with_capacity(1 << 20, File::create(out_path).map_err(|e| e.to_string())?);
     let mut mp3 = Vec::new();
     render(f, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| {
-        let count = pcm.len() / out_ch;
-        mp3.clear();
-        mp3.reserve(count * 5 / 4 + 7200);
-        let n = if out_ch == 1 {
-            encoder.encode(MonoPcm(pcm), mp3.spare_capacity_mut())
-        } else {
-            encoder.encode(InterleavedPcm(pcm), mp3.spare_capacity_mut())
-        }
-        .map_err(|_| t(Msg::EncodingFailed).to_string())?;
-        // SAFETY: the encoder initialised the first `n` bytes of the spare capacity.
-        unsafe { mp3.set_len(n) };
+        encoder.encode(pcm, &mut mp3).map_err(lame_err)?;
         file.write_all(&mp3).map_err(|e| e.to_string())
     })?;
-    mp3.clear();
-    mp3.reserve(7200);
-    let n = encoder.flush::<FlushGap>(mp3.spare_capacity_mut()).map_err(|_| t(Msg::EncodingFailed).to_string())?;
-    // SAFETY: as above.
-    unsafe { mp3.set_len(n) };
+    encoder.flush(&mut mp3).map_err(lame_err)?;
     file.write_all(&mp3).map_err(|e| e.to_string())?;
     let file = file.into_inner().map_err(|e| e.to_string())?;
     file.sync_all().map_err(|e| e.to_string())?;
@@ -1075,6 +1057,9 @@ mod tests {
         );
     }
 
+    /// FNV-1a of the MP3s this test writes (LAME 3.100, CBR 192, quality 2).
+    const MP3_GOLDEN: &[(&str, u64)] = &[("quiet_float.mp3", 0x5f72_568c_bd6c_32d9), ("pcm16.mp3", 0xa779_3f8f_1157_1548), ("hires.mp3", 0x0fc3_eec6_9bf4_807f)];
+
     #[test]
     fn detects_formats_masters_to_target_and_skips_existing() {
         let dir = tempdir("master");
@@ -1121,6 +1106,18 @@ mod tests {
             assert!(r.true_peak <= CEILING_DBTP + PEAK_TOLERANCE, "{o:?}");
         }
         assert!(fs::read_dir(&out).unwrap().all(|e| !e.unwrap().file_name().to_string_lossy().ends_with(".part")));
+
+        // Same bytes as ever: the encoder settings and the LAME version (3.100) are part of
+        // the calibration. Printed with PA_MASTER_DEBUG=1 to renew the values deliberately.
+        for (name, want) in MP3_GOLDEN {
+            let bytes = fs::read(out.join(name)).unwrap();
+            let got = crate::decode::fnv1a(&bytes, 0xcbf2_9ce4_8422_2325);
+            if std::env::var_os("PA_MASTER_DEBUG").is_some() {
+                eprintln!("golden {name}: {} bytes, 0x{got:016x}", bytes.len());
+            } else {
+                assert_eq!(got, *want, "{name} differs from the reference encoding");
+            }
+        }
 
         // The MP3s read back correctly and report their format.
         let back = analyze(&[out.join("quiet_float.mp3"), out.join("hires.mp3"), out.join("pcm16.mp3")], &cancel, &mut |_| {}).unwrap();

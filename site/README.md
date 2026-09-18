@@ -72,4 +72,4 @@ Entwickler und dürfen nie in Ausgaben oder Protokollen erscheinen.
 
 Danach mit `curl -s https://bias.city/prepareaudio/ | grep VERSION` prüfen.
 Der Download-Knopf zeigt auf die Release-Übersicht im öffentlichen Repository
-<https://github.com/BenPohlBasel/PrepareAudio/releases>.
+<https://github.com/bias-city/PrepareAudio/releases>.

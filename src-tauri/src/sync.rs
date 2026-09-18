@@ -2279,8 +2279,27 @@ struct EditClip {
     deleted: bool,
 }
 
+/// Where edits go when the folder of the sources cannot be written: in the App Store
+/// sandbox a single dropped file gives no access to its parent folder. One file per
+/// source folder under `~/Library/Application Support/city.bias.prepareaudio/edits`
+/// (inside the container when sandboxed); `PA_EDITS_DIR` overrides it for tests.
+fn fallback_edit_path(root: &Path) -> PathBuf {
+    let dir = std::env::var_os("PA_EDITS_DIR").map(PathBuf::from).unwrap_or_else(|| {
+        let base = std::env::var_os("HOME").map(PathBuf::from).map(|home| {
+            if cfg!(target_os = "macos") {
+                home.join("Library/Application Support")
+            } else {
+                home.join(".local/share")
+            }
+        });
+        base.unwrap_or_else(std::env::temp_dir).join("city.bias.prepareaudio").join("edits")
+    });
+    let bytes = root.to_string_lossy();
+    dir.join(format!("{:016x}.json", decode::fnv1a(bytes.as_bytes(), 0xcbf2_9ce4_8422_2325)))
+}
+
 fn load_edits(tracks: &[Track], root: &Path) -> Option<HashMap<usize, Vec<Clip>>> {
-    let text = fs::read_to_string(root.join(EDIT_FILE)).ok()?;
+    let text = fs::read_to_string(root.join(EDIT_FILE)).or_else(|_| fs::read_to_string(fallback_edit_path(root))).ok()?;
     let file: EditFile = serde_json::from_str(&text).ok()?;
     let mut out = HashMap::new();
     for et in file.tracks {
@@ -2301,9 +2320,12 @@ fn merge_edits(tracks: &[Track], analysis: &[Clip], edits: HashMap<usize, Vec<Cl
 }
 
 fn save_edits(plan: &SyncPlan) -> Result<(), String> {
-    let path = Path::new(&plan.roots[0]).join(EDIT_FILE);
+    let root = Path::new(&plan.roots[0]);
+    let path = root.join(EDIT_FILE);
+    let fallback = fallback_edit_path(root);
     if !plan.edited {
         let _ = fs::remove_file(&path);
+        let _ = fs::remove_file(&fallback);
         return Ok(());
     }
     let file = EditFile {
@@ -2321,9 +2343,20 @@ fn save_edits(plan: &SyncPlan) -> Result<(), String> {
             .collect(),
     };
     let text = serde_json::to_string_pretty(&file).map_err(|e| e.to_string())?;
-    let tmp = path.with_file_name(format!("{EDIT_FILE}.tmp"));
-    fs::write(&tmp, text).map_err(|e| tf(Msg::SaveEditFailed, &[("e", &e)]))?;
-    fs::rename(&tmp, &path).map_err(|e| tf(Msg::SaveEditFailed, &[("e", &e)]))
+    let write = |target: &Path| -> std::io::Result<()> {
+        if let Some(dir) = target.parent() {
+            fs::create_dir_all(dir)?;
+        }
+        let tmp = target.with_extension("json.tmp");
+        fs::write(&tmp, &text)?;
+        fs::rename(&tmp, target)
+    };
+    // Next to the sources when that folder is writable, so the edit travels with them.
+    if write(&path).is_ok() {
+        let _ = fs::remove_file(&fallback);
+        return Ok(());
+    }
+    write(&fallback).map_err(|e| tf(Msg::SaveEditFailed, &[("e", &e)]))
 }
 
 /// Takes the edited clips, recomputes the output files and saves the edit (or
@@ -2865,6 +2898,37 @@ mod tests {
         assert!((p5.to_timeline(p5.to_track(t)) - t).abs() < 1e-6);
     }
 
+    /// App Store sandbox: the folder of the sources may be read-only. The edit then
+    /// goes to the fallback folder, is found again, and disappears with the edit.
+    #[test]
+    #[cfg(unix)]
+    fn edits_fall_back_when_the_source_folder_is_read_only() {
+        use std::os::unix::fs::PermissionsExt;
+        let (dir, mut plan, ..) = solo_setup("edits-ro");
+        let edits = dir.join("edits-fallback");
+        std::env::set_var("PA_EDITS_DIR", &edits);
+        let root = dir.join("tracks");
+        fs::set_permissions(&root, fs::Permissions::from_mode(0o555)).unwrap();
+        let mut clips = plan.clips.clone();
+        let c = clips[0].clone();
+        let tau = (c.t0 + c.t1) / 2.0;
+        clips[0].t1 = tau;
+        clips.push(Clip { t0: tau, deleted: true, ..c });
+        let saved = apply_clips(&mut plan, clips);
+        let fallback = fallback_edit_path(Path::new(&plan.roots[0]));
+        let found = load_edits(&plan.tracks, Path::new(&plan.roots[0])).is_some();
+        let reset = plan.analysis_clips.clone();
+        let cleared = apply_clips(&mut plan, reset);
+        let gone = !fallback.exists();
+        fs::set_permissions(&root, fs::Permissions::from_mode(0o755)).unwrap();
+        std::env::remove_var("PA_EDITS_DIR");
+        saved.unwrap();
+        cleared.unwrap();
+        assert!(fallback.starts_with(&edits) && !root.join(EDIT_FILE).exists());
+        assert!(found, "the fallback edit is read back");
+        assert!(gone, "undoing the edit removes the fallback file");
+    }
+
     #[test]
     fn edits_split_retarget_delete_and_persist() {
         let (dir, mut plan, ..) = solo_setup("edits");
@@ -3032,24 +3096,7 @@ mod tests {
 
     /// Interleaved float samples as a CBR MP3 with LAME tag (encoder delay and padding for gapless decoding).
     fn write_mp3(path: &Path, sr: u32, channels: usize, pcm: &[f32]) {
-        use mp3lame_encoder::{Bitrate, Builder, FlushGap, InterleavedPcm, MonoPcm, Quality};
-        let mut b = Builder::new().unwrap();
-        b.set_num_channels(channels as u8).unwrap();
-        b.set_sample_rate(sr).unwrap();
-        b.set_brate(Bitrate::Kbps96).unwrap();
-        b.set_quality(Quality::Best).unwrap();
-        b.set_to_write_vbr_tag(true).unwrap();
-        let mut enc = b.build().unwrap();
-        let mut out = Vec::new();
-        for block in pcm.chunks(channels * 16_384) {
-            out.reserve(block.len() * 5 / 4 + 7200);
-            if channels == 1 { enc.encode_to_vec(MonoPcm(block), &mut out) } else { enc.encode_to_vec(InterleavedPcm(block), &mut out) }.unwrap();
-        }
-        out.reserve(7200);
-        enc.flush_to_vec::<FlushGap>(&mut out).unwrap();
-        let mut tag = Vec::with_capacity(enc.lame_tag_size());
-        enc.lame_tag_encode_to_vec(&mut tag).unwrap();
-        out[..tag.len()].copy_from_slice(&tag);
+        let out = crate::lame::encode_with_lame_tag(sr, channels, pcm);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(path, out).unwrap();
     }
