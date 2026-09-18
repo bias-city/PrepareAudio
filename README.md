@@ -64,13 +64,13 @@ Dritter Reiter. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/A
 - Der Fortschrittsbalken zählt alle Durchgänge und nennt den aktuellen Schritt (Pegel einstellen, MP3 kodieren, Nachmessen). Mit `PA_MASTER_DEBUG=1` protokolliert der Test `real_master` jeden Durchgang.
 - Ergebnis im Ordner `master`. Vorhandene MP3s gleicher Länge werden erkannt und nicht neu geschrieben.
 
-Die App braucht dafür keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 ist fest einkompiliert.
+Die App braucht dafür keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
 
 ## Lizenz
 
 PrepareAudio ist freie Software unter der GNU Affero General Public License, Version 3 oder später (`LICENSE`), wie LocalTranscript. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung, <https://bias.city/prepareaudio>. Quellcode: <https://github.com/bias-city/PrepareAudio>.
 
-Die App enthält Software Dritter unter MIT, Apache-2.0, BSD, Zlib, Unicode, MPL-2.0 (Symphonia, Teile von Tauri) und LGPL (LAME über mp3lame-sys/mp3lame-encoder); alle sind mit der AGPL vereinbar. Die Lizenztexte stehen in `THIRD_PARTY_LICENSES.md`, im App-Paket unter `Contents/Resources` und im Info-Feld der App. Wer die App weitergibt, gibt den Empfängern auch den Quellcode (oder den Zugang dazu).
+Die App enthält Software Dritter unter MIT, Apache-2.0, BSD, Zlib, Unicode, MPL-2.0 (Symphonia, Teile von Tauri) und LGPL (LAME 3.100, dynamisch gelinkt; der Quell-Tarball liegt im App-Paket und unter <https://bias.city/prepareaudio/quellen/>); alle sind mit der AGPL vereinbar. Die Lizenztexte stehen in `THIRD_PARTY_LICENSES.md`, im App-Paket unter `Contents/Resources` und im Info-Feld der App. Wer die App weitergibt, gibt den Empfängern auch den Quellcode (oder den Zugang dazu).
 
 Nach jeder Änderung an den Abhängigkeiten neu erzeugen:
 
@@ -82,12 +82,24 @@ python3 scripts/gen-licenses.py
 
 ```bash
 npm install
+sh scripts/baue-lame.sh          # einmal: libmp3lame.dylib nach src-tauri/frameworks
 npm run dev                      # App im Entwicklungsmodus
 cd src-tauri && cargo test --lib # Unit-Tests
 PA_REAL_DIR="/pfad/4|/pfad/5" cargo test --release --test real_data -- --ignored --nocapture
 PA_SYNC_DIR="/pfad/tracks" cargo test --release --test real_sync -- --ignored --nocapture
 npx tauri build --bundles app    # src-tauri/target/release/bundle/macos/PrepareAudio.app
 ```
+
+## Mac App Store
+
+Derselbe Code geht mit einer Zusatzerlaubnis nach AGPL §7 (`LICENSE-EXCEPTION`) in den Mac App Store; der Quellcode bleibt unter der AGPL. Plan und Befunde: `docs/PLAN-APPSTORE.md`.
+
+```bash
+npm run probe:sandbox   # App mit Sandbox-Rechten, ohne Profil, lokal startbar (zum Prüfen)
+npm run release:mas     # Store-Paket (.pkg) für Transporter; braucht src-tauri/profiles/PrepareAudio.provisionprofile
+```
+
+Das Skript bricht ab, wenn ein Programm im Paket keine Sandbox-Berechtigung trägt, wenn das Programm einen Pfad dieses Rechners enthält oder LAME nicht über `@rpath` gebunden ist.
 
 ## Release (signiert und notarisiert)
 

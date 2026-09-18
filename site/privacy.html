@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PrepareAudio – Datenschutz / Privacy</title>
+<meta name="description" content="Datenschutzerklärung der App PrepareAudio: läuft vollständig lokal, keine Konten, keine Netzverbindungen, keine Datenerhebung. Privacy policy in German, English, French and Italian.">
+<meta name="color-scheme" content="light dark">
+<style>
+@font-face{font-family:"Recursive";src:url("fonts/Recursive_VF.woff2") format("woff2");font-weight:300 1000;font-display:swap;}
+:root{--paper:#fff;--ink:#111;--muted:#555;--line:#dfe2e5;--aub:#56107a;--wash:#f5f1f7}
+@media (prefers-color-scheme:dark){:root{--paper:#141416;--ink:#ececee;--muted:#a0a0a8;--line:#2c2c31;--aub:#c690e0;--wash:#1e1a22}}
+html{background:var(--paper);color:var(--ink)}
+body{margin:0;font-family:"Recursive",-apple-system,system-ui,sans-serif;font-variation-settings:"MONO" 0,"CASL" 0.2;line-height:1.55;font-size:16px}
+main{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:20px;margin:36px 0 8px;padding-top:24px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:20px 0 4px}p,li{margin:6px 0}.muted{color:var(--muted)}
+nav{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 20px}
+nav a{border:1.5px solid var(--ink);border-radius:9999px;padding:3px 12px;text-decoration:none;color:var(--ink);font-size:14px}
+a{color:var(--aub)}code{background:var(--wash);padding:1px 5px;border-radius:4px;font-family:"Recursive",monospace;font-variation-settings:"MONO" 1}
+.box{background:var(--wash);border-radius:10px;padding:12px 16px;margin:12px 0}
+</style>
+</head>
+<body>
+<main>
+<p class="muted"><a href="index.html">← PrepareAudio</a></p>
+<h1>Datenschutz · Privacy · Confidentialité · Privacy</h1>
+<p class="muted">PrepareAudio ab 0.3.0 · B/IAS – Basel Institut für angewandte Stadtforschung · Stand 18. September 2026</p>
+<nav><a href="#de">Deutsch</a><a href="#en">English</a><a href="#fr">Français</a><a href="#it">Italiano</a></nav>
+
+<div class="box"><strong>Kurz:</strong> Die App erhebt keine Daten. Sie hat kein Konto, keinen Server, keine Telemetrie und öffnet keine Netzverbindung. Deine Aufnahmen bleiben auf deinem Mac.<br>
+<strong>In short:</strong> The app collects no data. No account, no server, no telemetry, no network connection. Your recordings stay on your Mac.</div>
+
+<h2 id="de" lang="de">Datenschutzerklärung (Deutsch)</h2>
+<h3 lang="de">Wer verantwortlich ist</h3>
+<p lang="de">PrepareAudio wird entwickelt von Ben Pohl, B/IAS – Basel Institut für angewandte Stadtforschung, Basel, Schweiz (<a href="https://bias.city">bias.city</a>). Kontakt für Fragen zum Datenschutz: über die Website.</p>
+<h3 lang="de">Was die App verarbeitet — und wo</h3>
+<p lang="de">Die App fügt Aufnahme-Teile von Audiorecordern zusammen, synchronisiert zwei Audioquellen und mastert Aufnahmen als MP3. Alles läuft als Bestandteil der App auf deinem Gerät; es gibt keine Zusatzprogramme und nichts wird nachgeladen.</p><p>Die App liest nur Dateien und Ordner, die du ins Fenster ziehst oder im Dialog wählst. Ergebnisse schreibt sie in den Ordner, den du beim Start eines Schritts wählst (<code>tracks</code>, <code>sync</code>, <code>master</code>). Originale verändert oder überschreibt sie nie.</p>
+<h3 lang="de">Was die App nicht tut</h3>
+<ul><li>Sie baut <strong>keine Netzverbindung</strong> auf: keine Telemetrie, keine Nutzungsstatistik, keine Update-Prüfung, keine Absturzberichte, keine Cloud-Verarbeitung.</li><li>Sie verlangt <strong>kein Konto</strong> und keine Anmeldung.</li><li>Sie nimmt <strong>nichts auf</strong> und verlangt keinen Zugriff auf das Mikrofon; sie spielt nur ab.</li><li>Sie erhebt <strong>keine personenbezogenen Daten</strong> über dich. In der App-Store-Datenschutzangabe heisst das «Daten werden nicht erfasst».</li></ul>
+<h3 lang="de">Was die App lokal ablegt</h3>
+<p lang="de">Komprimierte Eingaben (MP3, M4A, FLAC …) dekodiert die App einmal in eine Arbeitskopie unter <code>~/Library/Caches/city.bias.prepareaudio/</code>; Kopien, die 30 Tage nicht benutzt wurden, entfernt sie selbst. Deine Bearbeitung der Timeline speichert sie als kleine Datei <code>.prepareaudio-sync.json</code> neben den Quellen oder, wenn der Ordner nicht beschreibbar ist, im eigenen Datenordner der App. Die gewählte Sprache merkt sich die App lokal. In der Fassung aus dem Mac App Store liegen diese Orte im Container der App.</p>
+<h3 lang="de">Was in Dateien landet, die du selbst weitergibst</h3>
+<p lang="de">Dateinamen der Ergebnisse enthalten Datum, Uhrzeit und den Namen des Quellordners. MP3-Dateien tragen einen ID3-Eintrag mit dem Dateinamen als Titel und dem Vermerk «PrepareAudio: −16 LUFS». Eine Kennung deines Geräts oder deiner Person schreibt die App nirgends hinein.</p>
+<h3 lang="de">macOS</h3>
+<p lang="de">Die Fassung aus dem Mac App Store läuft in der macOS-App-Sandbox. Zugriff auf Dateien erhält sie nur über den Öffnen-Dialog oder per Drag & Drop. Sie trägt die Berechtigung für ausgehende Netzverbindungen, weil die Systemkomponente WebKit sie braucht, um die eigene, mitgelieferte Oberfläche anzuzeigen; die App selbst öffnet keine Verbindung. Diagnosedaten des Betriebssystems unterliegen den Systemeinstellungen von macOS, nicht der App.</p>
+<h3 lang="de">Deine Rechte</h3>
+<p lang="de">Da die App keine Daten über dich erhebt, gibt es bei uns nichts zu berichtigen oder zu löschen; deine Aufnahmen kontrollierst du selbst im Dateisystem. Für die Verarbeitung von Aufnahmen mit anderen Personen bist du bzw. deine Institution verantwortlich.</p>
+<h2 id="en" lang="en">Privacy Policy (English)</h2>
+<h3 lang="en">Who is responsible</h3>
+<p lang="en">PrepareAudio is developed by Ben Pohl, B/IAS – Basel Institut für angewandte Stadtforschung, Basel, Switzerland (<a href="https://bias.city">bias.city</a>). Contact for privacy questions: via the website.</p>
+<h3 lang="en">What the app processes — and where</h3>
+<p lang="en">The app joins the parts into which audio recorders split long recordings, synchronises two audio sources and masters recordings as MP3. Everything runs as part of the app on your device; there are no helper programs and nothing is downloaded.</p><p>The app only reads files and folders you drag into the window or choose in the dialog. It writes results into the folder you choose when you start a step (<code>tracks</code>, <code>sync</code>, <code>master</code>). It never changes or overwrites originals.</p>
+<h3 lang="en">What the app does not do</h3>
+<ul><li>It opens <strong>no network connection</strong>: no telemetry, no usage statistics, no update check, no crash reports, no cloud processing.</li><li>It requires <strong>no account</strong> and no login.</li><li>It <strong>records nothing</strong> and asks for no microphone access; it only plays back.</li><li>It collects <strong>no personal data</strong> about you. In the App Store privacy details this reads “Data Not Collected”.</li></ul>
+<h3 lang="en">What the app keeps locally</h3>
+<p lang="en">Compressed inputs (MP3, M4A, FLAC …) are decoded once into a working copy under <code>~/Library/Caches/city.bias.prepareaudio/</code>; copies unused for 30 days are removed by the app itself. Your timeline edits are saved as a small file <code>.prepareaudio-sync.json</code> next to the sources or, if that folder cannot be written, in the app’s own data folder. The chosen language is remembered locally. In the Mac App Store version these places are inside the app’s container.</p>
+<h3 lang="en">What ends up in files you pass on yourself</h3>
+<p lang="en">Result file names contain date, time and the name of the source folder. MP3 files carry an ID3 entry with the file name as title and the note “PrepareAudio: −16 LUFS”. The app writes no identifier of your device or of you anywhere.</p>
+<h3 lang="en">macOS</h3>
+<p lang="en">The Mac App Store version runs in the macOS App Sandbox. It gets access to files only through the open dialog or by drag and drop. It carries the entitlement for outgoing network connections because the system component WebKit needs it to display the app’s own bundled interface; the app itself opens no connection. Operating-system diagnostics are governed by the macOS system settings, not by the app.</p>
+<h3 lang="en">Your rights</h3>
+<p lang="en">Since the app collects no data about you, there is nothing for us to correct or delete; you control your recordings yourself in the file system. You or your institution are responsible for processing recordings that involve other people.</p>
+<h2 id="fr" lang="fr">Politique de confidentialité (Français)</h2>
+<h3 lang="fr">Qui est responsable</h3>
+<p lang="fr">PrepareAudio est développée par Ben Pohl, B/IAS – Basel Institut für angewandte Stadtforschung, Bâle, Suisse (<a href="https://bias.city">bias.city</a>). Contact pour les questions de confidentialité : via le site web.</p>
+<h3 lang="fr">Ce que l’app traite — et où</h3>
+<p lang="fr">L’app assemble les fragments dans lesquels les enregistreurs audio découpent les longs enregistrements, synchronise deux sources audio et masterise des enregistrements en MP3. Tout s’exécute dans l’app, sur ton appareil ; il n’y a aucun programme auxiliaire et rien n’est téléchargé.</p><p>L’app ne lit que les fichiers et dossiers que tu glisses dans la fenêtre ou que tu choisis dans le dialogue. Elle écrit les résultats dans le dossier que tu choisis au lancement d’une étape (<code>tracks</code>, <code>sync</code>, <code>master</code>). Elle ne modifie ni n’écrase jamais les originaux.</p>
+<h3 lang="fr">Ce que l’app ne fait pas</h3>
+<ul><li>Elle n’ouvre <strong>aucune connexion réseau</strong> : pas de télémétrie, pas de statistiques d’usage, pas de recherche de mises à jour, pas de rapports de plantage, pas de traitement dans le cloud.</li><li>Elle ne demande <strong>aucun compte</strong> ni identification.</li><li>Elle <strong>n’enregistre rien</strong> et ne demande pas l’accès au micro ; elle ne fait que lire.</li><li>Elle ne collecte <strong>aucune donnée personnelle</strong> te concernant. Dans l’App Store, cela s’appelle « Données non collectées ».</li></ul>
+<h3 lang="fr">Ce que l’app conserve localement</h3>
+<p lang="fr">Les entrées compressées (MP3, M4A, FLAC …) sont décodées une fois dans une copie de travail sous <code>~/Library/Caches/city.bias.prepareaudio/</code> ; l’app supprime elle-même les copies inutilisées depuis 30 jours. Tes modifications de la timeline sont enregistrées dans un petit fichier <code>.prepareaudio-sync.json</code> à côté des sources ou, si ce dossier n’est pas accessible en écriture, dans le dossier de données de l’app. La langue choisie est mémorisée localement. Dans la version du Mac App Store, ces emplacements se trouvent dans le conteneur de l’app.</p>
+<h3 lang="fr">Ce qui se retrouve dans les fichiers que tu transmets toi-même</h3>
+<p lang="fr">Les noms des fichiers produits contiennent la date, l’heure et le nom du dossier source. Les fichiers MP3 portent une entrée ID3 avec le nom du fichier comme titre et la mention « PrepareAudio: −16 LUFS ». L’app n’y inscrit aucun identifiant de ton appareil ni de ta personne.</p>
+<h3 lang="fr">macOS</h3>
+<p lang="fr">La version du Mac App Store s’exécute dans le bac à sable de macOS. Elle n’accède aux fichiers que par le dialogue d’ouverture ou par glisser-déposer. Elle porte l’autorisation de connexions réseau sortantes parce que le composant système WebKit en a besoin pour afficher l’interface fournie avec l’app ; l’app elle-même n’ouvre aucune connexion. Les données de diagnostic du système relèvent des réglages de macOS, pas de l’app.</p>
+<h3 lang="fr">Tes droits</h3>
+<p lang="fr">Comme l’app ne collecte aucune donnée te concernant, il n’y a rien à rectifier ni à effacer chez nous ; tu contrôles toi-même tes enregistrements dans le système de fichiers. Le traitement d’enregistrements impliquant d’autres personnes relève de ta responsabilité ou de celle de ton institution.</p>
+<h2 id="it" lang="it">Informativa sulla privacy (Italiano)</h2>
+<h3 lang="it">Chi è responsabile</h3>
+<p lang="it">PrepareAudio è sviluppata da Ben Pohl, B/IAS – Basel Institut für angewandte Stadtforschung, Basilea, Svizzera (<a href="https://bias.city">bias.city</a>). Contatto per domande sulla privacy: tramite il sito web.</p>
+<h3 lang="it">Che cosa elabora l’app — e dove</h3>
+<p lang="it">L’app unisce le parti in cui i registratori audio dividono le registrazioni lunghe, sincronizza due sorgenti audio e masterizza le registrazioni in MP3. Tutto avviene all’interno dell’app, sul tuo dispositivo; non ci sono programmi ausiliari e nulla viene scaricato.</p><p>L’app legge solo i file e le cartelle che trascini nella finestra o scegli nella finestra di dialogo. Scrive i risultati nella cartella che scegli all’avvio di un passaggio (<code>tracks</code>, <code>sync</code>, <code>master</code>). Non modifica né sovrascrive mai gli originali.</p>
+<h3 lang="it">Che cosa l’app non fa</h3>
+<ul><li>Non apre <strong>alcuna connessione di rete</strong>: niente telemetria, niente statistiche d’uso, nessun controllo degli aggiornamenti, nessun rapporto sugli arresti anomali, nessuna elaborazione nel cloud.</li><li>Non richiede <strong>alcun account</strong> né accesso.</li><li><strong>Non registra nulla</strong> e non chiede l’accesso al microfono; riproduce soltanto.</li><li>Non raccoglie <strong>alcun dato personale</strong> su di te. Nell’App Store questo si chiama «Dati non raccolti».</li></ul>
+<h3 lang="it">Che cosa l’app conserva in locale</h3>
+<p lang="it">Gli ingressi compressi (MP3, M4A, FLAC …) vengono decodificati una volta in una copia di lavoro in <code>~/Library/Caches/city.bias.prepareaudio/</code>; le copie non usate da 30 giorni vengono rimosse dall’app stessa. Le tue modifiche alla timeline sono salvate in un piccolo file <code>.prepareaudio-sync.json</code> accanto alle sorgenti oppure, se la cartella non è scrivibile, nella cartella dati dell’app. La lingua scelta viene ricordata in locale. Nella versione del Mac App Store questi percorsi si trovano nel contenitore dell’app.</p>
+<h3 lang="it">Che cosa finisce nei file che trasmetti tu</h3>
+<p lang="it">I nomi dei file prodotti contengono data, ora e nome della cartella di origine. I file MP3 portano una voce ID3 con il nome del file come titolo e la nota «PrepareAudio: −16 LUFS». L’app non vi scrive alcun identificativo del tuo dispositivo o della tua persona.</p>
+<h3 lang="it">macOS</h3>
+<p lang="it">La versione del Mac App Store funziona nella sandbox di macOS. Accede ai file solo tramite la finestra di apertura o con il trascinamento. Porta l’autorizzazione per le connessioni di rete in uscita perché il componente di sistema WebKit ne ha bisogno per mostrare l’interfaccia inclusa nell’app; l’app stessa non apre alcuna connessione. I dati diagnostici del sistema operativo dipendono dalle impostazioni di macOS, non dall’app.</p>
+<h3 lang="it">I tuoi diritti</h3>
+<p lang="it">Poiché l’app non raccoglie dati su di te, presso di noi non c’è nulla da rettificare o cancellare; controlli tu stessa/o le tue registrazioni nel file system. Per il trattamento di registrazioni che coinvolgono altre persone sei responsabile tu o la tua istituzione.</p>
+
+<p class="muted" style="margin-top:40px">Schrift: Recursive, SIL OFL 1.1 (<a href="fonts/OFL.txt">Lizenz</a>).</p>
+</main>
+</body>
+</html>

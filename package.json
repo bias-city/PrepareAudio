@@ -6,7 +6,9 @@
     "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build",
-    "release": "python3 scripts/gen-licenses.py && env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID tauri build --bundles app && node scripts/notarize-app.mjs && node scripts/build-dmg.mjs && node scripts/notarize-dmg.mjs"
+    "release": "python3 scripts/gen-licenses.py && env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID PA_RELEASE=1 tauri build --bundles app && node scripts/notarize-app.mjs && node scripts/build-dmg.mjs && node scripts/notarize-dmg.mjs",
+    "release:mas": "python3 scripts/gen-licenses.py && node scripts/release-mas.mjs",
+    "probe:sandbox": "node scripts/release-mas.mjs --probe"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4"

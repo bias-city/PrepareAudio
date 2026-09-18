@@ -5,6 +5,23 @@ Erfahrungen aus ResearchTranscript 0.6.0 (eingereicht am 18.9.2026,
 `~/Claude/enrich-transcript-spike/docs/appstore-plan.md`). Zielversion: **0.3.0**,
 derselbe Code als Store-Paket und als notarisiertes DMG.
 
+## Stand 2026-09-18 abends (Zweig `appstore`, nicht gepusht)
+
+- **Phase 0 umgesetzt**, Abnahme durch den User offen. Vorschaubilder: `docs/entwurf-phase0/`.
+- **Phase 1 umgesetzt:** Opener-Plugin, Ausweichort der Bearbeitungsdatei (mit Test), LAME
+  3.100 dynamisch mit eigener Anbindung `src/lame.rs` (MP3 bitgleich, Test), Feature `mas`,
+  `LICENSE-EXCEPTION`, Entitlements, `scripts/release-mas.mjs` mit `--probe`. Neu gefunden:
+  auch `mp3lame-encoder` und `mp3lame-sys` standen unter LGPL-3.0 und sind entfallen.
+- **Phase 2 begonnen:** Die Sandbox-Probe (`npm run probe:sandbox`) baut, besteht alle
+  Prüfungen, startet und legt ihren Container an. Offen ist der Handtest am Fenster
+  (Liste in Phase 2), darunter der Start ohne `network.client`.
+- **Phase 3 begonnen:** `site/privacy.html` (vier Sprachen, nicht hochgeladen),
+  Demo-Material, Demo-Backend und Bildschirmfoto-Skript liegen im Repo. Das Demo-Material
+  verkettet über exakte TimeReference, zeigt aber den Hinweis «kürzer als ein voller
+  Teil»; für Store-Bilder entweder hinnehmen oder Teile über 100 MiB erzeugen.
+- Im Schlüsselbund liegen zwei «Developer ID Application»; die Probe nimmt die aus
+  `tauri.conf.json`. Die andere liess `codesign` ohne Rückmeldung warten.
+
 ## Befund in Kürze
 
 PrepareAudio ist für den Store ein leichter Fall: reines Rust in einem Prozess,
