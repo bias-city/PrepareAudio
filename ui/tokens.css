@@ -1,0 +1,56 @@
+/* Design-Tokens von PrepareAudio, angeglichen an ResearchTranscript (User 2026-09-18).
+   Quelle der Werte: enrich-transcript/frontend/src/styles.css («Pillenform») und die
+   Slate-Skala von Radix Themes, die ResearchTranscript benutzt. Aubergine bleibt die
+   Farbe von PrepareAudio, so wie Indigo die von ResearchTranscript ist. */
+:root {
+  /* Flächen und Schrift: Radix slate 1/3/6/9/11/12 */
+  --bg: #fcfcfd;
+  --panel: #ffffff;
+  --panel-2: #f0f0f3;
+  --ink: #1c2024;
+  --muted: #60646c;
+  --faint: #8b8d98;
+  --line: #d9d9e0;
+  --hover: color-mix(in srgb, var(--ink) 7%, var(--panel));
+  --active: color-mix(in srgb, var(--ink) 14%, var(--panel));
+  /* Aubergine */
+  --accent: #56107a;
+  --accent-hover: #43065f;
+  --accent-ink: #ffffff;
+  --accent-soft: #f0e7f4;
+  --accent-fill: #56107a;
+  --warn: #8a5300;
+  --warn-soft: #fdf1dc;
+  --bad: #b42318;
+  --bad-soft: #fde8e6;
+  --ok: #16794a;
+  /* Masse: Abstände 4/8/12/16/24, Schrift 12/14, Pillen 24 (Startknopf 32) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --fs-1: 12px; --fs-2: 14px;
+  --pill-h: 24px; --pill-h-lg: 32px;
+  --pill-line: inset 0 0 0 1.5px currentColor;
+  --radius: 8px;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111113;
+    --panel: #18191b;
+    --panel-2: #212225;
+    --ink: #edeef0;
+    --muted: #b0b4ba;
+    --faint: #777b84;
+    --line: #363a3f;
+    --accent: #c690e0;
+    --accent-hover: #d6abea;
+    --accent-ink: #ffffff;
+    --accent-soft: #2d1d36;
+    --accent-fill: #6b1a90;
+    --warn: #f0b660;
+    --warn-soft: #2d2415;
+    --bad: #ff8a80;
+    --bad-soft: #3a1c1a;
+    --ok: #5fd08f;
+  }
+}

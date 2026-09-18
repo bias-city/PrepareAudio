@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PrepareAudio</title>
+  <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body data-mode="merge">
@@ -28,7 +29,6 @@
       <button class="btn ghost" id="sync-rescan" title="Dieselben Ordner erneut analysieren" data-i18n-title="page.analyseAgain.title" data-i18n="page.analyseAgain">Neu analysieren</button>
       <button class="btn ghost" id="sync-pick-again" data-i18n="common.otherFolder">Anderer Ordner…</button>
     </div>
-    <button class="info-btn" id="info-open" title="Info und Lizenzen" aria-label="Info und Lizenzen" data-i18n-title="page.info" data-i18n-aria="page.info">i</button>
     <div class="top-actions merge-only" id="top-actions" hidden>
       <button class="btn ghost" id="rescan" title="Dieselben Ordner erneut durchsuchen" data-i18n-title="page.scanAgain.title" data-i18n="page.scanAgain">Neu scannen</button>
       <button class="btn ghost" id="pick-again" data-i18n="common.otherFolder">Anderer Ordner…</button>
@@ -234,6 +234,8 @@
       <button class="btn" id="sync-acancel" data-i18n="common.cancel">Abbrechen</button>
     </div>
   </div>
+
+  <button class="info-pill" id="info-open" title="Info und Lizenzen" data-i18n-title="page.info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span data-i18n="page.info.short">Info</span></button>
 
   <div class="modal" id="info" hidden>
     <div class="modal-card" role="dialog" aria-labelledby="info-title">

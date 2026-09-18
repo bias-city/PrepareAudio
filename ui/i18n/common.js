@@ -62,6 +62,7 @@ I18N.add({
   'page.measureAgain': { de: 'Neu messen', en: 'Measure again', fr: 'Remesurer', it: 'Misura di nuovo' },
   'page.measureAgain.title': { de: 'Dieselben Ordner erneut messen', en: 'Measure the same folders again', fr: 'Remesurer les mêmes dossiers', it: 'Misura di nuovo le stesse cartelle' },
   'page.info': { de: 'Info und Lizenzen', en: 'Info and licences', fr: 'Informations et licences', it: 'Info e licenze' },
+  'page.info.short': { de: 'Info', en: 'Info', fr: 'Infos', it: 'Info' },
 
   /* ---------- 1 merge ---------- */
   'page.merge.drop': { de: 'Ordner mit Aufnahmen hierher ziehen', en: 'Drag a folder with recordings here', fr: 'Glissez ici un dossier d’enregistrements', it: 'Trascina qui una cartella con registrazioni' },
