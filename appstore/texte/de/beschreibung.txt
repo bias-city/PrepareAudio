@@ -1,0 +1,39 @@
+PrepareAudio macht aus dem, was Audiorecorder und Ansteckmikrofone abliefern, fertige Aufnahmen: Teile zusammenfügen, zwei Mikrofone synchronisieren, als MP3 mastern. Drei Schritte, jeder für sich nutzbar. Alles läuft lokal auf deinem Mac: keine Cloud, kein Konto, keine Daten verlassen den Rechner.
+
+1 · ZUSAMMENFÜGEN
+Viele Recorder schneiden lange Aufnahmen in Teile. PrepareAudio setzt sie wieder zusammen.
+• Ordner hineinziehen, alle Unterordner werden durchsucht, egal wie sortiert
+• Erkennung über Aufnahmezeit in den Metadaten (Broadcast-WAV, iXML), Dateiname oder Dateidatum
+• Bei zwei Sendern mit gleichen Dateinamen entscheidet das Audio an der Nahtstelle
+• Verlustfrei: die Audiodaten werden bitgenau kopiert, ab 4 GB automatisch als RF64
+• Unsichere Verkettungen sind markiert und nicht vorausgewählt
+
+2 · SYNCHRONISIEREN
+Zwei Personen, zwei Ansteckmikrofone, zwei Uhren. PrepareAudio findet die gemeinsamen Ereignisse und legt beide Spuren übereinander.
+• Misst Zeitversatz und Uhrendrift auf Millisekunden
+• Gemeinsame Abschnitte werden Stereo (links die eine, rechts die andere Person), getrennte Gespräche Mono
+• Timeline wie im Schnittprogramm: trimmen, trennen, zusammenführen, löschen, Stereo oder Mono wählen, rückgängig machen
+• Vorhören genau so, wie die Datei entsteht; Sender stumm oder solo
+• Eingaben: WAV sowie MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG, etwa vom Handy
+
+3 · MASTERN
+Gleich laute, gut hörbare Dateien zum Weitergeben, Transkribieren oder Veröffentlichen.
+• Lautheit nach EBU R128 (ITU-R BS.1770-4) mit True Peak und Lautheitsumfang
+• Feste Verstärkung auf −16 LUFS, Limiter bei −1,5 dBTP, keine Kompression: die Sprachdynamik bleibt
+• MP3 mit 192 kbit/s; das fertige MP3 wird nachgemessen und bei Bedarf nachgeregelt
+• Ehrlicher Fortschritt: die Prozente zählen nur erledigte Arbeit
+
+DEINE ORIGINALE BLEIBEN UNANGETASTET
+Die App verändert oder überschreibt nie eine Quelldatei. Ergebnisse landen in den Ordnern tracks, sync und master an dem Ort, den du wählst. Schon Vorhandenes wird erkannt und übersprungen.
+
+QUELLENSCHUTZ: KEINE DATEN VERLASSEN DEN RECHNER
+Wer Gespräche aufnimmt, schuldet den Beteiligten Vertraulichkeit. PrepareAudio erhebt keine Daten, hat keine Telemetrie, braucht kein Mikrofon und lädt nichts nach. Die App läuft in der App Sandbox von macOS.
+
+PASST ZU RESEARCHTRANSCRIPT
+Die gemasterten Dateien sind der ideale Ausgang für die Transkription mit ResearchTranscript, ebenfalls von B/IAS.
+
+OPEN SOURCE
+PrepareAudio ist freie Software unter der AGPL. Der Quellcode liegt offen auf GitHub und lässt sich prüfen. Entwickelt am B/IAS – Basel Institut für angewandte Stadtforschung.
+
+VORAUSSETZUNGEN
+Mac mit Apple Silicon, macOS 12 oder neuer. Oberfläche in Deutsch, Englisch, Französisch und Italienisch.

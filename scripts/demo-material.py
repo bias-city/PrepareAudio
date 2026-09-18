@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Erfundenes Demo-Material für PrepareAudio: Bildschirmfotos, Tests, App-Prüfung.
 
-  python3 scripts/demo-material.py <zielordner>
+  python3 scripts/demo-material.py <zielordner>            klein (82 MB), für die App-Prüfung
+  python3 scripts/demo-material.py <zielordner> --gross    Teile über 100 MiB (ca. 560 MB): so
+      gelten sie der App als «volle Teile» und die Liste zeigt keinen Hinweis — für Bildschirmfotos
 
 Nichts davon ist eine echte Aufnahme. Zwei Ansteckmikrofone («1» und «2») nehmen
 zwölf Minuten auf; der Recorder schneidet jede Aufnahme in drei Teile. Die Stimmen
@@ -25,11 +27,14 @@ from pathlib import Path
 
 import numpy as np
 
-SR = 24_000
+GROSS = "--gross" in sys.argv
+SR = 48_000 if GROSS else 24_000
 DATUM = "2026-05-12"
 START = (10, 15, 0)  # Uhrzeit Sender 1
 MIN = 60 * SR
-TEILE = [int(4.5 * MIN), int(4.5 * MIN), 3 * MIN]
+# gross: 32-bit float, 9,5 min je Teil = 104 MiB; klein: 16 bit, 4,5 min je Teil
+TEILE = [int(9.5 * MIN), int(9.5 * MIN), 6 * MIN] if GROSS else [int(4.5 * MIN), int(4.5 * MIN), 3 * MIN]
+GETRENNT = (10, 16) if GROSS else (5, 8)  # Minuten mit zwei getrennten Gesprächen
 VERSATZ_S = 3.9
 DRIFT = 4e-6
 
@@ -69,6 +74,12 @@ def raum(rng, n, je_minute=5):
     return out
 
 
+def glaetten(x, breite):
+    """Gleitender Mittelwert über die kumulierte Summe (np.convolve wäre hier O(n·breite))."""
+    c = np.cumsum(np.concatenate([np.zeros(breite // 2 + 1), x, np.zeros(breite // 2)]), dtype=np.float64)
+    return ((c[breite:breite + len(x)] - c[:len(x)]) / breite).astype(np.float32)
+
+
 def abwechselnd(rng, n, a, b):
     """Gespräch: mal spricht A, mal B (weiche Übergänge)."""
     gate = np.zeros(n, dtype=np.float32)
@@ -77,8 +88,7 @@ def abwechselnd(rng, n, a, b):
         d = int(rng.uniform(4, 14) * SR)
         gate[t:t + d] = wer
         t, wer = t + d, 1 - wer
-    kern = np.ones(SR // 10, dtype=np.float32) / (SR // 10)
-    gate = np.convolve(gate, kern, mode="same")
+    gate = glaetten(gate, SR // 10)
     return a * (1 - gate), b * gate
 
 
@@ -94,8 +104,12 @@ def bext(zeit_s: float, frames_seit_mitternacht: int) -> bytes:
 
 
 def schreibe_wav(pfad: Path, x: np.ndarray, kopf: bytes = b"", kanaele: int = 1) -> None:
-    pcm = (np.clip(x, -1, 1) * 32767).astype("<i2").tobytes()
-    fmt = b"fmt " + struct.pack("<IHHIIHH", 16, 1, kanaele, SR, SR * 2 * kanaele, 2 * kanaele, 16)
+    if GROSS:  # 32-bit float wie viele Recorder
+        pcm = np.clip(x, -1, 1).astype("<f4").tobytes()
+        fmt = b"fmt " + struct.pack("<IHHIIHH", 16, 3, kanaele, SR, SR * 4 * kanaele, 4 * kanaele, 32)
+    else:
+        pcm = (np.clip(x, -1, 1) * 32767).astype("<i2").tobytes()
+        fmt = b"fmt " + struct.pack("<IHHIIHH", 16, 1, kanaele, SR, SR * 2 * kanaele, 2 * kanaele, 16)
     daten = b"data" + struct.pack("<I", len(pcm)) + pcm
     rumpf = b"WAVE" + kopf + fmt + daten
     pfad.parent.mkdir(parents=True, exist_ok=True)
@@ -114,9 +128,9 @@ def sender(ziel: Path, name: str, x: np.ndarray, start_s: float) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
+    if len([a for a in sys.argv[1:] if not a.startswith('--')]) != 1:
         sys.exit(__doc__)
-    ziel = Path(sys.argv[1])
+    ziel = Path([a for a in sys.argv[1:] if not a.startswith('--')][0])
     rng = np.random.default_rng(20260512)
     n = sum(TEILE)
     extra = int((VERSATZ_S + 1) * SR)
@@ -128,8 +142,8 @@ def main() -> None:
     ereignisse, fremd1, fremd2 = raum(rng, N), raum(rng, N, 3), raum(rng, N, 3)
 
     getrennt = np.zeros(N, dtype=np.float32)
-    getrennt[5 * MIN:8 * MIN] = 1
-    getrennt = np.convolve(getrennt, np.ones(SR, dtype=np.float32) / SR, mode="same")
+    getrennt[GETRENNT[0] * MIN:GETRENNT[1] * MIN] = 1
+    getrennt = glaetten(getrennt, SR)
     gemeinsam = 1 - getrennt
 
     rausch = lambda: 0.002 * rng.standard_normal(N).astype(np.float32)  # noqa: E731

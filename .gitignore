@@ -8,3 +8,8 @@ src-tauri/gen/
 src-tauri/frameworks/
 # Signaturprofil für den Mac App Store
 src-tauri/profiles/
+# Store-Bilder und Entwürfe (erzeugt)
+appstore/upload/
+docs/entwurf-phase0/
+# Demo-Paket für die App-Prüfung (erzeugt, wird nach bias.city hochgeladen)
+appstore/demo/

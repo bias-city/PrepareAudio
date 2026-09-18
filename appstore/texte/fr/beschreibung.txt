@@ -1,0 +1,39 @@
+PrepareAudio transforme ce que livrent les enregistreurs audio et les micros-cravates en enregistrements finis : assembler les fragments, synchroniser deux micros, masteriser en MP3. Trois étapes, chacune utilisable seule. Tout s’exécute localement sur ton Mac : pas de cloud, pas de compte, aucune donnée ne quitte l’ordinateur.
+
+1 · ASSEMBLER
+Beaucoup d’enregistreurs découpent les longs enregistrements en fragments. PrepareAudio les réunit.
+• Glisse un dossier ; tous les sous-dossiers sont parcourus, quel que soit leur classement
+• Détection par l’heure d’enregistrement dans les métadonnées (Broadcast WAV, iXML), le nom ou la date du fichier
+• Avec deux émetteurs et des noms de fichiers identiques, c’est l’audio à la jointure qui décide
+• Sans perte : les données audio sont copiées bit à bit, automatiquement en RF64 à partir de 4 Go
+• Les chaînes incertaines sont signalées et ne sont pas présélectionnées
+
+2 · SYNCHRONISER
+Deux personnes, deux micros-cravates, deux horloges. PrepareAudio trouve les événements communs et superpose les deux pistes.
+• Mesure le décalage et la dérive d’horloge à la milliseconde
+• Les passages communs deviennent stéréo (une personne à gauche, l’autre à droite), les conversations séparées mono
+• Une timeline comme dans un logiciel de montage : rogner, couper, joindre, supprimer, choisir stéréo ou mono, annuler
+• Pré-écoute exactement telle que le fichier sera produit ; émetteur muet ou solo
+• Entrées : WAV ainsi que MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG, par exemple depuis un téléphone
+
+3 · MASTERISER
+Des fichiers de même niveau, bien audibles, à transmettre, transcrire ou publier.
+• Sonie selon EBU R128 (ITU-R BS.1770-4) avec crête réelle et plage de sonie
+• Gain fixe vers −16 LUFS, limiteur à −1,5 dBTP, aucune compression : la dynamique de la parole reste
+• MP3 à 192 kbit/s ; le MP3 fini est remesuré et réajusté si nécessaire
+• Une progression honnête : le pourcentage ne compte que le travail terminé
+
+TES ORIGINAUX RESTENT INTACTS
+L’app ne modifie ni n’écrase jamais un fichier source. Les résultats vont dans les dossiers tracks, sync et master à l’endroit que tu choisis. Ce qui existe déjà est reconnu et ignoré.
+
+PROTECTION DES SOURCES : AUCUNE DONNÉE NE QUITTE L’ORDINATEUR
+Quand tu enregistres des conversations, tu dois la confidentialité aux personnes concernées. PrepareAudio ne collecte aucune donnée, n’a pas de télémétrie, n’a pas besoin du micro et ne télécharge rien. L’app s’exécute dans le bac à sable de macOS.
+
+VA AVEC RESEARCHTRANSCRIPT
+Les fichiers masterisés sont le point de départ idéal pour la transcription avec ResearchTranscript, également du B/IAS.
+
+OPEN SOURCE
+PrepareAudio est un logiciel libre sous AGPL. Le code source est public sur GitHub et peut être vérifié. Développé au B/IAS – Basel Institut für angewandte Stadtforschung.
+
+CONFIGURATION REQUISE
+Mac avec puce Apple, macOS 12 ou ultérieur. Interface en allemand, anglais, français et italien.
