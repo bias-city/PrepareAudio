@@ -24,7 +24,7 @@
     titel: 'Dateien hineingeben',
     kurz: 'Formate, Ordner, Kopien',
     bloecke: [
-      { art: 'p', text: 'Zieh Ordner oder einzelne Dateien ins Fenster, oder nimm **Ordner wählen…**. Alle Unterordner werden durchsucht, egal wie sortiert.' },
+      { art: 'p', text: 'Zieh Ordner oder einzelne Dateien ins Fenster, oder nimm **Ordner wählen…**; im Dialog kannst du mehrere Ordner auf einmal auswählen. Alle Unterordner werden durchsucht, egal wie sortiert.' },
       { art: 'h', text: 'Welche Formate' },
       { art: 'liste', punkte: [
         'WAV in mono, stereo und mehrkanalig, auch RF64 und 32-bit float.',

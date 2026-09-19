@@ -3,7 +3,7 @@
 /* Dictionary: merge. Keys merge.* — de, en, fr, it are all required. See docs/I18N.md. */
 I18N.add({
   /* ---------- dialogs and messages ---------- */
-  'merge.pickTitle': { de: 'Ordner mit Aufnahmen wählen', en: 'Choose folder with recordings', fr: 'Choisir le dossier des enregistrements', it: 'Scegli la cartella con le registrazioni' },
+  'merge.pickTitle': { de: 'Ordner mit Aufnahmen wählen (mehrere möglich)', en: 'Choose folders with recordings (several possible)', fr: 'Choisir des dossiers d’enregistrements (plusieurs possibles)', it: 'Scegli cartelle con registrazioni (anche più di una)' },
   'merge.noneFound': {
     de: 'Keine Aufnahmen gefunden. Gelesen werden nur WAV-Dateien; Aufnahme-Teile werden an der Aufnahmezeit (Metadaten, Dateiname oder Dateidatum) und per Audio-Prüfung an der Nahtstelle erkannt.',
     en: 'No recordings found. Only WAV files are read; recording chunks are recognised by their recording time (metadata, file name or file date) and an audio check at the seam.',

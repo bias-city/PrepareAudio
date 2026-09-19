@@ -12,7 +12,7 @@
     scan_paths: () => D.scan,
     analyze_tracks: () => D.plan,
     analyze_master: () => D.master,
-    pick_folder: () => '/Users/demo/Gespraech/aufnahmen',
+    pick_folders: () => ['/Users/demo/Gespraech/aufnahmen'],
     pick_output_dir: ({ sub }) => `/Users/demo/Gespraech/${sub}`,
     sync_set_clips: ({ clips }) => clipsUpdate(clips),
     sync_reset_clips: () => clipsUpdate(D.plan.clips),

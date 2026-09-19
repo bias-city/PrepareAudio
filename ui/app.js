@@ -131,8 +131,8 @@ function toast(msg, kind = '') {
 async function chooseSource() {
   if (anyBusy()) return;
   try {
-    const p = await invoke('pick_folder', { title: tr('merge.pickTitle') });
-    if (p) runScan([p]);
+    const p = await invoke('pick_folders', { title: tr('merge.pickTitle') });
+    if (p && p.length) runScan(p);
   } catch (e) { toast(String(e), 'bad'); }
 }
 

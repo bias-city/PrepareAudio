@@ -24,7 +24,7 @@
     titel: 'Putting files in',
     kurz: 'Formats, folders, copies',
     bloecke: [
-      { art: 'p', text: 'Drag folders or single files into the window, or use **Choose folder…**. Every subfolder is searched, no matter how things are sorted.' },
+      { art: 'p', text: 'Drag folders or single files into the window, or use **Choose folder…**; in the dialog you can pick several folders at once. Every subfolder is searched, no matter how things are sorted.' },
       { art: 'h', text: 'Which formats' },
       { art: 'liste', punkte: [
         'WAV in mono, stereo and multichannel, including RF64 and 32-bit float.',

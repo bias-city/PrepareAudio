@@ -33,7 +33,7 @@ I18N.add({
   'sync.toast.oneSender': { de: 'Nur ein Sender gefunden, alles bleibt Mono.', en: 'Only one transmitter found, everything stays mono.', fr: 'Un seul émetteur trouvé, tout reste en mono.', it: 'Trovato un solo trasmettitore, tutto resta mono.' },
   'sync.toast.editRestored': { de: 'Frühere Bearbeitung dieser Tracks wiederhergestellt.', en: 'Earlier edits of these tracks restored.', fr: 'Modifications précédentes de ces pistes rétablies.', it: 'Modifiche precedenti di queste tracce ripristinate.' },
   'sync.toast.nothingToCreate': { de: 'Nichts zu erzeugen: alle Clips sind gelöscht.', en: 'Nothing to create: all clips are deleted.', fr: 'Rien à créer : tous les clips sont supprimés.', it: 'Niente da creare: tutte le clip sono eliminate.' },
-  'sync.pickTitle': { de: 'Ordner mit Tracks wählen', en: 'Choose a folder with tracks', fr: 'Choisir un dossier de pistes', it: 'Scegli una cartella con tracce' },
+  'sync.pickTitle': { de: 'Ordner mit Tracks wählen (mehrere möglich)', en: 'Choose folders with tracks (several possible)', fr: 'Choisir des dossiers de pistes (plusieurs possibles)', it: 'Scegli cartelle con tracce (anche più di una)' },
   'sync.outputTitle': { de: 'Wo sollen die synchronisierten Dateien gespeichert werden?', en: 'Where should the synchronised files be saved?', fr: 'Où enregistrer les fichiers synchronisés ?', it: 'Dove salvare i file sincronizzati?' },
   // Matched against backend errors in all four languages to recognise a cancelled analysis.
   'sync.cancelledError': { de: 'Abgebrochen', en: 'Cancelled', fr: 'Annulé', it: 'Annullato' },

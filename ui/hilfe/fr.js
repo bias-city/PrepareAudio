@@ -24,7 +24,7 @@
     titel: 'Ajouter des fichiers',
     kurz: 'Formats, dossiers, copies',
     bloecke: [
-      { art: 'p', text: 'Fais glisser des dossiers ou des fichiers isolés dans la fenêtre, ou passe par **Choisir un dossier…**. Tous les sous-dossiers sont parcourus, quel que soit leur classement.' },
+      { art: 'p', text: 'Fais glisser des dossiers ou des fichiers isolés dans la fenêtre, ou passe par **Choisir un dossier…** ; dans le dialogue tu peux choisir plusieurs dossiers à la fois. Tous les sous-dossiers sont parcourus, quel que soit leur classement.' },
       { art: 'h', text: 'Quels formats' },
       { art: 'liste', punkte: [
         'Le WAV en mono, en stéréo et en multicanal, y compris RF64 et 32 bits flottant.',

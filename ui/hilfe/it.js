@@ -24,7 +24,7 @@
     titel: 'Inserire i file',
     kurz: 'Formati, cartelle, copie',
     bloecke: [
-      { art: 'p', text: 'Trascina cartelle o singoli file nella finestra, oppure usa **Scegli cartella…**. Tutte le sottocartelle vengono scansionate, comunque siano ordinate.' },
+      { art: 'p', text: 'Trascina cartelle o singoli file nella finestra, oppure usa **Scegli cartella…**; nella finestra di dialogo puoi scegliere più cartelle insieme. Tutte le sottocartelle vengono scansionate, comunque siano ordinate.' },
       { art: 'h', text: 'Quali formati' },
       { art: 'liste', punkte: [
         'WAV in mono, stereo e multicanale, anche RF64 e 32 bit float.',

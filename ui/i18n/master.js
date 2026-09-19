@@ -2,12 +2,7 @@
 
 /* Dictionary: master. Keys master.* — de, en, fr, it are all required. See docs/I18N.md. */
 I18N.add({
-  'master.pickTitle': {
-    de: 'Ordner mit Audiodateien wählen',
-    en: 'Choose a folder with audio files',
-    fr: 'Choisir un dossier contenant des fichiers audio',
-    it: 'Scegli una cartella con file audio',
-  },
+  'master.pickTitle': { de: 'Ordner mit Audiodateien wählen (mehrere möglich)', en: 'Choose folders with audio files (several possible)', fr: 'Choisir des dossiers de fichiers audio (plusieurs possibles)', it: 'Scegli cartelle con file audio (anche più di una)' },
   'master.searching': {
     de: 'Suche Audiodateien',
     en: 'Looking for audio files',

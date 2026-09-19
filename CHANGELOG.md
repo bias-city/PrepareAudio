@@ -10,6 +10,9 @@ notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
 ### Neu
 
+- **Mehrere Ordner auf einmal wählen**: Der Dialog **Ordner wählen…** nimmt jetzt eine
+  Mehrfachauswahl, in allen drei Schritten. Hineinziehen ging das schon immer.
+
 - **Handbuch in der App** (Menü Help, ⌘⇧/): durchsuchbar, mit Bildern aus der echten Oberfläche
   in hell und dunkel, in allen vier Sprachen. Erklärt die drei Schritte, die Timeline, die Profile
   beim Mastern, alle Tastenkürzel und was die App lokal speichert.

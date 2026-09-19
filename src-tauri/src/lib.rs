@@ -92,11 +92,16 @@ async fn scan_paths(app: AppHandle, state: State<'_, AppState>, paths: Vec<Strin
 }
 
 #[tauri::command]
-async fn pick_folder(app: AppHandle, title: String) -> Result<Option<String>, String> {
-    let picked = tauri::async_runtime::spawn_blocking(move || app.dialog().file().set_title(title).blocking_pick_folder())
+async fn pick_folders(app: AppHandle, title: String) -> Result<Vec<String>, String> {
+    let picked = tauri::async_runtime::spawn_blocking(move || app.dialog().file().set_title(title).blocking_pick_folders())
         .await
         .map_err(|e| e.to_string())?;
-    Ok(picked.and_then(|p| p.into_path().ok()).map(|p| p.to_string_lossy().into_owned()))
+    Ok(picked
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|p| p.into_path().ok())
+        .map(|p| p.to_string_lossy().into_owned())
+        .collect())
 }
 
 #[tauri::command]
@@ -499,7 +504,7 @@ pub fn run() {
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
             scan_paths,
-            pick_folder,
+            pick_folders,
             merge_recordings,
             analyze_tracks,
             write_sync,

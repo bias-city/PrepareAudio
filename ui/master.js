@@ -43,8 +43,8 @@
   async function choose() {
     if (busyAny()) return;
     try {
-      const p = await invoke('pick_folder', { title: tr('master.pickTitle') });
-      if (p) analyze([p]);
+      const p = await invoke('pick_folders', { title: tr('master.pickTitle') });
+      if (p && p.length) analyze(p);
     } catch (e) { toast(String(e), 'bad'); }
   }
 
