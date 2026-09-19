@@ -10,6 +10,11 @@ notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
 ### Geändert
 
+- **Ablageflächen** in allen drei Schritten in derselben Form: Schrittnummer, ein Satz, der Knopf,
+  das Kleingedruckte. Die gezeichneten Wellenformen als Illustration sind entfallen.
+- Die Pille unten links führt jetzt zum **Handbuch**; das Info-Feld mit den Lizenzen öffnet der
+  Menüeintrag **About PrepareAudio**.
+
 - Der Übersichtsbalken über der Timeline ist entfallen: seit die Leerzeiten zwischen Sessions
   herausfallen, zeigt die Timeline den Tag ohnehin am Stück.
 

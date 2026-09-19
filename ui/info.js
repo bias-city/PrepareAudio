@@ -23,6 +23,12 @@
     return loading;
   }
 
+  function handbuch() {
+    const core = window.__TAURI__ && window.__TAURI__.core;
+    if (core) core.invoke('handbuch_oeffnen').catch(() => {});
+    else window.open('hilfe.html', '_blank');
+  }
+
   const link = (url, label) => `<button type="button" data-link="${esc(url)}" title="${esc(url)}">${esc(label)}</button>`;
 
   /* Parts that do not need licenses.json: shown at once and on every language change. */
@@ -95,19 +101,15 @@
     q('#info-texts').dataset.done = '1';
   }
 
-  q('#info-open').addEventListener('click', open);
-  // Menu entry "About PrepareAudio" (src-tauri/src/lib.rs) opens this panel.
+  // The pill at the bottom left leads to the handbook; this panel comes from the menu entry
+  // "About PrepareAudio" (src-tauri/src/lib.rs), which also holds the licence notices.
+  q('#hilfe-open').addEventListener('click', handbuch);
   const ev = window.__TAURI__ && window.__TAURI__.event;
   if (ev) ev.listen('ueber', () => { if (modal.hidden) open(); }).catch(() => {});
   q('#info-close').addEventListener('click', () => { modal.hidden = true; });
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.hidden = true;
-    if (e.target.closest('#info-handbuch')) {
-      const core = window.__TAURI__ && window.__TAURI__.core;
-      if (core) core.invoke('handbuch_oeffnen').catch(() => {});
-      else window.open('hilfe.html', '_blank');
-      return;
-    }
+    if (e.target.closest('#info-handbuch')) { handbuch(); return; }
     const b = e.target.closest('[data-link]');
     if (b && window.openLink) window.openLink(b.dataset.link);
     const l = e.target.closest('[data-lang]');

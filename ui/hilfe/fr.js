@@ -205,7 +205,7 @@
       ] },
       { art: 'p', text: 'Ce que contiennent les résultats : les noms de fichiers portent la date, l’heure et le nom du dossier source. Les fichiers communs portent un timecode et des noms de pistes. Les fichiers MP3 portent une entrée ID3 avec le nom du fichier et le profil utilisé. L’app n’inscrit nulle part un identifiant de ton appareil ou de ta personne.' },
       { art: 'h', text: 'Licence' },
-      { art: 'p', text: 'PrepareAudio est un logiciel libre sous GNU AGPL, version 3 ou ultérieure. Le code source est ouvert sur GitHub. La version du Mac App Store est le même code source, avec une autorisation supplémentaire selon le §7 pour la distribution là-bas. Tous les paquets tiers inclus et leurs licences figurent dans le champ Infos en bas à gauche.' },
+      { art: 'p', text: 'PrepareAudio est un logiciel libre sous GNU AGPL, version 3 ou ultérieure. Le code source est ouvert sur GitHub. La version du Mac App Store est le même code source, avec une autorisation supplémentaire selon le §7 pour la distribution là-bas. Tous les paquets tiers inclus et leurs licences figurent dans le menu sous **PrepareAudio › About PrepareAudio**.' },
       { art: 'p', text: 'Développé au B/IAS – Basel Institut für angewandte Stadtforschung.' },
     ],
   },

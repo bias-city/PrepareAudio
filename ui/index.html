@@ -32,25 +32,11 @@
   <main id="main">
     <section class="empty merge-only" id="empty">
       <div class="dropzone" id="dropzone">
-        <svg class="illu" viewBox="0 0 320 96" aria-hidden="true">
-          <g class="frag">
-            <rect x="8" y="40" width="6" height="16" rx="3"/><rect x="20" y="28" width="6" height="40" rx="3"/><rect x="32" y="18" width="6" height="60" rx="3"/><rect x="44" y="34" width="6" height="28" rx="3"/><rect x="56" y="24" width="6" height="48" rx="3"/>
-          </g>
-          <g class="frag">
-            <rect x="84" y="30" width="6" height="36" rx="3"/><rect x="96" y="14" width="6" height="68" rx="3"/><rect x="108" y="36" width="6" height="24" rx="3"/><rect x="120" y="22" width="6" height="52" rx="3"/>
-          </g>
-          <g class="frag">
-            <rect x="148" y="26" width="6" height="44" rx="3"/><rect x="160" y="38" width="6" height="20" rx="3"/><rect x="172" y="20" width="6" height="56" rx="3"/>
-          </g>
-          <path class="arrow" d="M196 48h40m-10-9 10 9-10 9"/>
-          <g class="whole">
-            <rect x="252" y="40" width="4" height="16" rx="2"/><rect x="260" y="28" width="4" height="40" rx="2"/><rect x="268" y="18" width="4" height="60" rx="2"/><rect x="276" y="30" width="4" height="36" rx="2"/><rect x="284" y="14" width="4" height="68" rx="2"/><rect x="292" y="26" width="4" height="44" rx="2"/><rect x="300" y="38" width="4" height="20" rx="2"/><rect x="308" y="20" width="4" height="56" rx="2"/>
-          </g>
-        </svg>
-        <h2 data-i18n="page.merge.drop">Ordner mit Aufnahmen hierher ziehen</h2>
-        <p data-i18n-html="page.merge.text">Nur WAV. Aufnahme-Teile, die ein Audiorecorder bei langen Aufnahmen schreibt, werden an der Aufnahmezeit erkannt (aus Metadaten, Dateiname oder Dateidatum) und an der Nahtstelle per Audio geprüft. Sauber sortiert oder durcheinander: alle Unterordner werden durchsucht, Kopien erkannt, die Teile jeder Aufnahme wieder zusammengesetzt.</p>
+        <span class="drop-step">1</span>
+        <h2 data-i18n="page.merge.drop"></h2>
+        <p data-i18n-html="page.merge.text"></p>
         <button class="btn primary" id="pick" data-i18n="common.chooseFolder">Ordner wählen…</button>
-        <p class="fine" data-i18n-html="page.merge.fine">Die Originale bleiben unangetastet. Beim Start fragt die App, wo der Ordner <b>tracks</b> entstehen soll, verlustfrei als WAV.</p>
+        <p class="fine" data-i18n-html="page.merge.fine"></p>
       </div>
     </section>
 
@@ -73,17 +59,11 @@
 
     <section class="empty sync-only" id="sync-empty">
       <div class="dropzone">
-        <svg class="illu" viewBox="0 0 320 96" aria-hidden="true">
-          <g class="frag"><rect x="8" y="14" width="96" height="24" rx="6"/><rect x="216" y="14" width="96" height="24" rx="6"/></g>
-          <g class="frag"><rect x="8" y="58" width="80" height="24" rx="6"/><rect x="232" y="58" width="80" height="24" rx="6"/></g>
-          <rect class="joint" x="112" y="10" width="96" height="76" rx="8"/>
-          <g class="whole"><rect x="120" y="20" width="4" height="12" rx="2"/><rect x="128" y="16" width="4" height="20" rx="2"/><rect x="136" y="22" width="4" height="8" rx="2"/><rect x="144" y="17" width="4" height="18" rx="2"/><rect x="152" y="21" width="4" height="10" rx="2"/><rect x="160" y="15" width="4" height="22" rx="2"/><rect x="168" y="20" width="4" height="12" rx="2"/><rect x="176" y="18" width="4" height="16" rx="2"/><rect x="184" y="22" width="4" height="8" rx="2"/><rect x="192" y="19" width="4" height="14" rx="2"/>
-          <rect x="120" y="64" width="4" height="12" rx="2"/><rect x="128" y="60" width="4" height="20" rx="2"/><rect x="136" y="66" width="4" height="8" rx="2"/><rect x="144" y="61" width="4" height="18" rx="2"/><rect x="152" y="65" width="4" height="10" rx="2"/><rect x="160" y="59" width="4" height="22" rx="2"/><rect x="168" y="64" width="4" height="12" rx="2"/><rect x="176" y="62" width="4" height="16" rx="2"/><rect x="184" y="66" width="4" height="8" rx="2"/><rect x="192" y="63" width="4" height="14" rx="2"/></g>
-        </svg>
-        <h2 data-i18n="page.sync.drop">Tracks hierher ziehen</h2>
-        <p data-i18n="page.sync.text">Die App sucht Ereignisse, die beide Mikrofone mit gleichbleibendem Zeitversatz hören: Silben, Stuhlrücken, Geschirr. Wo zwei Sender dasselbe Geschehen aufgenommen haben, entsteht eine Stereo-Datei. Wo die Mikros in verschiedenen Situationen waren, bleiben zwei Mono-Spuren.</p>
+        <span class="drop-step">2</span>
+        <h2 data-i18n="page.sync.drop"></h2>
+        <p data-i18n-html="page.sync.text"></p>
         <button class="btn primary" id="sync-pick" data-i18n="common.chooseFolder">Ordner wählen…</button>
-        <p class="fine" data-i18n-html="page.sync.fine">Am besten den Ordner <b>tracks</b> aus Schritt 1; rohe Aufnahme-Teile vom Recorder gehen auch. Neben WAV nimmt die App MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF und OGG an: Diese Dateien werden einmal dekodiert und zwischengespeichert, erzeugt wird immer WAV. Danach lässt sich alles in der Timeline bearbeiten; beim Erzeugen fragt die App, wo der Ordner <b>sync</b> entstehen soll.</p>
+        <p class="fine" data-i18n-html="page.sync.fine"></p>
       </div>
     </section>
 
@@ -134,16 +114,11 @@
 
     <section class="empty master-only" id="master-empty">
       <div class="dropzone">
-        <svg class="illu" viewBox="0 0 320 96" aria-hidden="true">
-          <g class="frag"><rect x="14" y="44" width="6" height="8" rx="3"/><rect x="26" y="40" width="6" height="16" rx="3"/><rect x="38" y="46" width="6" height="4" rx="2"/><rect x="50" y="30" width="6" height="36" rx="3"/><rect x="62" y="42" width="6" height="12" rx="3"/><rect x="74" y="45" width="6" height="6" rx="3"/><rect x="86" y="38" width="6" height="20" rx="3"/><rect x="98" y="44" width="6" height="8" rx="3"/><rect x="110" y="8" width="6" height="80" rx="3"/><rect x="122" y="43" width="6" height="10" rx="3"/></g>
-          <path class="arrow" d="M142 48h36m-10-9 10 9-10 9"/>
-          <line class="ceiling" x1="192" y1="16" x2="312" y2="16"/><line class="ceiling" x1="192" y1="80" x2="312" y2="80"/>
-          <g class="whole"><rect x="196" y="30" width="6" height="36" rx="3"/><rect x="208" y="22" width="6" height="52" rx="3"/><rect x="220" y="36" width="6" height="24" rx="3"/><rect x="232" y="18" width="6" height="60" rx="3"/><rect x="244" y="28" width="6" height="40" rx="3"/><rect x="256" y="34" width="6" height="28" rx="3"/><rect x="268" y="20" width="6" height="56" rx="3"/><rect x="280" y="30" width="6" height="36" rx="3"/><rect x="292" y="17" width="6" height="62" rx="3"/><rect x="304" y="32" width="6" height="32" rx="3"/></g>
-        </svg>
-        <h2 data-i18n="page.master.drop">Audiodateien hierher ziehen</h2>
-        <p data-i18n="page.master.text">Die App erkennt Format und Bittiefe jeder Datei, misst die Lautheit nach EBU R128 und bringt sie mit einer festen Verstärkung auf −16 LUFS. Ein Limiter fängt nur die Spitzen bei −1,5 dBTP ab, die Sprachdynamik bleibt.</p>
+        <span class="drop-step">3</span>
+        <h2 data-i18n="page.master.drop"></h2>
+        <p data-i18n-html="page.master.text"></p>
         <button class="btn primary" id="master-pick" data-i18n="common.chooseFolder">Ordner wählen…</button>
-        <p class="fine" data-i18n-html="page.master.fine">Nimmt WAV (auch RF64 und 32-bit float), MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF und OGG Vorbis, zum Beispiel den Ordner <b>sync</b> aus Schritt 2. Beim Start fragt die App, wo der Ordner <b>master</b> entstehen soll, MP3 mit 192 kbit/s.</p>
+        <p class="fine" data-i18n-html="page.master.fine"></p>
       </div>
     </section>
 
@@ -234,7 +209,8 @@
     </div>
   </div>
 
-  <button class="info-pill" id="info-open" title="Info und Lizenzen" data-i18n-title="page.info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span data-i18n="page.info.short">Info</span></button>
+  <button class="info-pill" id="hilfe-open" title="Handbuch öffnen (⌘⇧/)" data-i18n-title="page.help.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span data-i18n="page.help">Hilfe</span></button>
+
 
   <div class="modal" id="info" hidden>
     <div class="modal-card" role="dialog" aria-labelledby="info-title">

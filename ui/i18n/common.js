@@ -62,7 +62,8 @@ I18N.add({
   'page.measureAgain': { de: 'Neu messen', en: 'Measure again', fr: 'Remesurer', it: 'Misura di nuovo' },
   'page.measureAgain.title': { de: 'Dieselben Ordner erneut messen', en: 'Measure the same folders again', fr: 'Remesurer les mêmes dossiers', it: 'Misura di nuovo le stesse cartelle' },
   'page.info': { de: 'Info und Lizenzen', en: 'Info and licences', fr: 'Informations et licences', it: 'Info e licenze' },
-  'page.info.short': { de: 'Info', en: 'Info', fr: 'Infos', it: 'Info' },
+  'page.help': { de: 'Hilfe', en: 'Help', fr: 'Aide', it: 'Aiuto' },
+  'page.help.title': { de: 'Handbuch öffnen (⌘⇧/)', en: 'Open the handbook (⌘⇧/)', fr: 'Ouvrir le manuel (⌘⇧/)', it: 'Apri il manuale (⌘⇧/)' },
 
   /* ---------- 1 merge ---------- */
   'page.merge.drop': { de: 'Ordner oder Dateien hierher ziehen', en: 'Drag folders or files here', fr: 'Glisse ici des dossiers ou des fichiers', it: 'Trascina qui cartelle o file' },

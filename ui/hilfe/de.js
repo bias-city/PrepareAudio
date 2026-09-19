@@ -205,7 +205,7 @@
       ] },
       { art: 'p', text: 'Was in Ergebnissen steht: Dateinamen tragen Datum, Uhrzeit und den Namen des Quellordners. Gemeinsame Dateien tragen Timecode und Spurnamen. MP3-Dateien tragen einen ID3-Eintrag mit dem Dateinamen und dem verwendeten Profil. Eine Kennung deines Geräts oder deiner Person schreibt die App nirgends hinein.' },
       { art: 'h', text: 'Lizenz' },
-      { art: 'p', text: 'PrepareAudio ist freie Software unter der GNU AGPL, Version 3 oder später. Der Quellcode liegt offen auf GitHub. Die Fassung aus dem Mac App Store ist derselbe Quellcode, mit einer Zusatzerlaubnis nach §7 für den Vertrieb dort. Alle enthaltenen Fremdpakete und ihre Lizenzen stehen im Info-Feld unten links.' },
+      { art: 'p', text: 'PrepareAudio ist freie Software unter der GNU AGPL, Version 3 oder später. Der Quellcode liegt offen auf GitHub. Die Fassung aus dem Mac App Store ist derselbe Quellcode, mit einer Zusatzerlaubnis nach §7 für den Vertrieb dort. Alle enthaltenen Fremdpakete und ihre Lizenzen stehen im Menü unter **PrepareAudio › About PrepareAudio**.' },
       { art: 'p', text: 'Entwickelt am B/IAS – Basel Institut für angewandte Stadtforschung.' },
     ],
   },

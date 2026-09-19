@@ -58,7 +58,9 @@ async function lauf(lang, dunkel, motive, groesse) {
   await knips("merge");
   await page.click("#tabs button[data-mode=sync]"); await page.click("#sync-pick"); await page.waitForTimeout(600); await knips("sync");
   await page.click("#tabs button[data-mode=master]"); await page.click("#master-pick"); await knips("master");
-  await page.click("#info-open"); await knips("info");
+  await page.evaluate(() => document.querySelector("#info-open") || window.__TAURI__.event.emit?.("ueber"));
+  await page.evaluate(() => { const m = document.querySelector("#info"); if (m) m.hidden = false; });
+  await knips("info");
   await page.close();
 }
 for (const g of GROESSEN) { await lauf(SPRACHEN[0], DUNKEL, ["leer", "merge", "sync", "master", "info"], g); console.log("✓", g.join("x")); }
