@@ -17,9 +17,9 @@ T = {
 "de": {
 "portal": "Deutsch",
 "name": "PrepareAudio",
-"untertitel": "Gesprächsaufnahmen vorbereiten",
-"werbetext": "Aus verstreuten Aufnahmen wird ein Gespräch: Teile verlustfrei zusammenfügen, beliebig viele Mikrofone synchronisieren, als MP3 mastern. Alles lokal auf deinem Mac.",
-"schlagwoerter": "Audio,Recorder,WAV,zusammenfügen,synchronisieren,Mastern,MP3,LUFS,Interview,Podcast,Video,offline",
+"untertitel": "Multi-Mic und Aufnahme-Teile",
+"werbetext": "Multi-Mic-Field-Recordings und zerteilte Audiodaten für Transkription und Podcast vorbereiten: zusammenfügen, synchronisieren, mastern. Alles lokal auf deinem Mac.",
+"schlagwoerter": "Audio,Field Recording,Multi-Mic,Recorder,WAV,synchronisieren,Mastern,MP3,LUFS,Interview,Podcast",
 "beschreibung": """PrepareAudio macht aus dem, was Audiorecorder, Ansteckmikrofone, Handys und Kameras abliefern, fertige Aufnahmen: Teile zusammenfügen, beliebig viele Mikrofone synchronisieren, als MP3 mastern. Drei Schritte, jeder für sich nutzbar. Alles läuft lokal auf deinem Mac: keine Cloud, kein Konto, keine Daten verlassen den Rechner.
 
 1 · ZUSAMMENFÜGEN
@@ -71,9 +71,9 @@ Mac mit Apple Silicon, macOS 12 oder neuer. Oberfläche in Deutsch, Englisch, Fr
 "en": {
 "portal": "Englisch (UK)",
 "name": "PrepareAudio",
-"untertitel": "Prepare conversation audio",
-"werbetext": "Scattered recordings become one conversation: merge the parts losslessly, synchronise any number of microphones, master as MP3. All locally on your Mac.",
-"schlagwoerter": "audio,recorder,WAV,merge,synchronise,mastering,MP3,LUFS,interview,podcast,video,offline",
+"untertitel": "Multi-mic field recordings",
+"werbetext": "Prepare multi-mic field recordings and split audio files for transcription and podcast: merge, synchronise, master. Everything stays on your Mac.",
+"schlagwoerter": "audio,field recording,multi-mic,recorder,WAV,sync,mastering,MP3,LUFS,interview,podcast,offline",
 "beschreibung": """PrepareAudio turns what audio recorders, lavalier microphones, phones and cameras deliver into finished recordings: merge the parts, synchronise any number of microphones, master as MP3. Three steps, each useful on its own. Everything runs locally on your Mac: no cloud, no account, no data leaves the computer.
 
 1 · MERGE
@@ -125,9 +125,9 @@ Mac with Apple Silicon, macOS 12 or later. Interface in German, English, French 
 "fr": {
 "portal": "Französisch",
 "name": "PrepareAudio",
-"untertitel": "Préparer tes enregistrements",
-"werbetext": "Des enregistrements épars deviennent une conversation : assembler sans perte, synchroniser autant de micros que tu veux, masteriser en MP3. Tout en local sur ton Mac.",
-"schlagwoerter": "audio,enregistreur,WAV,assembler,synchroniser,mastering,MP3,LUFS,entretien,podcast,vidéo",
+"untertitel": "Field recordings multi-micros",
+"werbetext": "Prépare des field recordings multi-micros et des fichiers fragmentés pour la transcription et le podcast : assembler, synchroniser, masteriser. Tout reste sur ton Mac.",
+"schlagwoerter": "audio,field recording,multi-micro,enregistreur,WAV,synchroniser,mastering,MP3,LUFS,entretien,podcast",
 "beschreibung": """PrepareAudio transforme ce que livrent enregistreurs audio, micros-cravates, téléphones et caméras en enregistrements finis : assembler les fragments, synchroniser autant de micros que tu veux, masteriser en MP3. Trois étapes, chacune utilisable seule. Tout s’exécute localement sur ton Mac : pas de cloud, pas de compte, aucune donnée ne quitte l’ordinateur.
 
 1 · ASSEMBLER
@@ -179,9 +179,9 @@ Mac avec Apple Silicon, macOS 12 ou ultérieur. Interface en allemand, anglais, 
 "it": {
 "portal": "Italienisch",
 "name": "PrepareAudio",
-"untertitel": "Prepara le tue registrazioni",
-"werbetext": "Da registrazioni sparse nasce una conversazione: unire le parti senza perdita, sincronizzare quanti microfoni vuoi, masterizzare in MP3. Tutto in locale sul tuo Mac.",
-"schlagwoerter": "audio,registratore,WAV,unire,sincronizzare,mastering,MP3,LUFS,intervista,podcast,video",
+"untertitel": "Field recording multi-mic",
+"werbetext": "Prepara field recording multi-microfono e file audio spezzati per trascrizione e podcast: unire, sincronizzare, masterizzare. Tutto resta sul tuo Mac.",
+"schlagwoerter": "audio,field recording,multi-mic,registratore,WAV,sincronizzare,mastering,MP3,LUFS,podcast",
 "beschreibung": """PrepareAudio trasforma ciò che consegnano registratori audio, microfoni lavalier, telefoni e videocamere in registrazioni finite: unire le parti, sincronizzare quanti microfoni vuoi, masterizzare in MP3. Tre passaggi, ciascuno utilizzabile da solo. Tutto avviene in locale sul tuo Mac: niente cloud, niente account, nessun dato lascia il computer.
 
 1 · UNIRE
