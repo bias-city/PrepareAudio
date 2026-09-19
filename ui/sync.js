@@ -16,7 +16,7 @@
     ptext: q('#sync-ptext'), done: q('#sync-done'), sel: q('#sync-sel'), go: q('#sync-go'), cancel: q('#sync-cancel'),
     retry: q('#sync-retry'), analyzing: q('#sync-analyzing'), abar: q('#sync-abar'), atext: q('#sync-atext'),
     topActions: q('#sync-top-actions'), editState: q('#sync-edit-state'),
-    editor: q('#sync-editor'), days: q('#ed-days'), overview: q('#ed-overview'), canvas: q('#ed-canvas'),
+    editor: q('#sync-editor'), days: q('#ed-days'), canvas: q('#ed-canvas'),
     wrap: q('#ed-wrap'), legend: q('#ed-legend'), time: q('#ed-time'), play: q('#ed-play'), reset: q('#ed-reset'), menu: q('#ed-menu'),
   };
   const sy = { inputs: [], plan: null, outDir: '', outcomes: new Map(), busy: false, activeId: null, retryIds: null, decoding: false };
@@ -447,7 +447,6 @@
       ctx.beginPath(); ctx.moveTo(px - 6, 0); ctx.lineTo(px + 6, 0); ctx.lineTo(px, 8); ctx.closePath(); ctx.fill();
     }
     E.time.textContent = clockText(ph, true);
-    drawOverview(v);
   }
 
   function drawWave(ctx, clip, x0, x1, y, h, fill) {
@@ -464,39 +463,6 @@
       const amp = (pk.data[i] / 255) * (h / 2 - 3);
       if (amp > 0.3) ctx.fillRect(x, mid - amp, 1, amp * 2);
     }
-  }
-
-  function drawOverview(v) {
-    const c = E.overview;
-    const d = day();
-    const dpr = window.devicePixelRatio || 1;
-    const W = Math.max(320, c.clientWidth), H = 30;
-    if (c.width !== Math.round(W * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
-    const ctx = c.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, W, H);
-    const pad = daySpan() * 0.02 + 2;
-    const o0 = -pad, o1 = daySpan() + pad;                 // display seconds, like the timeline
-    const ou = (u) => ((u - o0) / (o1 - o0)) * W;
-    const ox = (t) => ou(U(t));
-    ed.overviewMap = { o0, o1, W };
-    const labels = P().labels.filter((l) => d.tracks.some((t) => labelOf(t) === l));
-    const laneH = (H - 6) / Math.max(1, labels.length);
-    for (const clip of ed.clips) {
-      if (!d.tracks.includes(clip.track) || clip.deleted) continue;
-      const li = labels.indexOf(labelOf(clip.track));
-      ctx.fillStyle = clip.mode === 'stereo' ? withAlpha(colorOf(labelOf(clip.track)), 0.9) : tint(colorOf(labelOf(clip.track)), 0.72);
-      const a = ox(toTimeline(clip.track, clip.t0)), b = ox(toTimeline(clip.track, clip.t1));
-      ctx.fillRect(a, 3 + li * laneH, Math.max(1, b - a), laneH - 1);
-    }
-    ctx.strokeStyle = v('--ink'); ctx.lineWidth = 1.5;
-    ctx.fillStyle = v('--ink');
-    for (const s of sessions()) if (s.gap) ctx.fillRect(Math.round(ox(s.t0)) - 0.5, 0, 1, H);
-    const va = ou(ed.view.t0), vb = ou(ed.view.t0 + visibleSpan());
-    ctx.strokeRect(Math.max(0.75, va), 0.75, Math.min(W - 1.5, vb - va), H - 1.5);
-    const p = ox(playheadNow());
-    ctx.fillStyle = v('--ink');
-    ctx.fillRect(p - 0.75, 0, 1.5, H);
   }
 
   /* ---------- hit testing and gestures ---------- */
@@ -683,21 +649,6 @@
     updateToolbar();
     draw();
   });
-
-  let overviewDrag = false;
-  const overviewTo = (e) => {
-    const m = ed.overviewMap;
-    if (!m) return;
-    const r = E.overview.getBoundingClientRect();
-    const u = m.o0 + ((e.clientX - r.left) / m.W) * (m.o1 - m.o0);
-    ed.view.t0 = u - visibleSpan() / 2;
-    clampView();
-    schedulePeaks();
-    draw();
-  };
-  E.overview.addEventListener('pointerdown', (e) => { overviewDrag = true; try { E.overview.setPointerCapture(e.pointerId); } catch (err) { /* synthetic */ } overviewTo(e); });
-  E.overview.addEventListener('pointermove', (e) => { if (overviewDrag) overviewTo(e); });
-  E.overview.addEventListener('pointerup', () => { overviewDrag = false; });
 
   function showMenu(x, y, clip) {
     const n = ed.sel.size;

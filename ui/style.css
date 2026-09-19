@@ -294,7 +294,6 @@ body[data-mode="master"] .merge-only, body[data-mode="master"] .sync-only { disp
 .ed-days button { height: var(--pill-h); padding: 0 12px; border: 0; border-radius: 9999px; background: var(--panel); color: var(--ink); box-shadow: var(--pill-line); font-size: var(--fs-1); font-weight: 500; cursor: pointer; }
 .ed-days button:hover { background: var(--hover); }
 .ed-days button.on { background: var(--active); font-weight: 600; }
-.ed-overview { display: block; width: 100%; height: 30px; border-radius: 6px; background: var(--panel-2); cursor: pointer; margin-bottom: 6px; }
 .ed-wrap { position: relative; }
 #ed-canvas { display: block; width: 100%; outline: none; border-radius: 6px; touch-action: none; }
 #ed-canvas:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); }

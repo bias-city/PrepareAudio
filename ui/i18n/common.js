@@ -126,12 +126,6 @@ I18N.add({
   'page.ed.zoomIn.title': { de: 'Vergrößern (⌘+)', en: 'Zoom in (⌘+)', fr: 'Zoom avant (⌘+)', it: 'Ingrandisci (⌘+)' },
   'page.ed.fit': { de: 'Tag', en: 'Day', fr: 'Jour', it: 'Giorno' },
   'page.ed.fit.title': { de: 'Ganzen Tag zeigen (0)', en: 'Show the whole day (0)', fr: 'Afficher toute la journée (0)', it: 'Mostra l’intera giornata (0)' },
-  'page.ed.overview.title': {
-    de: 'Übersicht: klicken oder ziehen zum Verschieben',
-    en: 'Overview: click or drag to move',
-    fr: 'Vue d’ensemble : cliquez ou glissez pour vous déplacer',
-    it: 'Panoramica: clicca o trascina per spostarti',
-  },
   'page.ed.hint': {
     de: 'Klick auf einen Abschnitt öffnet seine Optionen. Kanten ziehen zum Trimmen oder Verlängern. Leertaste spielt, S trennt, J führt zusammen, Entf löscht, ⌘Z macht rückgängig. ⌘ + Mausrad oder Zwei-Finger-Zoom zoomt.',
     en: 'Click a segment to open its options. Drag edges to trim or extend. Space plays, S splits, J joins, Delete removes, ⌘Z undoes. ⌘ + scroll wheel or pinch zooms.',

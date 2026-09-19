@@ -8,6 +8,11 @@ sind der entsprechende Abschnitt dieser Datei.
 Erste Fassung für den Mac App Store; derselbe Code erscheint als signiertes und
 notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
+### Geändert
+
+- Der Übersichtsbalken über der Timeline ist entfallen: seit die Leerzeiten zwischen Sessions
+  herausfallen, zeigt die Timeline den Tag ohnehin am Stück.
+
 ### Neu
 
 - **Mehrere Ordner auf einmal wählen**: Der Dialog **Ordner wählen…** nimmt jetzt eine
