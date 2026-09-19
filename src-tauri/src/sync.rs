@@ -53,6 +53,12 @@ const SEARCH_S: f64 = 300.0;
 const COARSE_Z_MIN: f64 = 6.0;
 const FINE_WINDOW_MS: usize = 60_000;
 const FINE_STEP_S: f64 = 60.0;
+/// Short recordings (overlap under five minutes) would give fewer than the three windows the
+/// line fit needs: they are measured in 20-s windows every 10 s instead. Long recordings keep
+/// the calibrated 60-s windows.
+const SHORT_OVERLAP_S: f64 = 300.0;
+const SHORT_WINDOW_MS: usize = 20_000;
+const SHORT_STEP_S: f64 = 10.0;
 const FINE_SEARCH_MS: isize = 1000;
 const FINE_Z_MIN: f64 = 6.0;
 const FIT_RESID_MAX_S: f64 = 0.03;
@@ -1015,7 +1021,8 @@ struct Win {
 }
 
 fn fine_windows(oa: &[f32], ob: &[f32], coarse: f64) -> Vec<Win> {
-    let w = FINE_WINDOW_MS;
+    let overlap = (oa.len() as f64 / ENV_RATE).min(ob.len() as f64 / ENV_RATE + coarse) - coarse.max(0.0);
+    let (w, step) = if overlap < SHORT_OVERLAP_S { (SHORT_WINDOW_MS, SHORT_STEP_S) } else { (FINE_WINDOW_MS, FINE_STEP_S) };
     let fs = FINE_SEARCH_MS;
     let t_end = (oa.len() as f64 / ENV_RATE).min(ob.len() as f64 / ENV_RATE + coarse + fs as f64 / ENV_RATE);
     let mut t = (coarse - fs as f64 / ENV_RATE).max(0.0);
@@ -1039,7 +1046,7 @@ fn fine_windows(oa: &[f32], ob: &[f32], coarse: f64) -> Vec<Win> {
             let (d, z) = peak_stats(&curve, PEAK_EXCLUDE_MS);
             out.push(Win { t, lag: (ia + (d - fs) - lo) as f64 / ENV_RATE, z });
         }
-        t += FINE_STEP_S;
+        t += step;
     }
     out
 }
@@ -2860,6 +2867,40 @@ mod tests {
         write_float_wav(&dir.join("tracks/260101_S100230-E101140_D000910_5.wav"), sr, &five);
         let plan = analyze(&[dir.join("tracks")], &AtomicBool::new(false), &mut |_| {}).unwrap();
         (dir, plan, four, five, sr)
+    }
+
+    /// Two microphones in the same room for little more than a minute: short windows find the
+    /// offset (file names say 3 s, the truth is 3.4 s) and the whole overlap becomes one stereo file.
+    #[test]
+    fn short_recordings_from_sixty_seconds_are_synchronised() {
+        let dir = tempdir("short-sync");
+        let sr = 8000u32;
+        let n = |secs: f64| (secs * sr as f64) as usize;
+        let s = talk(41, sr, n(80.0));
+        let mut floor = Lcg(42);
+        let a: Vec<f32> = (0..n(70.0)).map(|g| s[g] + 0.002 * (floor.next() as f32 - 0.5)).collect();
+        let b: Vec<f32> = (0..n(70.0)).map(|k| 0.5 * s[k + n(3.4)] + 0.002 * (floor.next() as f32 - 0.5)).collect();
+        write_float_wav(&dir.join("tracks/260101_S100000-E100110_D000110_4.wav"), sr, &a);
+        write_float_wav(&dir.join("tracks/260101_S100003-E100113_D000110_5.wav"), sr, &b);
+        let plan = analyze(&[dir.join("tracks")], &AtomicBool::new(false), &mut |_| {}).unwrap();
+        let p = &plan.pairs[0];
+        assert!(p.ok, "{:?} windows {} good {}", p.note, p.n_windows, p.n_good);
+        assert!((p.offset - 3.4).abs() < 0.005, "offset {}", p.offset);
+        let kinds: Vec<&str> = plan.items.iter().map(|i| i.kind).collect();
+        assert_eq!(kinds, ["stereo"], "{:?}", plan.items.iter().map(|i| (i.kind, i.reason, i.t0, i.t1)).collect::<Vec<_>>());
+    }
+
+    /// The counter-check: two unrelated short recordings must not be forced together.
+    #[test]
+    fn unrelated_short_recordings_stay_apart() {
+        let dir = tempdir("short-apart");
+        let sr = 8000u32;
+        let n = 90 * sr as usize;
+        write_float_wav(&dir.join("tracks/260101_S100000-E100130_D000130_4.wav"), sr, &talk(51, sr, n));
+        write_float_wav(&dir.join("tracks/260101_S100002-E100132_D000130_5.wav"), sr, &talk(52, sr, n));
+        let plan = analyze(&[dir.join("tracks")], &AtomicBool::new(false), &mut |_| {}).unwrap();
+        assert!(!plan.pairs[0].ok, "offset {} z {}", plan.pairs[0].offset, plan.pairs[0].coarse_z);
+        assert!(plan.items.iter().all(|i| i.kind == "mono"));
     }
 
     #[test]
