@@ -372,7 +372,10 @@ fn default_out_dir(roots: &[PathBuf]) -> PathBuf {
         common = roots[0].clone();
     }
     let name = common.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-    if name == crate::scan::OUTPUT_DIR_NAME || name == sync::OUTPUT_DIR_NAME {
+    if crate::decode::heisst(&common, OUTPUT_DIR_NAME) {
+        return common;
+    }
+    if name.eq_ignore_ascii_case(crate::scan::OUTPUT_DIR_NAME) || name.eq_ignore_ascii_case(sync::OUTPUT_DIR_NAME) {
         if let Some(parent) = common.parent() {
             return parent.join(OUTPUT_DIR_NAME);
         }

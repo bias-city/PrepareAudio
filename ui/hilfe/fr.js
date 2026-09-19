@@ -37,6 +37,7 @@
         'Les copies identiques octet pour octet d’un même enregistrement ; elles sont comptées malgré tout.',
         'Ses propres résultats dans les dossiers `tracks`, `sync` et `master`.',
         'Les fichiers que macOS crée en copiant (`._…`) et les dossiers masqués.',
+        'Les fichiers qu’un service cloud (iCloud, Nextcloud, Dropbox) n’affiche que comme fantômes — télécharge-les d’abord.',
       ] },
       { art: 'hinweis', text: 'Opus n’est pas encore lu, par exemple les messages vocaux des messageries. Convertis-les d’abord en M4A ou en WAV.' },
     ],

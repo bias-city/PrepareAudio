@@ -286,6 +286,25 @@ mod tests {
         v.iter().flat_map(|s| s.to_le_bytes()).collect()
     }
 
+    /// A folder that is already called «tracks» (however it is spelled) is used as it is: no
+    /// «Tracks/tracks». The same holds for the folders of the other two steps.
+    #[test]
+    fn an_output_folder_is_never_nested_in_itself() {
+        let root = tempdir("nested");
+        let sr = 8000;
+        for (dir, name) in [("Tracks", "DJI_01_20260101_100000.WAV"), ("tracks", "DJI_01_20260101_110000.WAV")] {
+            write_float_wav(&root.join(dir).join(name), sr, &sine(220.0, 0.5, sr, 0, 8000));
+        }
+        for dir in ["Tracks", "tracks"] {
+            let s = crate::scan::scan(&[root.join(dir)], &small()).unwrap();
+            assert_eq!(PathBuf::from(&s.default_out_dir), root.join(dir), "{dir}: writes into itself, not into a subfolder");
+        }
+        // A folder with another name keeps the subfolder.
+        write_float_wav(&root.join("roh/DJI_01_20260101_120000.WAV"), sr, &sine(220.0, 0.5, sr, 0, 8000));
+        let s = crate::scan::scan(&[root.join("roh")], &small()).unwrap();
+        assert_eq!(PathBuf::from(&s.default_out_dir), root.join("roh/tracks"));
+    }
+
     #[test]
     fn merges_bit_exact_idempotent_and_never_overwrites() {
         let root = tempdir("merge");

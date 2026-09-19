@@ -100,6 +100,7 @@ messages! {
     Cancelled => ["Abgebrochen.", "Cancelled.", "Annulé.", "Annullato."],
 
     // ---- scanning and reading files
+    NotLocal => ["nicht lokal vorhanden (Cloud-Platzhalter): zuerst herunterladen", "not stored locally (cloud placeholder): download it first", "pas disponible localement (fichier fantôme du cloud) : télécharge-le d’abord", "non disponibile in locale (segnaposto del cloud): scaricalo prima"],
     NotWav => ["kein unterstütztes Audio- oder Videoformat", "not a supported audio or video format", "format audio ou vidéo non pris en charge", "formato audio o video non supportato"],
     NoFoldersOrWavs => ["Keine Ordner oder Mediendateien angegeben.", "No folders or media files given.", "Aucun dossier ni fichier média indiqué.", "Nessuna cartella o file multimediale indicato."],
     UnreadableWith => ["nicht lesbar: {e}", "unreadable: {e}", "illisible : {e}", "non leggibile: {e}"],

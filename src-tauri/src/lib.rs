@@ -245,8 +245,9 @@ async fn pick_output_dir(app: AppHandle, title: String, start: String, sub: Stri
     .await
     .map_err(|e| e.to_string())?;
     Ok(picked.and_then(|p| p.into_path().ok()).map(|dir| {
-        let name = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-        let out = if sub.is_empty() || name == sub { dir } else { dir.join(&sub) };
+        // A folder that is already called «tracks», «sync» or «master» is used as it is —
+        // however it is spelled, so no «Tracks/tracks» can appear (User 19.9.2026).
+        let out = if sub.is_empty() || decode::heisst(&dir, &sub) { dir } else { dir.join(&sub) };
         out.to_string_lossy().into_owned()
     }))
 }

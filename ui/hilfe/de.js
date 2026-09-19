@@ -37,6 +37,7 @@
         'Byte-gleiche Kopien derselben Aufnahme; gezählt werden sie trotzdem.',
         'Ihre eigenen Ergebnisse in den Ordnern `tracks`, `sync` und `master`.',
         'Dateien, die macOS beim Kopieren anlegt (`._…`) und versteckte Ordner.',
+        'Dateien, die eine Cloud (iCloud, Nextcloud, Dropbox) nur als Platzhalter zeigt — lade sie vorher herunter.',
       ] },
       { art: 'hinweis', text: 'Opus wird noch nicht gelesen, zum Beispiel Sprachnachrichten aus Messenger-Programmen. Wandle sie vorher in M4A oder WAV um.' },
     ],

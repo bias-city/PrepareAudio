@@ -8,6 +8,15 @@ sind der entsprechende Abschnitt dieser Datei.
 Erste Fassung für den Mac App Store; derselbe Code erscheint als signiertes und
 notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
+### Behoben
+
+- **Kein Ordner im Ordner mehr:** Heisst der gewählte Ordner schon `tracks`, `sync` oder
+  `master` — gleich wie geschrieben —, schreibt die App direkt hinein statt einen weiteren
+  Unterordner anzulegen.
+- **Cloud-Platzhalter blockieren nicht mehr:** Dateien, die iCloud, Nextcloud oder Dropbox nur als
+  Platzhalter zeigen, werden mit dem Hinweis «nicht lokal vorhanden» übersprungen. Vorher wartete
+  die App beim Lesen auf den Download, und der Abbruch griff nicht.
+
 ### Geändert
 
 - **Ablageflächen** in allen drei Schritten in derselben Form: Schrittnummer, ein Satz, der Knopf,

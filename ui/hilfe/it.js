@@ -37,6 +37,7 @@
         'Le copie identiche byte per byte della stessa registrazione; contate lo sono comunque.',
         'I propri risultati nelle cartelle `tracks`, `sync` e `master`.',
         'I file che macOS crea durante la copia (`._…`) e le cartelle nascoste.',
+        'I file che un servizio cloud (iCloud, Nextcloud, Dropbox) mostra solo come segnaposto — scaricali prima.',
       ] },
       { art: 'hinweis', text: 'Opus non viene ancora letto, per esempio i messaggi vocali dei programmi di messaggistica. Convertili prima in M4A o WAV.' },
     ],

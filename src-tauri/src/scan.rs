@@ -301,8 +301,11 @@ fn default_out_dir(roots: &[PathBuf]) -> PathBuf {
             }
         }
         if common.parent().is_some() {
-            return common.join(OUTPUT_DIR_NAME);
+            return if decode::heisst(&common, OUTPUT_DIR_NAME) { common } else { common.join(OUTPUT_DIR_NAME) };
         }
+    }
+    if decode::heisst(&roots[0], OUTPUT_DIR_NAME) {
+        return roots[0].clone();
     }
     roots[0].join(OUTPUT_DIR_NAME)
 }
@@ -362,6 +365,10 @@ fn load_decoded(paths: &[PathBuf], cache: &Path, cancel: &AtomicBool, progress: 
     }
     let mut sources = Vec::new();
     for p in paths {
+        if decode::nicht_lokal(p) {
+            ignored.push(Skipped { path: p.display().to_string(), reason: t(Msg::NotLocal).into() });
+            continue;
+        }
         match decode::Source::new(p) {
             Ok(src) => sources.push(src),
             Err(e) => ignored.push(Skipped { path: p.display().to_string(), reason: tf(Msg::UnreadableWith, &[("e", &e)]) }),
@@ -456,6 +463,9 @@ fn decoded_part(orig: &Path, wav_path: &Path, info: WavInfo) -> Result<Part, Str
 
 /// Reads one candidate file. Errors are user-facing reasons for skipping it.
 pub fn load_part(path: &Path) -> Result<Part, String> {
+    if decode::nicht_lokal(path) {
+        return Err(t(Msg::NotLocal).into());
+    }
     let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
     let info = wav::read_info(path).map_err(|e| tf(Msg::UnreadableWith, &[("e", &e)]))?;
     if info.data_len == 0 {

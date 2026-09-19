@@ -571,6 +571,10 @@ fn load(inputs: &[PathBuf]) -> Result<Loaded, String> {
     let mut compressed = Vec::new();
     for f in files {
         let name = f.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        if decode::nicht_lokal(&f) {
+            ignored.push(Skipped { path: f.display().to_string(), reason: t(Msg::NotLocal).into() });
+            continue;
+        }
         if decode::is_compressed(&f) {
             // Converted copies of this step's outputs (e.g. mastered MP3s) are not sources.
             let stem = f.file_stem().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
@@ -759,7 +763,10 @@ fn default_out_dir(roots: &[PathBuf]) -> PathBuf {
     if common.parent().is_none() {
         common = roots[0].clone();
     }
-    if common.file_name().map_or(false, |n| n == scan::OUTPUT_DIR_NAME) {
+    if decode::heisst(&common, OUTPUT_DIR_NAME) {
+        return common;
+    }
+    if decode::heisst(&common, scan::OUTPUT_DIR_NAME) {
         if let Some(parent) = common.parent() {
             return parent.join(OUTPUT_DIR_NAME);
         }
@@ -3056,6 +3063,26 @@ mod tests {
 
     /// Two microphones in the same room for little more than a minute: short windows find the
     /// offset (file names say 3 s, the truth is 3.4 s) and the whole overlap becomes one stereo file.
+    /// Cloud placeholders (iCloud, Nextcloud): reading them would start a download that cannot be
+    /// interrupted, so they are skipped with a reason instead of blocking the analysis.
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn cloud_placeholders_are_skipped_not_waited_for() {
+        let dir = tempdir("dataless");
+        let sr = 8000u32;
+        write_float_wav(&dir.join("tracks/260101_S100000-E100200_D000200_4.wav"), sr, &talk(71, sr, 120 * sr as usize));
+        // A placeholder has a size but no content on disk; only the kernel may set SF_DATALESS,
+        // so the test uses the other half of the rule: a large file with no allocated blocks.
+        let heikel = dir.join("tracks/260101_S100000-E100200_D000200_5.wav");
+        {
+            let f = File::create(&heikel).unwrap();
+            f.set_len(4 << 20).unwrap();
+        }
+        let plan = analyze(&[dir.join("tracks")], &AtomicBool::new(false), &mut |_| {}).unwrap();
+        assert_eq!(plan.tracks.len(), 1, "only the local file becomes a track");
+        assert!(plan.ignored.iter().any(|s| s.path.ends_with("_5.wav")), "{:?}", plan.ignored);
+    }
+
     #[test]
     fn short_recordings_from_sixty_seconds_are_synchronised() {
         let dir = tempdir("short-sync");

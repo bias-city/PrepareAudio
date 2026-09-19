@@ -37,6 +37,7 @@
         'Byte-identical copies of the same recording; they are counted all the same.',
         'Its own results in the folders `tracks`, `sync` and `master`.',
         'Files that macOS creates when copying (`._…`) and hidden folders.',
+        'Files a cloud service (iCloud, Nextcloud, Dropbox) only shows as a placeholder — download them first.',
       ] },
       { art: 'hinweis', text: 'Opus is not read yet, for example voice messages from messenger apps. Convert them to M4A or WAV first.' },
     ],

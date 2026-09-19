@@ -38,6 +38,32 @@ const PART_MAX_AGE: Duration = Duration::from_secs(86_400);
 /// Size estimate when the stream does not state its length: as if coded at 64 kbit/s.
 const FALLBACK_BITRATE: f64 = 64_000.0;
 
+/// Whether the folder is called `name`, however it is spelled (macOS file names keep their
+/// case but compare without it: a folder «Tracks» IS the folder `tracks`).
+pub fn heisst(path: &Path, name: &str) -> bool {
+    path.file_name().map_or(false, |n| n.to_string_lossy().eq_ignore_ascii_case(name))
+}
+
+/// Files that a cloud service (iCloud Drive, Nextcloud, Dropbox) only shows as a placeholder:
+/// reading them starts a download that can take minutes and cannot be interrupted. They are
+/// skipped with a clear reason instead of blocking the run.
+#[cfg(target_os = "macos")]
+pub fn nicht_lokal(path: &Path) -> bool {
+    use std::os::macos::fs::MetadataExt;
+    /// The flag the kernel sets on a file whose content is not materialised.
+    const SF_DATALESS: u32 = 0x4000_0000;
+    fs::metadata(path).map_or(false, |m| {
+        // Some services do not set the flag but keep the file empty on disk: a placeholder has
+        // a size but no allocated blocks. Audio files are never sparse.
+        m.st_flags() & SF_DATALESS != 0 || (m.len() > 1 << 20 && m.st_blocks() == 0)
+    })
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn nicht_lokal(_path: &Path) -> bool {
+    false
+}
+
 pub fn extension(path: &Path) -> String {
     path.extension().map(|e| e.to_string_lossy().to_ascii_lowercase()).unwrap_or_default()
 }
