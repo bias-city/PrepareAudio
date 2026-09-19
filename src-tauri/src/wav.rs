@@ -303,6 +303,66 @@ pub fn output_size(fmt_len: usize, data_len: u64) -> u64 {
     header_len(fmt_len) + data_len + (data_len & 1)
 }
 
+/// 32-bit float format block: plain for one or two channels, WAVE_FORMAT_EXTENSIBLE (no speaker
+/// positions, sub format IEEE float) from three channels on, as multichannel readers expect.
+pub fn float_fmt(channels: u16, rate: u32) -> Vec<u8> {
+    let mut f = Vec::with_capacity(40);
+    f.extend_from_slice(&(if channels > 2 { 0xFFFEu16 } else { 3u16 }).to_le_bytes());
+    f.extend_from_slice(&channels.to_le_bytes());
+    f.extend_from_slice(&rate.to_le_bytes());
+    f.extend_from_slice(&(rate * channels as u32 * 4).to_le_bytes());
+    f.extend_from_slice(&(channels * 4).to_le_bytes());
+    f.extend_from_slice(&32u16.to_le_bytes());
+    if channels > 2 {
+        f.extend_from_slice(&22u16.to_le_bytes()); // cbSize
+        f.extend_from_slice(&32u16.to_le_bytes()); // valid bits
+        f.extend_from_slice(&0u32.to_le_bytes()); // channel mask: discrete channels
+        f.extend_from_slice(&[0x03, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71]);
+    }
+    f
+}
+
+/// One RIFF chunk with its padding byte.
+pub fn chunk(id: &[u8; 4], body: &[u8]) -> Vec<u8> {
+    let mut c = Vec::with_capacity(8 + body.len() + 1);
+    c.extend_from_slice(id);
+    c.extend_from_slice(&(body.len() as u32).to_le_bytes());
+    c.extend_from_slice(body);
+    if body.len() % 2 == 1 {
+        c.push(0);
+    }
+    c
+}
+
+/// A `bext` chunk (version 1): description, local date and time, samples since midnight.
+pub fn timecode_chunk(description: &str, date: (i64, i64, i64), time: (i64, i64, i64), time_reference: u64) -> Vec<u8> {
+    let mut b = vec![0u8; 602];
+    let put = |b: &mut [u8], at: usize, max: usize, s: &str| {
+        let bytes: Vec<u8> = s.bytes().filter(u8::is_ascii).take(max).collect();
+        b[at..at + bytes.len()].copy_from_slice(&bytes);
+    };
+    put(&mut b, 0, 256, description);
+    put(&mut b, 256, 32, "PrepareAudio");
+    put(&mut b, 320, 10, &format!("{:04}-{:02}-{:02}", date.0, date.1, date.2));
+    put(&mut b, 330, 8, &format!("{:02}:{:02}:{:02}", time.0, time.1, time.2));
+    b[338..342].copy_from_slice(&((time_reference & 0xFFFF_FFFF) as u32).to_le_bytes());
+    b[342..346].copy_from_slice(&((time_reference >> 32) as u32).to_le_bytes());
+    b[346..348].copy_from_slice(&1u16.to_le_bytes());
+    chunk(b"bext", &b)
+}
+
+/// An `iXML` chunk naming the channels of a polyphonic file.
+pub fn channel_names_chunk(track_names: &[String]) -> Vec<u8> {
+    let esc = |s: &str| s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;");
+    let mut x = String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?><BWFXML><IXML_VERSION>1.61</IXML_VERSION><PROJECT>PrepareAudio</PROJECT>");
+    x.push_str(&format!("<TRACK_LIST><TRACK_COUNT>{}</TRACK_COUNT>", track_names.len()));
+    for (i, name) in track_names.iter().enumerate() {
+        x.push_str(&format!("<TRACK><CHANNEL_INDEX>{0}</CHANNEL_INDEX><INTERLEAVE_INDEX>{0}</INTERLEAVE_INDEX><NAME>{1}</NAME></TRACK>", i + 1, esc(name)));
+    }
+    x.push_str("</TRACK_LIST></BWFXML>");
+    chunk(b"iXML", x.as_bytes())
+}
+
 /// Writes a WAVE header. Below `riff_limit` it is a classic RIFF header with a
 /// 28-byte JUNK placeholder; above it the same layout becomes RF64 with ds64.
 pub fn write_header<W: Write>(
@@ -312,7 +372,20 @@ pub fn write_header<W: Write>(
     frames: u64,
     riff_limit: u64,
 ) -> io::Result<()> {
-    let riff_size = output_size(fmt.len(), data_len) - 8;
+    write_header_with_trailer(w, fmt, data_len, frames, riff_limit, 0)
+}
+
+/// Like [`write_header`] for a file that carries `trailer_len` bytes of further chunks
+/// (bext, iXML) after the audio data; the caller writes them after the padded data.
+pub fn write_header_with_trailer<W: Write>(
+    w: &mut W,
+    fmt: &[u8],
+    data_len: u64,
+    frames: u64,
+    riff_limit: u64,
+    trailer_len: u64,
+) -> io::Result<()> {
+    let riff_size = output_size(fmt.len(), data_len) + trailer_len - 8;
     let rf64 = riff_size > riff_limit || data_len > riff_limit;
     let mut h = Vec::with_capacity(header_len(fmt.len()) as usize);
     if rf64 {

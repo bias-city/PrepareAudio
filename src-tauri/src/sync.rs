@@ -272,6 +272,13 @@ pub struct Source {
     pub t1: f64,
 }
 
+/// One channel of a shared (polyphonic) file: a sender and the stretches it contributes.
+#[derive(Debug, Clone, Serialize)]
+pub struct Channel {
+    pub label: String,
+    pub sources: Vec<Source>,
+}
+
 /// One output file.
 #[derive(Debug, Clone, Serialize)]
 pub struct Item {
@@ -289,9 +296,13 @@ pub struct Item {
     /// Stereo: absolute timeline seconds. Mono: seconds in the track `left`.
     pub t0: f64,
     pub t1: f64,
-    pub left_sources: Vec<Source>,
-    pub right_sources: Vec<Source>,
-    /// Seconds in which a channel of this stereo file has no recording.
+    /// Shared file ("stereo" kind, also with more than two senders): one channel per sender in
+    /// label order. Two senders give the familiar left/right file. Empty for mono files.
+    pub channels: Vec<Channel>,
+    /// Chunks written after the audio of a shared file: bext (timecode) and iXML (channel names).
+    #[serde(skip)]
+    pub trailer: Vec<u8>,
+    /// Seconds in which a channel of this shared file has no recording.
     pub dropout: f64,
     pub silent: Vec<Silence>,
     pub hit_share: Option<f64>,
@@ -1605,7 +1616,8 @@ pub fn analyze_in(inputs: &[PathBuf], cache: &Path, cancel: &AtomicBool, progres
     let pairs: Vec<Pair> = pair_results.into_iter().map(|r| r.ok_or_else(|| t(Msg::AnalysisFailed).to_string())).collect::<Result<_, _>>()?;
     let drafts = plan_items(&tracks, &pairs);
     let places = placements(&tracks, &pairs, &labels);
-    let analysis_clips = clips_from_drafts(&tracks, &pairs, &drafts);
+    // Two senders keep the calibrated proposal; from three on every sender is judged against all others.
+    let analysis_clips = if labels.len() >= 3 { clips_for_many(&tracks, &pairs) } else { clips_from_drafts(&tracks, &pairs, &drafts) };
     let peaks: Vec<Arc<Peaks>> = envs.iter().map(|e| Arc::new(e.as_ref().map_or_else(Peaks::default, |e| peak_pyramid(&e.peak)))).collect();
     let preview_gain_db: Vec<f32> = envs.iter().map(|e| e.as_ref().map_or(20.0, |e| preview_gain(&e.loud))).collect();
     drop(envs);
@@ -2062,6 +2074,71 @@ fn clips_from_drafts(tracks: &[Track], pairs: &[Pair], drafts: &[Draft]) -> Vec<
     normalize_clips(tracks, clips)
 }
 
+/// Proposal for three or more senders. A sender belongs into the shared file wherever it is
+/// "together" with at least one other sender, and also where it runs alone. Only stretches in
+/// which it is "apart" from everyone it overlaps (another conversation) become mono, if they
+/// last; a sender that is never together with anyone is mono as a whole.
+fn clips_for_many(tracks: &[Track], pairs: &[Pair]) -> Vec<Clip> {
+    let mut clips = Vec::new();
+    for t in tracks {
+        let (mut together, mut apart): (Vec<(f64, f64)>, Vec<(f64, f64)>) = (Vec::new(), Vec::new());
+        for p in pairs.iter().filter(|p| p.a == t.id || p.b == t.id) {
+            for ph in &p.phases {
+                let (s, e) = if p.a == t.id { (ph.start, ph.end) } else { (p.to_b(ph.start), p.to_b(ph.end)) };
+                let iv = (s.min(e).clamp(0.0, t.duration), s.max(e).clamp(0.0, t.duration));
+                if p.ok && ph.kind == "together" { together.push(iv) } else { apart.push(iv) }
+            }
+        }
+        if together.is_empty() {
+            clips.push(Clip { track: t.id, t0: 0.0, t1: t.duration, mode: ClipMode::Mono, deleted: false });
+            continue;
+        }
+        let together = union(together);
+        // apart minus together, long pieces only
+        let mut mono: Vec<(f64, f64)> = Vec::new();
+        for (mut s, e) in union(apart) {
+            for &(ts, te) in &together {
+                if te <= s || ts >= e {
+                    continue;
+                }
+                if ts - s >= MIN_APART_S {
+                    mono.push((s, ts));
+                }
+                s = te.max(s);
+            }
+            if e - s >= MIN_APART_S {
+                mono.push((s, e));
+            }
+        }
+        let mut at = 0.0;
+        for (s, e) in mono {
+            if s - at >= MIN_CLIP_S {
+                clips.push(Clip { track: t.id, t0: at, t1: s, mode: ClipMode::Stereo, deleted: false });
+            }
+            clips.push(Clip { track: t.id, t0: s, t1: e, mode: ClipMode::Mono, deleted: false });
+            at = e;
+        }
+        if t.duration - at >= MIN_CLIP_S {
+            clips.push(Clip { track: t.id, t0: at, t1: t.duration, mode: ClipMode::Stereo, deleted: false });
+        }
+    }
+    normalize_clips(tracks, clips)
+}
+
+/// Sorted union of intervals.
+fn union(mut v: Vec<(f64, f64)>) -> Vec<(f64, f64)> {
+    v.retain(|&(s, e)| e > s);
+    v.sort_by(|a, b| a.0.total_cmp(&b.0));
+    let mut out: Vec<(f64, f64)> = Vec::new();
+    for (s, e) in v {
+        match out.last_mut() {
+            Some(last) if s <= last.1 => last.1 = last.1.max(e),
+            _ => out.push((s, e)),
+        }
+    }
+    out
+}
+
 /// Clamps clips to their recordings, sorts them and removes overlaps within a track.
 pub fn normalize_clips(tracks: &[Track], clips: Vec<Clip>) -> Vec<Clip> {
     let mut clips: Vec<Clip> = clips.into_iter().filter(|c| c.track < tracks.len() && c.t0.is_finite() && c.t1.is_finite()).collect();
@@ -2145,41 +2222,65 @@ fn covered(sources: &[Source], t0: f64, t1: f64) -> f64 {
 pub fn items_from_clips(tracks: &[Track], pairs: &[Pair], places: &[Place], labels: &[String], clips: &[Clip]) -> Vec<Item> {
     let lane = |t: usize| labels.iter().position(|l| *l == tracks[t].label).unwrap_or(usize::MAX);
     let stereo_possible = labels.len() >= 2;
-    let is_stereo = |c: &Clip| c.mode == ClipMode::Stereo && stereo_possible && lane(c.track) < 2;
+    let is_stereo = |c: &Clip| c.mode == ClipMode::Stereo && stereo_possible;
     let mut items = Vec::new();
 
-    let mut ivs: Vec<(usize, Source)> = clips
+    // Senders that were measured against each other (directly or over others) share a clock;
+    // only they can go into one file. Two rooms recorded at the same time stay two files.
+    let mut comp: Vec<usize> = (0..tracks.len()).collect();
+    fn root(comp: &mut [usize], mut i: usize) -> usize {
+        while comp[i] != i {
+            comp[i] = comp[comp[i]];
+            i = comp[i];
+        }
+        i
+    }
+    for p in pairs.iter().filter(|p| p.ok) {
+        let (ra, rb) = (root(&mut comp, p.a), root(&mut comp, p.b));
+        comp[ra.max(rb)] = ra.min(rb);
+    }
+    // With exactly two senders everything shared is one left/right file, as before.
+    let group_of = |comp: &mut [usize], track: usize| if labels.len() == 2 { 0 } else { root(comp, track) };
+
+    let mut ivs: Vec<(usize, usize, Source)> = clips
         .iter()
         .filter(|c| !c.deleted && is_stereo(c))
-        .map(|c| (lane(c.track), Source { track: c.track, t0: places[c.track].to_timeline(c.t0), t1: places[c.track].to_timeline(c.t1) }))
+        .map(|c| (group_of(&mut comp, c.track), lane(c.track), Source { track: c.track, t0: places[c.track].to_timeline(c.t0), t1: places[c.track].to_timeline(c.t1) }))
         .collect();
-    ivs.sort_by(|a, b| a.1.t0.total_cmp(&b.1.t0));
+    ivs.sort_by(|a, b| a.0.cmp(&b.0).then(a.2.t0.total_cmp(&b.2.t0)));
     let mut groups: Vec<Vec<(usize, Source)>> = Vec::new();
-    let mut end = f64::NEG_INFINITY;
-    for iv in ivs {
-        if groups.is_empty() || iv.1.t0 >= end - SAME_INSTANT_S {
-            end = iv.1.t1;
+    let (mut end, mut current) = (f64::NEG_INFINITY, usize::MAX);
+    for (g, l, src) in ivs {
+        if groups.is_empty() || g != current || src.t0 >= end - SAME_INSTANT_S {
+            end = src.t1;
+            current = g;
             groups.push(Vec::new());
         } else {
-            end = end.max(iv.1.t1);
+            end = end.max(src.t1);
         }
-        groups.last_mut().expect("group").push(iv);
+        groups.last_mut().expect("group").push((l, src));
     }
     for g in groups {
         let t0 = g.iter().map(|x| x.1.t0).fold(f64::INFINITY, f64::min);
         let t1 = g.iter().map(|x| x.1.t1).fold(f64::NEG_INFINITY, f64::max);
-        let mut sides: [Vec<Source>; 2] = [Vec::new(), Vec::new()];
+        // Two senders: always both channels (a missing one is silent). More: the senders present.
+        let mut lanes: Vec<usize> = if labels.len() == 2 { vec![0, 1] } else { g.iter().map(|x| x.0).collect() };
+        lanes.sort_unstable();
+        lanes.dedup();
+        let mut channels: Vec<Channel> = lanes.iter().map(|&l| Channel { label: labels[l].clone(), sources: Vec::new() }).collect();
         for (l, src) in g {
-            sides[l].push(src);
+            let at = lanes.iter().position(|&x| x == l).expect("lane of the group");
+            channels[at].sources.push(src);
         }
-        let rep = |l: usize| sides[l].first().map(|s| s.track).or_else(|| tracks.iter().position(|t| t.label == labels[l]));
-        let (left, right) = (rep(0).unwrap_or(0), rep(1));
-        let rate = tracks[sides[0].first().or(sides[1].first()).map_or(0, |s| s.track)].info.sample_rate;
+        let rep = |c: &Channel| c.sources.first().map(|s| s.track).or_else(|| tracks.iter().position(|t| t.label == c.label));
+        let left = rep(&channels[0]).unwrap_or(0);
+        let right = channels.get(1).and_then(rep);
+        let rate = tracks[channels.iter().find_map(|c| c.sources.first()).map_or(0, |s| s.track)].info.sample_rate;
         let mut silent = Vec::new();
-        for l in 0..2 {
-            let missing = (t1 - t0) - covered(&sides[l], t0, t1);
+        for c in &channels {
+            let missing = (t1 - t0) - covered(&c.sources, t0, t1);
             if missing > 0.5 {
-                silent.push(Silence { label: labels[l].clone(), seconds: missing });
+                silent.push(Silence { label: c.label.clone(), seconds: missing });
             }
         }
         let start_secs = t0.round() as i64;
@@ -2188,11 +2289,26 @@ pub fn items_from_clips(tracks: &[Track], pairs: &[Pair], places: &[Place], labe
         let (day, clock0) = day_clock(t0);
         let (hit_share, msc) = evidence(pairs, places, t0, t1);
         let frames = ((t1 - t0) * rate as f64).round() as u64;
-        let [left_sources, right_sources] = sides;
+        let names: Vec<String> = channels.iter().map(|c| c.label.clone()).collect();
+        let name = if labels.len() == 2 {
+            format!("{}_stereo_L-{}_R-{}.wav", stamp(start_secs, dur), names[0], names[1])
+        } else {
+            format!("{}_poly_{}.wav", stamp(start_secs, dur), names.join("-"))
+        };
+        let (y, mo, d, ..) = civil_from_secs(start_secs);
+        let tod = clock0.rem_euclid(86_400.0);
+        let mut trailer = wav::timecode_chunk(
+            &format!("PrepareAudio sync: {}", names.join(", ")),
+            (y, mo, d),
+            ((tod / 3600.0) as i64, (tod % 3600.0 / 60.0) as i64, (tod % 60.0) as i64),
+            (tod * rate as f64).round() as u64,
+        );
+        trailer.extend(wav::channel_names_chunk(&names));
+        let fmt_len = wav::float_fmt(channels.len() as u16, rate).len();
         items.push(Item {
             id: 0,
             kind: "stereo",
-            name: format!("{}_stereo_L-{}_R-{}.wav", stamp(start_secs, dur), labels[0], labels[1]),
+            name,
             day: if c0.day == day { c0.day } else { day },
             start: c0.hms,
             end: c1.hms,
@@ -2202,13 +2318,13 @@ pub fn items_from_clips(tracks: &[Track], pairs: &[Pair], places: &[Place], labe
             right,
             t0,
             t1,
-            left_sources,
-            right_sources,
+            bytes: wav::output_size(fmt_len, frames * 4 * channels.len() as u64) + trailer.len() as u64,
+            channels,
+            trailer,
             dropout: silent.iter().map(|s| s.seconds).sum(),
             silent,
             hit_share,
             msc,
-            bytes: wav::output_size(16, frames * 8),
             reason: "gemeinsam",
             start_secs,
             rate,
@@ -2240,8 +2356,8 @@ pub fn items_from_clips(tracks: &[Track], pairs: &[Pair], places: &[Place], labe
             right: None,
             t0: c.t0,
             t1: c.t1,
-            left_sources: Vec::new(),
-            right_sources: Vec::new(),
+            channels: Vec::new(),
+            trailer: Vec::new(),
             dropout: 0.0,
             silent: Vec::new(),
             hit_share: None,
@@ -2473,18 +2589,6 @@ impl From<io::Error> for WErr {
     }
 }
 
-fn float_stereo_fmt(sr: u32) -> Vec<u8> {
-    let mut f = Vec::with_capacity(16);
-    f.extend_from_slice(&3u16.to_le_bytes());
-    f.extend_from_slice(&2u16.to_le_bytes());
-    f.extend_from_slice(&sr.to_le_bytes());
-    f.extend_from_slice(&(sr * 8).to_le_bytes());
-    f.extend_from_slice(&8u16.to_le_bytes());
-    f.extend_from_slice(&32u16.to_le_bytes());
-    f
-}
-
-#[inline]
 fn catmull(p0: f32, p1: f32, p2: f32, p3: f32, x: f32) -> f32 {
     p1 + 0.5 * x * (p2 - p0 + x * (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3 + x * (3.0 * (p1 - p2) + p3 - p0)))
 }
@@ -2551,13 +2655,17 @@ fn write_mono_mix<W: Write>(t: &Track, f0: u64, f1: u64, out: &mut W, cancel: &A
 
 /// Output raster = the day's timeline at the item's sample rate; each channel is
 /// the list of its sources (see `render_source`), silence elsewhere.
-fn write_stereo<W: Write>(plan: &SyncPlan, it: &Item, out: &mut W, cancel: &AtomicBool, report: &mut dyn FnMut(u64)) -> Result<(), WErr> {
+/// Writes a shared file: one channel per sender, each rendered onto the common timeline
+/// (offset and drift applied), then the bext and iXML chunks.
+fn write_poly<W: Write>(plan: &SyncPlan, it: &Item, out: &mut W, cancel: &AtomicBool, report: &mut dyn FnMut(u64)) -> Result<(), WErr> {
     let sr = it.rate as f64;
+    let nch = it.channels.len();
     let k0 = (it.t0 * sr).round() as i64;
     let n = ((it.t1 - it.t0) * sr).round() as u64;
-    wav::write_header(out, &float_stereo_fmt(it.rate), n * 8, n, wav::RIFF_LIMIT)?;
+    let frame_bytes = 4 * nch as u64;
+    wav::write_header_with_trailer(out, &wav::float_fmt(nch as u16, it.rate), n * frame_bytes, n, wav::RIFF_LIMIT, it.trailer.len() as u64)?;
     let block = it.rate as u64;
-    let mut bytes = Vec::with_capacity(block as usize * 8);
+    let mut bytes = Vec::with_capacity(block as usize * frame_bytes as usize);
     let mut m = 0u64;
     while m < n {
         if cancel.load(Ordering::Relaxed) {
@@ -2565,9 +2673,9 @@ fn write_stereo<W: Write>(plan: &SyncPlan, it: &Item, out: &mut W, cancel: &Atom
         }
         let len = (n - m).min(block) as usize;
         let ks = k0 + m as i64;
-        let mut chans = [vec![0f32; len], vec![0f32; len]];
-        for (ci, sources) in [&it.left_sources, &it.right_sources].into_iter().enumerate() {
-            for src in sources {
+        let mut chans = vec![vec![0f32; len]; nch];
+        for (ci, channel) in it.channels.iter().enumerate() {
+            for src in &channel.sources {
                 let (s0, s1) = ((src.t0 * sr).round() as i64, (src.t1 * sr).round() as i64);
                 let (from, to) = (ks.max(s0), (ks + len as i64).min(s1));
                 if to > from {
@@ -2577,13 +2685,18 @@ fn write_stereo<W: Write>(plan: &SyncPlan, it: &Item, out: &mut W, cancel: &Atom
         }
         bytes.clear();
         for j in 0..len {
-            bytes.extend_from_slice(&chans[0][j].to_le_bytes());
-            bytes.extend_from_slice(&chans[1][j].to_le_bytes());
+            for c in &chans {
+                bytes.extend_from_slice(&c[j].to_le_bytes());
+            }
         }
         out.write_all(&bytes)?;
         m += len as u64;
-        report(m * 8);
+        report(m * frame_bytes);
     }
+    if (n * frame_bytes) % 2 == 1 {
+        out.write_all(&[0])?;
+    }
+    out.write_all(&it.trailer)?;
     Ok(())
 }
 
@@ -2605,7 +2718,7 @@ fn write_item(plan: &SyncPlan, it: &Item, target: &Path, cancel: &AtomicBool, re
 fn write_item_into(plan: &SyncPlan, it: &Item, path: &Path, cancel: &AtomicBool, report: &mut dyn FnMut(u64)) -> Result<(), WErr> {
     let mut out = io::BufWriter::with_capacity(4 << 20, File::create(path)?);
     if it.kind == "stereo" {
-        write_stereo(plan, it, &mut out, cancel, report)?;
+        write_poly(plan, it, &mut out, cancel, report)?;
     } else {
         write_mono(&plan.tracks[it.left], it, &mut out, cancel, report)?;
     }
@@ -2802,7 +2915,7 @@ mod tests {
         assert_eq!(plan.items.len(), 1, "{:#?}", plan.items.iter().map(|i| (i.kind, i.reason, i.t0, i.t1)).collect::<Vec<_>>());
         let it = &plan.items[0];
         let p4 = plan.places[0];
-        assert_eq!((it.kind, it.left_sources.len(), it.right_sources.len()), ("stereo", 2, 1));
+        assert_eq!((it.kind, it.channels[0].sources.len(), it.channels[1].sources.len()), ("stereo", 2, 1));
         assert!((it.t0 - p4.p).abs() < 0.01 && (it.t1 - p4.p - 902.0).abs() < 0.05, "{} {}", it.t0 - p4.p, it.t1 - p4.p);
         let silent = |l: &str| it.silent.iter().find(|x| x.label == l).map_or(0.0, |x| x.seconds);
         assert!((silent("4") - 202.0).abs() < 1.0 && (silent("5") - 2.0).abs() < 0.5, "{:?}", it.silent);
@@ -2908,6 +3021,49 @@ mod tests {
         let plan = analyze(&[dir.join("tracks")], &AtomicBool::new(false), &mut |_| {}).unwrap();
         assert!(!plan.pairs[0].ok, "offset {} z {}", plan.pairs[0].offset, plan.pairs[0].coarse_z);
         assert!(plan.items.iter().all(|i| i.kind == "mono"));
+    }
+
+    /// Three microphones in one room and a fourth somewhere else: one polyphonic file with a
+    /// channel per sender in label order, timecode and channel names inside; the stranger is mono.
+    #[test]
+    fn three_senders_give_one_polyphonic_file() {
+        let dir = tempdir("poly");
+        let sr = 8000u32;
+        let n = |secs: f64| (secs * sr as f64) as usize;
+        let s = talk(61, sr, n(420.0));
+        let mut floor = Lcg(62);
+        let mut mic = |delay: f64, gain: f32| -> Vec<f32> { (0..n(400.0)).map(|k| gain * s[k + n(delay)] + 0.002 * (floor.next() as f32 - 0.5)).collect() };
+        write_float_wav(&dir.join("tracks/260101_S100000-E100640_D000640_4.wav"), sr, &mic(0.0, 1.0));
+        write_float_wav(&dir.join("tracks/260101_S100002-E100642_D000640_5.wav"), sr, &mic(2.3, 0.6));
+        write_float_wav(&dir.join("tracks/260101_S100005-E100645_D000640_6.wav"), sr, &mic(5.1, 0.4));
+        write_float_wav(&dir.join("tracks/260101_S100001-E100641_D000640_7.wav"), sr, &talk(63, sr, n(400.0)));
+        let cancel = AtomicBool::new(false);
+        let plan = analyze(&[dir.join("tracks")], &cancel, &mut |_| {}).unwrap();
+        let shared: Vec<&Item> = plan.items.iter().filter(|i| i.kind == "stereo").collect();
+        assert_eq!(shared.len(), 1, "{:#?}", plan.items.iter().map(|i| (i.kind, &i.name, i.reason)).collect::<Vec<_>>());
+        let it = shared[0];
+        assert_eq!(it.channels.iter().map(|c| c.label.as_str()).collect::<Vec<_>>(), ["4", "5", "6"]);
+        assert!(it.name.ends_with("_poly_4-5-6.wav"), "{}", it.name);
+        assert!(plan.items.iter().any(|i| i.kind == "mono" && plan.tracks[i.left].label == "7"), "the stranger stays mono");
+
+        let sum = write(&plan, &[it.id], &dir.join("sync"), &cancel, |_| {}).unwrap();
+        assert_eq!(sum.outcomes[0].status, Status::Written, "{:?}", sum.outcomes[0]);
+        let info = wav::read_info(&out_path(&sum, it.id)).unwrap();
+        assert_eq!((info.channels, info.base_tag(), info.repaired), (3, 3, false));
+        let bext = info.bext.as_ref().expect("timecode");
+        assert_eq!(bext.time_reference, 10 * 3600 * sr as u64, "file starts at 10:00:00");
+        let names = info.ixml.as_ref().map(|_| ()).is_some();
+        assert!(names || fs::read(out_path(&sum, it.id)).unwrap().windows(14).any(|w| w == b"<NAME>5</NAME>"), "channel names inside");
+
+        // Channel 2 is sender 5, moved by its measured offset: it carries the same talk as channel 1.
+        let data = fs::read(out_path(&sum, it.id)).unwrap();
+        let at = |frame: usize, ch: usize| f32::from_le_bytes(data[info.data_offset as usize + (frame * 3 + ch) * 4..][..4].try_into().unwrap());
+        let (mut same, mut total) = (0.0f64, 0.0f64);
+        for k in n(60.0)..n(62.0) {
+            same += (at(k, 0) * at(k, 1)) as f64;
+            total += (at(k, 0) * at(k, 0)) as f64 * 0.6;
+        }
+        assert!(same > 0.9 * total, "channels are aligned: {same} vs {total}");
     }
 
     #[test]
