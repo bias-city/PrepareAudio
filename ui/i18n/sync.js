@@ -55,13 +55,14 @@ I18N.add({
   'sync.legend.left': { de: 'links', en: 'left', fr: 'gauche', it: 'sinistra' },
   'sync.legend.right': { de: 'rechts', en: 'right', fr: 'droite', it: 'destra' },
   'sync.legend.monoOnly': { de: 'nur Mono', en: 'mono only', fr: 'mono uniquement', it: 'solo mono' },
-  'sync.legend.mono': { de: 'heller: Mono, nach außen geschoben', en: 'lighter: mono, moved outwards', fr: 'plus clair : mono, déplacé vers l’extérieur', it: 'più chiaro: mono, spostato verso l’esterno' },
+  'sync.legend.mono': { de: 'heller: einzeln, wird eine eigene Mono-Datei', en: 'lighter: separate, becomes a mono file of its own', fr: 'plus clair : séparé, devient un fichier mono', it: 'più chiaro: separato, diventa un file mono' },
+  'sync.legend.channel': { de: 'Kanal {n}', en: 'channel {n}', fr: 'canal {n}', it: 'canale {n}' },
   'sync.legend.cut': { de: 'gelöscht oder weggeschnitten', en: 'deleted or cut away', fr: 'supprimé ou coupé', it: 'eliminato o tagliato' },
   'sync.legend.events': { de: 'gemeinsame Ereignisse', en: 'shared events', fr: 'événements communs', it: 'eventi comuni' },
 
   // summary
-  'sync.stat.stereo.one': { de: 'Stereo-Datei · {dur}', en: 'Stereo file · {dur}', fr: 'Fichier stéréo · {dur}', it: 'File stereo · {dur}' },
-  'sync.stat.stereo.other': { de: 'Stereo-Dateien · {dur}', en: 'Stereo files · {dur}', fr: 'Fichiers stéréo · {dur}', it: 'File stereo · {dur}' },
+  'sync.stat.stereo.one': { de: 'gemeinsame Datei · {dur}', en: 'shared file · {dur}', fr: 'fichier commun · {dur}', it: 'file comune · {dur}' },
+  'sync.stat.stereo.other': { de: 'gemeinsame Dateien · {dur}', en: 'shared files · {dur}', fr: 'fichiers communs · {dur}', it: 'file comuni · {dur}' },
   'sync.stat.mono.one': { de: 'Mono-Datei', en: 'Mono file', fr: 'Fichier mono', it: 'File mono' },
   'sync.stat.mono.other': { de: 'Mono-Dateien', en: 'Mono files', fr: 'Fichiers mono', it: 'File mono' },
   'sync.stat.pairs': { de: 'Track-Paare synchron', en: 'Track pairs in sync', fr: 'Paires de pistes synchrones', it: 'Coppie di tracce sincrone' },
@@ -85,6 +86,7 @@ I18N.add({
 
   // output list
   'sync.badge.stereo': { de: 'Stereo · L {left} · R {right}', en: 'Stereo · L {left} · R {right}', fr: 'Stéréo · L {left} · R {right}', it: 'Stereo · L {left} · R {right}' },
+  'sync.badge.poly': { de: '{n} Kanäle · {labels}', en: '{n} channels · {labels}', fr: '{n} canaux · {labels}', it: '{n} canali · {labels}' },
   'sync.badge.mono': { de: 'Mono · {label}', en: 'Mono · {label}', fr: 'Mono · {label}', it: 'Mono · {label}' },
   'sync.item.why': { de: 'Treffer {hits} · Kohärenz {coh}', en: 'Hits {hits} · Coherence {coh}', fr: 'Concordances {hits} · Cohérence {coh}', it: 'Corrispondenze {hits} · Coerenza {coh}' },
   'sync.item.missing': { de: 'Sender {label} fehlt {dur}', en: 'Transmitter {label} missing for {dur}', fr: 'Émetteur {label} absent pendant {dur}', it: 'Trasmettitore {label} assente per {dur}' },

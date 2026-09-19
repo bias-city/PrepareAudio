@@ -3,6 +3,7 @@
 
   python3 scripts/demo-material.py <zielordner>            klein (82 MB), für die App-Prüfung
   python3 scripts/demo-material.py <zielordner> --kurz     je Sender eine Datei von 100 s, Mastern 20 s
+  … --dritter                                              dritter Sender (Tischmikrofon) dazu
   … --kurz --start 14:05 --seed 2                          weitere Session in denselben Ordner
   python3 scripts/demo-material.py <zielordner> --gross    Teile über 100 MiB (ca. 560 MB): so
       gelten sie der App als «volle Teile» und die Liste zeigt keinen Hinweis — für Bildschirmfotos
@@ -169,6 +170,13 @@ def main() -> None:
     quelle = (VERSATZ_S * SR) + np.arange(n) * (1 + DRIFT)
     mic2_eigen = np.interp(quelle, np.arange(N), mic2).astype(np.float32)
     sender(ziel / "aufnahmen", "2", mic2_eigen, start1 + VERSATZ_S)
+
+    if "--dritter" in sys.argv:
+        # Sender 3: ein Tischmikrofon, hört beide gleich, startet 6,2 s später, Uhr 3 ppm langsamer
+        e = stimme(rng, N, 160, 0.8)
+        mic3 = gemeinsam * (0.33 * a + 0.33 * b + 0.30 * ereignisse) + getrennt * (0.5 * e + 0.25 * raum(rng, N, 3)) + rausch()
+        quelle3 = (6.2 * SR) + np.arange(n) * (1 - 3e-6)
+        sender(ziel / "aufnahmen", "3", np.interp(quelle3, np.arange(N), mic3).astype(np.float32), start1 + 6.2)
 
     print("Mastern:")
     stueck = slice(10 * SR, 30 * SR) if KURZ else slice(30 * SR, 150 * SR)

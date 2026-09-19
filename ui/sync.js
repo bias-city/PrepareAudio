@@ -22,8 +22,8 @@
   const sy = { inputs: [], plan: null, outDir: '', outcomes: new Map(), busy: false, activeId: null, retryIds: null, decoding: false };
   window.syncState = sy;
 
-  const LABEL_W = 124, RULER_H = 24, ROW_H = 46, GROUP_GAP = 10, EVENTS_H = 10;
-  const COLORS = ['#3478f6', '#e0443e', '#1f9d55', '#d98b10', '#7c5cd6']; // blue = left, red = right, then further mono senders
+  const LABEL_W = 124, RULER_H = 24, ROW_H = 46, EVENTS_H = 10;
+  const COLORS = ['#3478f6', '#e0443e', '#1f9d55', '#d98b10', '#7c5cd6', '#0e9aa7', '#c2410c', '#64748b']; // one per sender, in label order
 
   const MIN_CLIP = 0.05, EDGE_PX = 6, SNAP_PX = 7, MIN_SPP = 0.002;
   const ed = {
@@ -151,23 +151,18 @@
   function buildRows() {
     const plan = P();
     const d = day();
+    // One lane per sender. Whether a clip goes into the shared file or becomes a file of its own
+    // shows in its colour (full or pale), so the layout is the same for two senders and for ten.
     const labels = plan.labels.filter((l) => d.tracks.some((t) => labelOf(t) === l));
-    const stereoPossible = plan.labels.length >= 2;
     const rows = [];
-    let y = RULER_H + 6;
-    labels.forEach((label, i) => {
-      const li = plan.labels.indexOf(label);
-      const kinds = !stereoPossible || li > 1 ? ['mono'] : li === 0 ? ['mono', 'stereo'] : ['stereo', 'mono'];
-      const joined = i > 0 && li === 1 && plan.labels.indexOf(labels[i - 1]) === 0;
-      if (i > 0 && !joined) y += GROUP_GAP;
-      kinds.forEach((kind) => { rows.push({ label, li, kind, y, h: ROW_H }); y += ROW_H; });
-    });
+    let y = RULER_H + 18;   // room for the labels of session boundaries
+    labels.forEach((label) => { rows.push({ label, li: plan.labels.indexOf(label), kind: 'lane', y, h: ROW_H }); y += ROW_H; });
     ed.rows = rows;
     ed.eventsY = y + 8;
     ed.height = ed.eventsY + EVENTS_H + 8;
   }
 
-  const rowFor = (clip) => ed.rows.find((r) => r.label === labelOf(clip.track) && r.kind === clip.mode) || ed.rows.find((r) => r.label === labelOf(clip.track));
+  const rowFor = (clip) => ed.rows.find((r) => r.label === labelOf(clip.track));
 
   function fitDay() {
     const d = day();
@@ -305,19 +300,6 @@
       }
     }
 
-    // stereo link between the two inner rows
-    const stereoRows = ed.rows.filter((r) => r.kind === 'stereo');
-    if (stereoRows.length === 2) {
-      const spans = (li) => ed.clips.filter((cl) => inDay.has(cl.track) && !cl.deleted && cl.mode === 'stereo' && plan.labels.indexOf(labelOf(cl.track)) === li)
-        .map((cl) => [toTimeline(cl.track, cl.t0), toTimeline(cl.track, cl.t1)]);
-      const seamY = stereoRows[1].y;
-      ctx.fillStyle = withAlpha(v('--ink') || '#222', 0.55);
-      for (const [a0, a1] of spans(0)) for (const [b0, b1] of spans(1)) {
-        const s0 = Math.max(a0, b0), s1 = Math.min(a1, b1);
-        if (s1 > s0) ctx.fillRect(X(s0), seamY - 1.5, X(s1) - X(s0), 3);
-      }
-    }
-
     // clips
     for (const clip of ed.clips) {
       if (!inDay.has(clip.track)) continue;
@@ -428,14 +410,9 @@
     ed.headerHits = [];
     const seen = new Set();
     for (const r of ed.rows) {
-      ctx.fillStyle = v('--faint');
-      ctx.font = '10.5px -apple-system, system-ui, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(tr(r.kind === 'stereo' ? 'sync.row.stereo' : 'sync.row.mono'), LABEL_W - 8, r.y + r.h - 8);
-      ctx.textAlign = 'left';
       if (seen.has(r.label)) continue;
       seen.add(r.label);
-      const top = r.li === 1 && r.kind === 'stereo' ? r.y + r.h : r.y;
+      const top = r.y;
       ctx.fillStyle = colorOf(r.label);
       ctx.fillRect(6, top + 6, 4, 34);
       ctx.fillStyle = v('--ink');
@@ -635,7 +612,7 @@
     } else if (ed.drag.type === 'move') {
       const clip = ed.clips[ed.drag.idx];
       const row = ed.rows.find((r) => y >= r.y && y <= r.y + r.h && r.label === labelOf(clip.track));
-      ed.drag.targetRow = row && row.kind !== clip.mode && Math.abs(y - ed.drag.y0) > 10 ? row : null;
+      ed.drag.targetRow = null; // one lane per sender: shared or separate is set with ↑ ↓ or the toolbar
       E.canvas.style.cursor = 'grabbing';
       draw();
     } else if (ed.drag.type === 'scrub') {
@@ -1105,7 +1082,7 @@
     const sw = (bg, extra = '') => `<i style="background:${bg};${extra}"></i>`;
     const senders = plan.labels.map((l, i) => {
       const c = COLORS[i % COLORS.length];
-      const role = tr(plan.labels.length >= 2 && i < 2 ? (i === 0 ? 'sync.legend.left' : 'sync.legend.right') : 'sync.legend.monoOnly');
+      const role = plan.labels.length === 2 ? tr(i === 0 ? 'sync.legend.left' : 'sync.legend.right') : tr('sync.legend.channel', { n: i + 1 });
       return `<span>${sw(c)}${esc(tr('sync.legend.sender', { label: l, role }))}</span>`;
     }).join('');
     E.legend.innerHTML = `${senders}
@@ -1171,13 +1148,15 @@
     const o = sy.outcomes.get(it.id);
     const a = plan.tracks[it.left];
     const badge = it.kind === 'stereo'
-      ? `<span class="parts-badge">${esc(tr('sync.badge.stereo', { left: plan.labels[0], right: plan.labels[1] || '' }))}</span>`
+      ? `<span class="parts-badge">${esc(it.channels.length === 2 && plan.labels.length === 2
+        ? tr('sync.badge.stereo', { left: it.channels[0].label, right: it.channels[1].label })
+        : tr('sync.badge.poly', { n: it.channels.length, labels: it.channels.map((c) => c.label).join(' · ') }))}</span>`
       : `<span class="parts-badge mono">${esc(tr('sync.badge.mono', { label: a.label }))}</span>`;
     const gap = (it.silent || []).filter((x) => x.seconds >= 1).map((x) => ` · ${esc(tr('sync.item.missing', { label: x.label, dur: fmtDur(x.seconds) }))}`).join('');
     const why = it.kind === 'stereo'
       ? `${esc(tr('sync.item.why', { hits: percent(it.hit_share), coh: it.msc == null ? '–' : fixed(it.msc, 2) }))}${gap}`
       : esc(tr(it.reason === 'getrennt' ? 'sync.item.apart' : 'sync.item.alone'));
-    const srcTracks = it.kind === 'stereo' ? [...it.left_sources, ...it.right_sources].map((s) => s.track) : [it.left];
+    const srcTracks = it.kind === 'stereo' ? it.channels.flatMap((c) => c.sources.map((s) => s.track)) : [it.left];
     const formats = [...new Set(srcTracks.map((i) => plan.tracks[i] && plan.tracks[i].decoded_from).filter(Boolean))];
     const decoded = formats.length ? ` · ${esc(tr('sync.item.decoded', { format: formats.join(', ') }))}` : '';
     const label = {
