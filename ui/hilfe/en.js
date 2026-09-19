@@ -221,7 +221,7 @@
         'Your edits to the timeline live as a small file next to the sources or in the app’s data folder.',
         'The app remembers the chosen language and the profile for mastering locally.',
       ] },
-      { art: 'p', text: 'What is in the results: file names carry the date, the time and the name of the source folder. Shared files carry timecode and track names. MP3 files carry an ID3 entry with the file name and the profile used. The app writes an identifier of your device or of you nowhere at all.' },
+      { art: 'p', text: 'What is in the results: file names carry the date, the time and the name of the source folder. Shared files carry timecode and track names. MP3 files carry an ID3 entry with the file name and the profile used; a master written as WAV carries no such entry. The app writes an identifier of your device or of you nowhere at all.' },
       { art: 'h', text: 'Licence' },
       { art: 'p', text: 'PrepareAudio is free software under the GNU AGPL, version 3 or later. The source code is open on GitHub. The version from the Mac App Store is the same source code, with an additional permission under §7 for distribution there. All bundled third-party packages and their licences are listed in the menu under **PrepareAudio › About PrepareAudio**.' },
       { art: 'p', text: 'Developed at B/IAS – Basel Institut für angewandte Stadtforschung.' },

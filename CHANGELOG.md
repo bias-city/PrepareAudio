@@ -3,7 +3,7 @@
 Alle nennenswerten Änderungen an PrepareAudio. Die GitHub-Release-Notizen einer Version
 sind der entsprechende Abschnitt dieser Datei.
 
-## 0.4.0 — noch nicht veröffentlicht
+## 0.4.0 — 2026-09-19
 
 ### Neu
 
@@ -16,6 +16,16 @@ sind der entsprechende Abschnitt dieser Datei.
   jetzt je Datei vermerkt und nur beim MP3 übergangen — als WAV gehen sie durch.
 - Über eine Quelldatei schreibt das Mastern nie, auch wenn der gewählte Zielordner der
   Quellordner ist; in dem Fall entsteht ein Name mit `_2`.
+- **Das Namensschema steht jetzt da, wo man es sucht:** im Handbuch unter «Ordner und Namen»,
+  auf der Website in der Anleitung und im README. Erklärt sind die Form
+  `JJMMTT_S<Start>-E<Ende>_D<Dauer>_<Inhalt>` Teil für Teil, was der Inhalt in jedem Schritt
+  bedeutet (`_1`, `_stereo_L-4_R-5`, `_poly_1-2-3`, `_mono_2`), wie Sendernamen bereinigt
+  werden und wie gleiche Namen durchnummeriert werden.
+
+### Behoben
+
+- `cargo test --lib` scheiterte im Debug-Profil an einem Überlauf im Testcode von Schritt 2
+  (ein negativer Versatz wurde als `usize` gerechnet). Nur der Test war betroffen, nicht die App.
 
 ## 0.3.0 — 2026-09-19
 

@@ -47,10 +47,10 @@ I18N.add({
 
   /* ---------- header ---------- */
   'page.subtitle': {
-    de: 'Aufnahme-Teile zusammenfügen, Audioquellen synchronisieren, auf −16 LUFS mastern',
-    en: 'Merge recording chunks, synchronise audio sources, master to −16 LUFS',
-    fr: 'Assembler des fragments d’enregistrement, synchroniser des sources audio, masteriser à −16 LUFS',
-    it: 'Unire frammenti di registrazione, sincronizzare sorgenti audio, masterizzare a −16 LUFS',
+    de: 'Aufnahme-Teile zusammenfügen, Audioquellen synchronisieren, als MP3 oder WAV auf −16 LUFS mastern',
+    en: 'Merge recording chunks, synchronise audio sources, master to −16 LUFS as MP3 or WAV',
+    fr: 'Assembler des fragments d’enregistrement, synchroniser des sources audio, masteriser à −16 LUFS en MP3 ou en WAV',
+    it: 'Unire frammenti di registrazione, sincronizzare sorgenti audio, masterizzare a −16 LUFS in MP3 o WAV',
   },
   'page.tab.merge': { de: 'Zusammenfügen', en: 'Merge', fr: 'Assembler', it: 'Unire' },
   'page.tab.sync': { de: 'Synchronisieren', en: 'Synchronise', fr: 'Synchroniser', it: 'Sincronizzare' },

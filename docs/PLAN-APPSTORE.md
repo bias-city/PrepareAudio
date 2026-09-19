@@ -111,7 +111,7 @@ Nie nur im Entwicklungsmodus. Testlauf mit den Aufnahmen vom 6. bis 8.9.2026:
 - Zusammenfügen über 4 GB (RF64), Abbrechen, «schon vorhanden».
 - Synchronisieren: Analyse, Bearbeiten, Neustart, Bearbeitung wieder da (beide
   Speicherorte aus Befund 2), Vorschau-Wiedergabe, Erzeugen.
-- Mastern aus WAV, M4A und MP3; Cache im Container; Aufräumen nach 30 Tagen.
+- Mastern aus WAV, M4A und MP3, Ausgabe als MP3 oder WAV; Cache im Container; Aufräumen nach 30 Tagen.
 - «Ordner öffnen», Links im Info-Feld, Sprachwechsel, Systemdialoge viersprachig.
 - Einmal ohne `network.client` starten und das Ergebnis festhalten.
 - `cargo test --lib`, dazu `real_data`, `real_sync`, `real_master`: MP3-Ergebnis

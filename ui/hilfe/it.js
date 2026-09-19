@@ -221,7 +221,7 @@
         'La tua modifica della timeline sta come piccolo file accanto alle sorgenti oppure nella cartella dati dell’app.',
         'La lingua scelta e il profilo del mastering l’app se li ricorda in locale.',
       ] },
-      { art: 'p', text: 'Che cosa sta nei risultati: i nomi dei file portano data, ora e il nome della cartella di origine. I file comuni portano timecode e nomi delle tracce. I file MP3 portano una voce ID3 con il nome del file e il profilo usato. Un identificativo del tuo dispositivo o della tua persona l’app non lo scrive da nessuna parte.' },
+      { art: 'p', text: 'Che cosa sta nei risultati: i nomi dei file portano data, ora e il nome della cartella di origine. I file comuni portano timecode e nomi delle tracce. I file MP3 portano una voce ID3 con il nome del file e il profilo usato; un master scritto come WAV non porta alcuna voce del genere. Un identificativo del tuo dispositivo o della tua persona l’app non lo scrive da nessuna parte.' },
       { art: 'h', text: 'Licenza' },
       { art: 'p', text: 'PrepareAudio è software libero sotto la GNU AGPL, versione 3 o successiva. Il codice sorgente è aperto su GitHub. La versione del Mac App Store è lo stesso codice sorgente, con un permesso aggiuntivo secondo il §7 per la distribuzione lì. Tutti i pacchetti di terze parti inclusi e le loro licenze si trovano nel menu sotto **PrepareAudio › About PrepareAudio**.' },
       { art: 'p', text: 'Sviluppato al B/IAS – Basel Institut für angewandte Stadtforschung.' },

@@ -71,7 +71,7 @@ Dritter Tab. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/AAC,
 - Der Fortschrittsbalken zählt alle Durchgänge und nennt den aktuellen Schritt (Pegel einstellen, MP3 kodieren oder WAV schreiben, Nachmessen). Mit `PA_MASTER_DEBUG=1` protokolliert der Test `real_master` jeden Durchgang.
 - Ergebnis im Ordner `master`. Vorhandene Dateien gleicher Länge im gewählten Format werden erkannt und nicht neu geschrieben (WAV zusätzlich an der Bittiefe 24, damit eine gleichnamige Quelle nicht für ein Ergebnis gehalten wird). Über eine Quelldatei schreibt die App nie.
 
-Das gewählte Profil steht im ID3-Kommentar des MP3. Gemeinsame Dateien aus Schritt 2 erkennt der Leveler an den Positionen im iXML, ältere an ihrem Namen (`…_stereo_L-4_R-5.wav`). Die App braucht keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
+Das gewählte Profil steht im ID3-Kommentar des MP3; ein WAV trägt keinen solchen Vermerk (es enthält nur `fmt `/`data`). Gemeinsame Dateien aus Schritt 2 erkennt der Leveler an den Positionen im iXML, ältere an ihrem Namen (`…_stereo_L-4_R-5.wav`). Die App braucht keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
 
 ## Namensschema der Ergebnisse
 
