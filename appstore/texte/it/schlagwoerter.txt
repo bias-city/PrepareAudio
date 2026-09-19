@@ -1,1 +1,1 @@
-audio,registratore,WAV,unire,sincronizzare,mastering,MP3,LUFS,intervista,podcast,loudness
+audio,registratore,WAV,unire,sincronizzare,mastering,MP3,LUFS,intervista,podcast,video

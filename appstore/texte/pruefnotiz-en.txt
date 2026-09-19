@@ -2,14 +2,14 @@ PrepareAudio works fully offline: no account, no login, no server, no telemetry.
 
 The network-client entitlement is present only because WebKit requires it to render the app's own bundled pages inside the App Sandbox; the app opens no network connections. No microphone access is requested: the app only plays back.
 
-The app prepares audio from field recorders. Because it needs recordings to show anything, we provide invented demo material (synthetic voices, no real persons), 64 MB:
+The app prepares audio from field recordings. Because it needs recordings to show anything, we provide invented demo material (synthetic voices, no real persons), 90 MB:
 https://bias.city/prepareaudio/demo/prepareaudio-demo.zip
 
-How to test (about 3 minutes):
-1. Unzip. Tab "1 Merge": drag the folder "aufnahmen" into the window. Two recordings of three parts each appear. Click "Merge…", choose any folder; the app creates "tracks" there.
-2. Tab "2 Synchronise": drag the folder "aufnahmen" (or the new "tracks") in. After the analysis a timeline shows stereo and mono clips. Space bar plays. Click "Create…" and choose a folder; the app creates "sync".
-3. Tab "3 Master": drag the folder "mastern" in. Click "Master…"; the app writes MP3 files at −16 LUFS into "master".
-The pill "Info" (bottom left) shows licences and the language switch (German, English, French, Italian).
+How to test (about 4 minutes):
+1. Unzip. Tab "1 Merge": drag the folder "aufnahmen" into the window. Three recordings of three chunks each appear. Click "Merge…", choose any folder; the app creates "tracks" there.
+2. Tab "2 Synchronise": drag the folder "aufnahmen" (or the new "tracks") in. After the analysis a timeline shows one lane per transmitter; space bar plays. Click a segment to open its options (shared file or mono file, and the position left/middle/right). Click "Create…" and choose a folder; the app writes one shared file per conversation — with three transmitters a polyphonic WAV — plus mono files into "sync".
+3. Tab "3 Master": drag the folder "mastern" in, pick a profile at the bottom ("For transcription" or "For listening") and click "Master…"; the app writes MP3 files at -16 LUFS into "master".
+The pill "Help" at the bottom left opens the built-in handbook (searchable, four languages).
 
 The source code is public (AGPL-3.0-or-later with an additional permission under section 7 for App Store distribution): https://github.com/bias-city/PrepareAudio
 LAME (LGPL) is linked dynamically; its source is inside the bundle and at https://bias.city/prepareaudio/quellen/

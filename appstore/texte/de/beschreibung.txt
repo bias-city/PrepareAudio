@@ -1,27 +1,34 @@
-PrepareAudio macht aus dem, was Audiorecorder und Ansteckmikrofone abliefern, fertige Aufnahmen: Teile zusammenfügen, zwei Mikrofone synchronisieren, als MP3 mastern. Drei Schritte, jeder für sich nutzbar. Alles läuft lokal auf deinem Mac: keine Cloud, kein Konto, keine Daten verlassen den Rechner.
+PrepareAudio macht aus dem, was Audiorecorder, Ansteckmikrofone, Handys und Kameras abliefern, fertige Aufnahmen: Teile zusammenfügen, beliebig viele Mikrofone synchronisieren, als MP3 mastern. Drei Schritte, jeder für sich nutzbar. Alles läuft lokal auf deinem Mac: keine Cloud, kein Konto, keine Daten verlassen den Rechner.
 
 1 · ZUSAMMENFÜGEN
 Viele Recorder schneiden lange Aufnahmen in Teile. PrepareAudio setzt sie wieder zusammen.
-• Ordner hineinziehen, alle Unterordner werden durchsucht, egal wie sortiert
+• Nimmt WAV in mono, stereo und mehrkanalig, dazu MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG Vorbis und den Ton aus MP4- und MOV-Videos
+• Ordner hineinziehen oder mehrere auf einmal wählen; alle Unterordner werden durchsucht, egal wie sortiert
 • Erkennung über Aufnahmezeit in den Metadaten (Broadcast-WAV, iXML), Dateiname oder Dateidatum
 • Bei zwei Sendern mit gleichen Dateinamen entscheidet das Audio an der Nahtstelle
-• Verlustfrei: die Audiodaten werden bitgenau kopiert, ab 4 GB automatisch als RF64
+• Ausgabe immer WAV, aus WAV-Quellen bitgenau kopiert, ab 4 GB automatisch als RF64
 • Unsichere Verkettungen sind markiert und nicht vorausgewählt
 
 2 · SYNCHRONISIEREN
-Zwei Personen, zwei Ansteckmikrofone, zwei Uhren. PrepareAudio findet die gemeinsamen Ereignisse und legt beide Spuren übereinander.
-• Misst Zeitversatz und Uhrendrift auf Millisekunden
-• Gemeinsame Abschnitte werden Stereo (links die eine, rechts die andere Person), getrennte Gespräche Mono
-• Timeline wie im Schnittprogramm: trimmen, trennen, zusammenführen, löschen, Stereo oder Mono wählen, rückgängig machen
+Mehrere Personen, mehrere Mikrofone, mehrere Uhren. PrepareAudio findet die gemeinsamen Ereignisse und legt alle Spuren übereinander.
+• Misst Zeitversatz und Uhrendrift auf Millisekunden, schon ab einer Minute Überlappung
+• Gemeinsame Abschnitte werden eine Datei mit einem Kanal je Sender: bei zweien links und rechts, bei mehreren eine polyphone WAV mit Timecode und Spurnamen
+• Getrennte Gespräche werden Mono-Dateien
+• Timeline wie im Schnittprogramm: eine Bahn je Sender, trimmen, trennen, zusammenführen, löschen, rückgängig machen
+• Ein Klick auf einen Abschnitt setzt sein Ziel und seine Position im späteren Stereo-Mixdown: links, Mitte oder rechts
+• Zeit ohne Aufnahme fällt aus der Timeline; eine Sessiongrenze nennt die Dauer der Lücke
 • Vorhören genau so, wie die Datei entsteht; Sender stumm oder solo
-• Eingaben: WAV sowie MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG, etwa vom Handy
 
 3 · MASTERN
 Gleich laute, gut hörbare Dateien zum Weitergeben, Transkribieren oder Veröffentlichen.
 • Lautheit nach EBU R128 (ITU-R BS.1770-4) mit True Peak und Lautheitsumfang
-• Feste Verstärkung auf −16 LUFS, Limiter bei −1,5 dBTP, keine Kompression: die Sprachdynamik bleibt
-• MP3 mit 192 kbit/s; das fertige MP3 wird nachgemessen und bei Bedarf nachgeregelt
-• Ehrlicher Fortschritt: die Prozente zählen nur erledigte Arbeit
+• Profil «Für Transkription» (Standard): feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik — an echten Interviews geprüft, Spracherkennung und Sprechertrennung arbeiten damit besser
+• Profil «Fürs Hören»: gleicht zusätzlich die Lautstärken der Sprechenden aus, hebt leise Passagen an und senkt Übersprechen
+• Mehrkanalige Dateien werden in beiden Profilen nach L/M/R auf Stereo gemischt
+• Limiter bei −1,5 dBTP, MP3 mit 192 kbit/s; das fertige MP3 wird nachgemessen und bei Bedarf neu kodiert
+
+HANDBUCH IN DER APP
+Neun Kapitel mit Suche und Bildern, in allen vier Sprachen: die drei Schritte, die Timeline, alle Tastenkürzel und was die App lokal speichert.
 
 DEINE ORIGINALE BLEIBEN UNANGETASTET
 Die App verändert oder überschreibt nie eine Quelldatei. Ergebnisse landen in den Ordnern tracks, sync und master an dem Ort, den du wählst. Schon Vorhandenes wird erkannt und übersprungen.

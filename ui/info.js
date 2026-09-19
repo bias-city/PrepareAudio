@@ -104,6 +104,8 @@
   // The pill at the bottom left leads to the handbook; this panel comes from the menu entry
   // "About PrepareAudio" (src-tauri/src/lib.rs), which also holds the licence notices.
   q('#hilfe-open').addEventListener('click', handbuch);
+  // For the screenshot script (scripts/screenshots.mjs): open the panel from outside.
+  window.openInfo = open;
   const ev = window.__TAURI__ && window.__TAURI__.event;
   if (ev) ev.listen('ueber', () => { if (modal.hidden) open(); }).catch(() => {});
   q('#info-close').addEventListener('click', () => { modal.hidden = true; });

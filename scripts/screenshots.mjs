@@ -13,7 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import http from "node:http";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const arg = (name, std) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : std; };
@@ -33,19 +34,33 @@ const DATEN = arg("daten", path.join(ROOT, "scripts/demo-data"));
 const GROESSEN = arg("groessen", "").split(",").filter(Boolean).map((g) => g.split("x").map(Number));
 const lies = (n) => JSON.parse(fs.readFileSync(path.join(DATEN, n), "utf8"));
 const backend = fs.readFileSync(path.join(ROOT, "scripts/demo-backend.js"), "utf8");
-const lizenzen = fs.readFileSync(path.join(ROOT, "ui/licenses.json"), "utf8");
+
+// Die Oberfläche wird über einen kleinen Server ausgeliefert, nicht über file://: nur so darf
+// die Seite ihre eigene licenses.json nachladen (WebKit verbietet das bei file://).
+const TYPEN = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".svg": "image/svg+xml" };
+const server = http.createServer((req, res) => {
+  const rel = decodeURIComponent(req.url.split("?")[0]).replace(/^\/+/, "") || "index.html";
+  const datei = path.join(ROOT, "ui", rel);
+  if (!datei.startsWith(path.join(ROOT, "ui"))) { res.writeHead(403).end(); return; }
+  fs.readFile(datei, (err, buf) => {
+    if (err) { res.writeHead(404).end(); return; }
+    res.writeHead(200, { "content-type": TYPEN[path.extname(datei)] || "application/octet-stream" });
+    res.end(buf);
+  });
+});
+await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
+const BASIS = `http://127.0.0.1:${server.address().port}/`;
 
 const browser = await webkit.launch();
-const REIHE = ["sync", "merge", "master", "sync-dunkel", "leer", "info"]; // Reihenfolge im Store
+const REIHE = ["sync", "merge", "master", "sync-dunkel", "handbuch", "leer", "info"]; // Reihenfolge im Store
 async function lauf(lang, dunkel, motive, groesse) {
   const p = lies(`plan-${lang}.json`);
   const demo = { scan: lies(`scan-${lang}.json`), plan: p.plan, peaks: p.peaks, master: lies(`master-${lang}.json`) };
   const [b, h] = groesse || [B, H];
   const page = await browser.newPage({ viewport: { width: b, height: h }, deviceScaleFactor: groesse ? 1 : F, colorScheme: dunkel ? "dark" : "light" });
   page.on("pageerror", (e) => { if (!/licenses\.json/.test(e.message)) console.log(`[${lang}] FEHLER`, e.message); });
-  await page.route("**/licenses.json", (r) => r.fulfill({ contentType: "application/json", body: lizenzen }));
   await page.addInitScript(`localStorage.setItem("prepareaudio.lang", ${JSON.stringify(lang)}); window.PA_DEMO = ${JSON.stringify(demo)}; ${backend}`);
-  await page.goto(pathToFileURL(path.join(ROOT, "ui/index.html")).href);
+  await page.goto(BASIS + "index.html");
   await page.evaluate((l) => window.I18N && I18N.setLang(l), lang);
   const knips = async (name) => {
     if (!motive.includes(name)) return;
@@ -84,19 +99,35 @@ async function lauf(lang, dunkel, motive, groesse) {
     await page.evaluate(() => { document.querySelector("#sync-finished").hidden = true; document.querySelector("#sync-results").hidden = false; });
   }
   await page.click("#tabs button[data-mode=master]"); await page.click("#master-pick"); await knips("master");
-  await page.evaluate(() => document.querySelector("#info-open") || window.__TAURI__.event.emit?.("ueber"));
-  await page.evaluate(() => { const m = document.querySelector("#info"); if (m) m.hidden = false; });
+  await page.evaluate(() => window.openInfo && window.openInfo());
+  await page.waitForTimeout(250);
   await knips("info");
   await page.close();
 }
 for (const g of GROESSEN) { await lauf(SPRACHEN[0], DUNKEL, ["leer", "merge", "sync", "master", "info"], g); console.log("✓", g.join("x")); }
+/** Das Handbuch ist eine eigene Seite: eigener Aufruf, gleiche Grösse wie die übrigen Motive. */
+async function handbuchSeite(lang) {
+  const page = await browser.newPage({ viewport: { width: B, height: H }, deviceScaleFactor: F });
+  await page.addInitScript(`localStorage.setItem("prepareaudio.lang", ${JSON.stringify(lang)}); localStorage.setItem("prepareaudio.hilfe.kapitel", "timeline");`);
+  await page.goto(BASIS + "hilfe.html");
+  await page.waitForTimeout(400);
+  const datei = path.join(ZIEL, lang, `${String(REIHE.indexOf("handbuch") + 1).padStart(2, "0")}-handbuch.jpg`);
+  fs.mkdirSync(path.dirname(datei), { recursive: true });
+  await page.screenshot({ path: datei, type: "jpeg", quality: 92 });
+  await page.close();
+}
+
 for (const lang of GROESSEN.length ? [] : SPRACHEN) {
   if (SITE) {
     await lauf(lang, false, ["hero"], [1600, 1000]);
     await lauf(lang, false, ["merge", "sync", "edit", "done", "master", "info"], [1200, 750]);
+  } else if (STORE) {
+    await lauf(lang, false, ["leer", "merge", "sync", "master", "info"]);
+    await lauf(lang, true, ["sync"]);
+    await handbuchSeite(lang);
   } else if (HANDBUCH) { for (const d of [false, true]) await lauf(lang, d, ["leer", "merge", "sync", "master"]); }
-  else if (STORE) { await lauf(lang, false, ["leer", "merge", "sync", "master", "info"]); await lauf(lang, true, ["sync"]); }
   else await lauf(lang, DUNKEL, ["leer", "merge", "sync", "master", "info"]);
   console.log("✓", lang);
 }
 await browser.close();
+server.close();

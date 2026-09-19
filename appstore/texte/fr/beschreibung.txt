@@ -1,33 +1,40 @@
-PrepareAudio transforme ce que livrent les enregistreurs audio et les micros-cravates en enregistrements finis : assembler les fragments, synchroniser deux micros, masteriser en MP3. Trois étapes, chacune utilisable seule. Tout s’exécute localement sur ton Mac : pas de cloud, pas de compte, aucune donnée ne quitte l’ordinateur.
+PrepareAudio transforme ce que livrent enregistreurs audio, micros-cravates, téléphones et caméras en enregistrements finis : assembler les fragments, synchroniser autant de micros que tu veux, masteriser en MP3. Trois étapes, chacune utilisable seule. Tout s’exécute localement sur ton Mac : pas de cloud, pas de compte, aucune donnée ne quitte l’ordinateur.
 
 1 · ASSEMBLER
 Beaucoup d’enregistreurs découpent les longs enregistrements en fragments. PrepareAudio les réunit.
-• Glisse un dossier ; tous les sous-dossiers sont parcourus, quel que soit leur classement
+• Accepte le WAV en mono, en stéréo et en multicanal, ainsi que MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG Vorbis et le son des vidéos MP4 et MOV
+• Glisse un dossier ou choisis-en plusieurs d’un coup ; tous les sous-dossiers sont parcourus, quel que soit leur classement
 • Détection par l’heure d’enregistrement dans les métadonnées (Broadcast WAV, iXML), le nom ou la date du fichier
 • Avec deux émetteurs et des noms de fichiers identiques, c’est l’audio à la jointure qui décide
-• Sans perte : les données audio sont copiées bit à bit, automatiquement en RF64 à partir de 4 Go
+• La sortie est toujours du WAV, copié bit à bit depuis les sources WAV, automatiquement en RF64 à partir de 4 Go
 • Les chaînes incertaines sont signalées et ne sont pas présélectionnées
 
 2 · SYNCHRONISER
-Deux personnes, deux micros-cravates, deux horloges. PrepareAudio trouve les événements communs et superpose les deux pistes.
-• Mesure le décalage et la dérive d’horloge à la milliseconde
-• Les passages communs deviennent stéréo (une personne à gauche, l’autre à droite), les conversations séparées mono
-• Une timeline comme dans un logiciel de montage : rogner, couper, joindre, supprimer, choisir stéréo ou mono, annuler
+Plusieurs personnes, plusieurs micros, plusieurs horloges. PrepareAudio trouve les événements communs et superpose toutes les pistes.
+• Mesure le décalage et la dérive d’horloge à la milliseconde, dès une minute de recouvrement
+• Les passages communs deviennent un fichier avec un canal par émetteur : à deux, à gauche et à droite ; à plusieurs, un WAV polyphonique avec timecode et noms de pistes
+• Les conversations séparées deviennent des fichiers mono
+• Une timeline comme dans un logiciel de montage : une voie par émetteur, rogner, couper, joindre, supprimer, annuler
+• Un clic sur un segment fixe sa destination et sa position dans le futur mixage stéréo : gauche, milieu ou droite
+• Le temps sans enregistrement sort de la timeline ; une limite de session indique la durée du trou
 • Pré-écoute exactement telle que le fichier sera produit ; émetteur muet ou solo
-• Entrées : WAV ainsi que MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG, par exemple depuis un téléphone
 
 3 · MASTERISER
 Des fichiers de même niveau, bien audibles, à transmettre, transcrire ou publier.
-• Sonie selon EBU R128 (ITU-R BS.1770-4) avec crête réelle et plage de sonie
-• Gain fixe vers −16 LUFS, limiteur à −1,5 dBTP, aucune compression : la dynamique de la parole reste
-• MP3 à 192 kbit/s ; le MP3 fini est remesuré et réajusté si nécessaire
-• Une progression honnête : le pourcentage ne compte que le travail terminé
+• Loudness selon EBU R128 (ITU-R BS.1770-4) avec True Peak et plage de loudness
+• Profil « Pour la transcription » (par défaut) : gain fixe à −16 LUFS, aucune intervention sur la dynamique — vérifié sur de vrais entretiens, la reconnaissance vocale et la séparation des locuteurs fonctionnent mieux ainsi
+• Profil « Pour l’écoute » : égalise en plus le niveau des personnes qui parlent, relève les passages faibles et atténue la diaphonie
+• Les fichiers multicanaux sont mixés en stéréo selon L/M/R dans les deux profils
+• Limiteur à −1,5 dBTP, MP3 à 192 kbit/s ; le MP3 fini est remesuré et réencodé si nécessaire
+
+MANUEL DANS L’APP
+Neuf chapitres avec recherche et images, dans les quatre langues : les trois étapes, la timeline, tous les raccourcis clavier et ce que l’app enregistre localement.
 
 TES ORIGINAUX RESTENT INTACTS
 L’app ne modifie ni n’écrase jamais un fichier source. Les résultats vont dans les dossiers tracks, sync et master à l’endroit que tu choisis. Ce qui existe déjà est reconnu et ignoré.
 
 PROTECTION DES SOURCES : AUCUNE DONNÉE NE QUITTE L’ORDINATEUR
-Quand tu enregistres des conversations, tu dois la confidentialité aux personnes concernées. PrepareAudio ne collecte aucune donnée, n’a pas de télémétrie, n’a pas besoin du micro et ne télécharge rien. L’app s’exécute dans le bac à sable de macOS.
+Quand tu enregistres des conversations, tu dois la confidentialité aux personnes concernées. PrepareAudio ne collecte aucune donnée, n’a pas de télémétrie, n’a pas besoin du micro et ne télécharge rien. L’app s’exécute dans l’App Sandbox de macOS.
 
 VA AVEC RESEARCHTRANSCRIPT
 Les fichiers masterisés sont le point de départ idéal pour la transcription avec ResearchTranscript, également du B/IAS.
@@ -36,4 +43,4 @@ OPEN SOURCE
 PrepareAudio est un logiciel libre sous AGPL. Le code source est public sur GitHub et peut être vérifié. Développé au B/IAS – Basel Institut für angewandte Stadtforschung.
 
 CONFIGURATION REQUISE
-Mac avec puce Apple, macOS 12 ou ultérieur. Interface en allemand, anglais, français et italien.
+Mac avec Apple Silicon, macOS 12 ou ultérieur. Interface en allemand, anglais, français et italien.

@@ -1,1 +1,1 @@
-audio,recorder,WAV,merge,join,sync,mastering,MP3,LUFS,interview,podcast,loudness,offline
+audio,recorder,WAV,merge,synchronise,mastering,MP3,LUFS,interview,podcast,video,offline

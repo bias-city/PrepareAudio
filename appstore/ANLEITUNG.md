@@ -1,8 +1,10 @@
-# PrepareAudio im Mac App Store — Anleitung fürs Apple-Portal
+# PrepareAudio 0.3.0 im Mac App Store — Anleitung fürs Apple-Portal
 
-Texte: `appstore/texte/<sprache>/` (erzeugt von `scripts/appstore-texte.py`). Bilder:
-`appstore/upload/<sprache>/` (erzeugt von `scripts/screenshots.mjs appstore/upload --store`,
-2880 × 1800, JPEG ohne Alpha). Beides lässt sich jederzeit neu erzeugen.
+Alles Nötige liegt bereit. Texte: `appstore/texte/<sprache>/` (erzeugt von
+`scripts/appstore-texte.py`, Längen werden geprüft). Bilder: `appstore/upload/<sprache>/`
+(erzeugt von `node scripts/screenshots.mjs appstore/upload --store`, 2880 × 1800, JPEG ohne
+Alpha, in der Reihenfolge nummeriert). App-Symbol: `appstore/app-icon-1024.png`. Beides lässt
+sich jederzeit neu erzeugen.
 
 ## A. developer.apple.com › Certificates, Identifiers & Profiles
 
@@ -20,7 +22,7 @@ Schlüsselbund (von ResearchTranscript).
 Plattform macOS · Name `PrepareAudio` · Hauptsprache wie bei ResearchTranscript · Bundle-ID
 `city.bias.prepareaudio` · SKU `prepareaudio-mac` · Zugriff uneingeschränkt.
 
-## C. Versionsseite, je Sprache (Deutsch, Englisch (UK), Französisch, Italienisch)
+## C. Versionsseite 0.3.0, je Sprache (Deutsch, Englisch (UK), Französisch, Italienisch)
 
 | Feld | Datei |
 |---|---|
@@ -29,7 +31,10 @@ Plattform macOS · Name `PrepareAudio` · Hauptsprache wie bei ResearchTranscrip
 | Schlagwörter | `schlagwoerter.txt` |
 | Neuerungen | `neu.txt` |
 | Untertitel (unter App-Informationen) | `untertitel.txt` |
-| Bildschirmfotos | `appstore/upload/<sprache>/01…06` in dieser Reihenfolge |
+| Bildschirmfotos | `appstore/upload/<sprache>/01…07` in dieser Reihenfolge |
+
+Die sieben Motive: Synchronisieren, Zusammenfügen, Mastern, Synchronisieren dunkel, Handbuch,
+Leerzustand, Info-Feld mit Lizenzen.
 
 Support-URL, Marketing-URL, Datenschutz-URL und Copyright: `appstore/texte/urls.txt`.
 
@@ -41,8 +46,8 @@ Support-URL, Marketing-URL, Datenschutz-URL und Copyright: `appstore/texte/urls.
 - **Verschlüsselung:** keine (steht schon in der Info.plist). **DSA:** wie bei ResearchTranscript.
 - **Preis:** kostenlos. **Verfügbarkeit:** alle Länder. **Lizenzvertrag:** Apples Standard.
 - **Informationen zur App-Prüfung:** keine Anmeldung nötig; Notiz aus
-  `appstore/texte/pruefnotiz-en.txt`. Vorher muss das Demo-Paket unter
-  `https://bias.city/prepareaudio/demo/prepareaudio-demo.zip` liegen.
+  `appstore/texte/pruefnotiz-en.txt` einsetzen. Sie verweist auf das Demo-Paket unter
+  `https://bias.city/prepareaudio/demo/prepareaudio-demo.zip` (liegt dort, 90 MB, erfundene Stimmen).
 
 ## E. Paket bauen und hochladen
 
@@ -50,11 +55,19 @@ Support-URL, Marketing-URL, Datenschutz-URL und Copyright: `appstore/texte/urls.
 npm run release:mas            # optional: node scripts/release-mas.mjs --build 2
 ```
 
-Ergebnis `src-tauri/target/release/bundle/mas/PrepareAudio.pkg` in **Transporter** ziehen und
-senden. Nach etwa 15 Minuten erscheint der Build unter TestFlight; dort testen, dann auf der
-Versionsseite den Build wählen und «Zur Prüfung hinzufügen».
+Das Skript baut mit dem Feature `mas`, versiegelt mit «Apple Distribution» und den
+Store-Entitlements, prüft (Sandbox auf jedem Programm, keine Rechnerpfade, LAME über `@rpath`)
+und schreibt `src-tauri/target/release/bundle/mas/PrepareAudio.pkg`. Dieses Paket in
+**Transporter** ziehen und senden. Nach etwa 15 Minuten erscheint der Build unter TestFlight;
+dort testen, dann auf der Versionsseite den Build wählen und «Zur Prüfung hinzufügen».
 
-## Vor dem Einreichen auf bias.city (nur auf ausdrückliches Go, Live-Stand vorher sichern)
+Vorher einmal ohne Profil prüfen: `npm run probe:sandbox` baut dieselbe App mit Sandbox-Rechten,
+signiert mit der Developer ID, und lässt sich lokal starten.
 
-`site/privacy.html`, `site/index.html`, `quellen/lame-3.100.tar.gz` (aus `src-tauri/frameworks/`),
-`demo/prepareaudio-demo.zip` (aus `appstore/demo/`). Kein Store-Emblem vor der Freigabe.
+## Was schon erledigt ist
+
+- Datenschutzseite: <https://bias.city/prepareaudio/privacy.html> (viersprachig, Du-Form)
+- Demo-Paket für die Prüfer: <https://bias.city/prepareaudio/demo/prepareaudio-demo.zip>
+- LAME-Quellen (LGPL): <https://bias.city/prepareaudio/quellen/lame-3.100.tar.gz>
+- Zusatzerlaubnis AGPL §7: `LICENSE-EXCEPTION`, im App-Paket und auf GitHub
+- Website und GitHub-Release stehen auf 0.3.0
