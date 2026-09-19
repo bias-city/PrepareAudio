@@ -116,6 +116,7 @@ I18N.add({
   'page.ed.stereo': { de: 'Gemeinsam', en: 'Shared', fr: 'Commun', it: 'Comune' },
   'page.ed.stereo.title': { de: 'In die gemeinsame Datei nehmen (↑)', en: 'Put into the shared file (↑)', fr: 'Mettre dans le fichier commun (↑)', it: 'Metti nel file comune (↑)' },
   'page.ed.mono': { de: 'Einzeln', en: 'Separate', fr: 'Séparé', it: 'Separato' },
+  'page.ed.pan.title': { de: 'Position des Segments im Stereo-Mixdown beim Mastern: links, Mitte, rechts', en: 'Position of the segment in the stereo mixdown of mastering: left, middle, right', fr: 'Position du segment dans le mixage stéréo du mastering : gauche, milieu, droite', it: 'Posizione del segmento nel mixdown stereo del mastering: sinistra, centro, destra' },
   'page.ed.mono.title': { de: 'Als eigene Mono-Datei ausgeben (↓)', en: 'Write as a mono file of its own (↓)', fr: 'Écrire comme fichier mono à part (↓)', it: 'Scrivi come file mono a parte (↓)' },
   'page.ed.undo.title': { de: 'Rückgängig (⌘Z)', en: 'Undo (⌘Z)', fr: 'Annuler (⌘Z)', it: 'Annulla (⌘Z)' },
   'page.ed.redo.title': { de: 'Wiederholen (⇧⌘Z)', en: 'Redo (⇧⌘Z)', fr: 'Rétablir (⇧⌘Z)', it: 'Ripeti (⇧⌘Z)' },

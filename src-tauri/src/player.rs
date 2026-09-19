@@ -260,9 +260,9 @@ pub fn render(mix: &Mix, muted: &HashSet<String>, solo: &HashSet<String>, t0: f6
             continue;
         }
         let lane = mix.labels.iter().position(|l| l == label).unwrap_or(usize::MAX);
-        let (gl, gr) = match (c.mode, lane) {
-            (ClipMode::Stereo, 0) if stereo_possible => (1.0, 0.0),
-            (ClipMode::Stereo, 1) => (0.0, 1.0),
+        // Shared segments sit where they will sit in the mixdown; separate ones in the middle.
+        let (gl, gr) = match c.mode {
+            ClipMode::Stereo if stereo_possible => c.pan.unwrap_or_else(|| sync::Pan::default_for(lane, mix.labels.len())).gains(),
             _ => (FRAC_1_SQRT_2, FRAC_1_SQRT_2),
         };
         let g = mix.gains.get(c.track).copied().unwrap_or(1.0);
@@ -302,7 +302,7 @@ mod tests {
         let at = |mix: &Mix, t: f64| render(mix, &none, &none, p4 + t, sr, 800);
         let expected = |k: usize| four[sr as usize + k];
 
-        mix.clips = vec![Clip { track: 0, t0: 0.0, t1: 20.0, mode: ClipMode::Mono, deleted: false }];
+        mix.clips = vec![Clip { track: 0, t0: 0.0, t1: 20.0, mode: ClipMode::Mono, deleted: false, pan: None }];
         let mono = at(&mix, 1.0);
         for k in [0usize, 123, 799] {
             assert!((mono[2 * k] - expected(k) * FRAC_1_SQRT_2).abs() < 1e-5 && mono[2 * k] == mono[2 * k + 1]);

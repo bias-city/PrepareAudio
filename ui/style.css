@@ -390,6 +390,7 @@ body[data-mode="master"] .merge-only, body[data-mode="master"] .sync-only { disp
 .pillgroup > button + button { border-left: 1.5px solid var(--ink); }
 .pillgroup > button:hover:not(:disabled) { background: var(--hover); }
 .pillgroup > button:disabled { opacity: 1; color: var(--faint); }
+.pillgroup > button.on { background: var(--active); font-weight: 650; }
 .pillgroup > .icon-btn { width: 30px; }
 .legend { font-size: 11.5px; gap: 4px 14px; margin-top: 8px; }
 

@@ -4,6 +4,7 @@
 I18N.add({
   // timeline canvas
   'sync.clip.deleted': { de: 'gelöscht', en: 'deleted', fr: 'supprimé', it: 'eliminato' },
+  'sync.clip.separate': { de: 'einzeln', en: 'separate', fr: 'séparé', it: 'separato' },
   'sync.row.stereo': { de: 'Stereo', en: 'Stereo', fr: 'Stéréo', it: 'Stereo' },
   'sync.row.mono': { de: 'Mono', en: 'Mono', fr: 'Mono', it: 'Mono' },
   'sync.canvas.sender': { de: 'Sender {label}', en: 'Transmitter {label}', fr: 'Émetteur {label}', it: 'Trasmettitore {label}' },

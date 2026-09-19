@@ -325,7 +325,7 @@
       }
       if (w > 26) {
         ctx.font = '600 10px -apple-system, system-ui, sans-serif';
-        const tag = clip.deleted ? tr('sync.clip.deleted') : clip.mode === 'mono' ? 'M' : plan.labels.indexOf(labelOf(clip.track)) === 0 ? 'L' : 'R';
+        const tag = clip.deleted ? tr('sync.clip.deleted') : clip.mode === 'mono' ? tr('sync.clip.separate') : panOf(clip).toUpperCase();
         const tx = Math.max(a, LABEL_W) + 5;
         ctx.fillStyle = clip.deleted || clip.mode === 'mono' ? withAlpha(color, 0.95) : 'rgba(255,255,255,0.95)';
         ctx.fillText(tag, tx, y + 12);
@@ -773,7 +773,21 @@
     if (!sel.length) return;
     if (mode === 'stereo' && P().labels.length < 2) { toast(tr('sync.toast.stereoNeedsTwo')); return; }
     const next = clone(ed.clips);
-    sel.forEach((i) => { if (P().labels.indexOf(labelOf(next[i].track)) < 2) next[i].mode = mode; });
+    sel.forEach((i) => { next[i].mode = mode; });
+    commit(next);
+  }
+
+  /** Position of a shared segment in the stereo mixdown of step 3: its own choice, else the sender's default. */
+  function panOf(clip) {
+    if (clip.pan) return clip.pan;
+    const n = P().labels.length, l = P().labels.indexOf(labelOf(clip.track));
+    return n < 2 ? 'm' : l === 0 ? 'l' : l === n - 1 ? 'r' : 'm';
+  }
+  function opPan(pan) {
+    const sel = selectedIndices();
+    if (!sel.length) return;
+    const next = clone(ed.clips);
+    sel.forEach((i) => { next[i].pan = pan; });
     commit(next);
   }
 
@@ -783,6 +797,7 @@
     else if (op === 'merge') opMerge();
     else if (op === 'delete') opDelete();
     else if (op === 'stereo' || op === 'mono') opMode(op);
+    else if (op.startsWith('pan-')) opPan(op.slice(4));
     else if (op === 'undo') undo();
     else if (op === 'redo') redo();
     else if (op === 'zoom-in') zoomAt(1 / 1.6, LABEL_W + (ed.width - LABEL_W) / 2);
@@ -835,6 +850,11 @@
     E.editor.querySelectorAll('[data-op]').forEach((b) => {
       const op = b.dataset.op;
       if (['merge', 'delete', 'stereo', 'mono'].includes(op)) b.disabled = !n || sy.busy;
+      if (op.startsWith('pan-')) {
+        const shared = selectedIndices().map((i) => ed.clips[i]).filter((c) => c.mode === 'stereo' && !c.deleted);
+        b.disabled = !shared.length || sy.busy;
+        b.classList.toggle('on', shared.length > 0 && shared.every((c) => panOf(c) === op.slice(4)));
+      }
       if (op === 'undo') b.disabled = !ed.history.length || sy.busy;
       if (op === 'redo') b.disabled = !ed.future.length || sy.busy;
     });

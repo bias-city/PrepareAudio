@@ -351,16 +351,42 @@ pub fn timecode_chunk(description: &str, date: (i64, i64, i64), time: (i64, i64,
     chunk(b"bext", &b)
 }
 
-/// An `iXML` chunk naming the channels of a polyphonic file.
-pub fn channel_names_chunk(track_names: &[String]) -> Vec<u8> {
+/// An `iXML` chunk for a polyphonic file: channel names, their FUNCTION (LEFT, CENTER, RIGHT) and,
+/// in the `PREPAREAUDIO` element, the position of every stretch: `(channel, from, to, "L"|"M"|"R")`
+/// in seconds of the file.
+pub fn channel_names_chunk(track_names: &[String], functions: &[&str], segments: &[(usize, f64, f64, &str)]) -> Vec<u8> {
     let esc = |s: &str| s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;");
     let mut x = String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?><BWFXML><IXML_VERSION>1.61</IXML_VERSION><PROJECT>PrepareAudio</PROJECT>");
     x.push_str(&format!("<TRACK_LIST><TRACK_COUNT>{}</TRACK_COUNT>", track_names.len()));
     for (i, name) in track_names.iter().enumerate() {
-        x.push_str(&format!("<TRACK><CHANNEL_INDEX>{0}</CHANNEL_INDEX><INTERLEAVE_INDEX>{0}</INTERLEAVE_INDEX><NAME>{1}</NAME></TRACK>", i + 1, esc(name)));
+        x.push_str(&format!(
+            "<TRACK><CHANNEL_INDEX>{0}</CHANNEL_INDEX><INTERLEAVE_INDEX>{0}</INTERLEAVE_INDEX><NAME>{1}</NAME><FUNCTION>{2}</FUNCTION></TRACK>",
+            i + 1,
+            esc(name),
+            functions.get(i).copied().unwrap_or("CENTER")
+        ));
     }
-    x.push_str("</TRACK_LIST></BWFXML>");
+    x.push_str("</TRACK_LIST><PREPAREAUDIO>");
+    for (ch, from, to, pan) in segments {
+        x.push_str(&format!("<PAN CH=\"{ch}\" T0=\"{from:.3}\" T1=\"{to:.3}\" POS=\"{pan}\"/>"));
+    }
+    x.push_str("</PREPAREAUDIO></BWFXML>");
     chunk(b"iXML", x.as_bytes())
+}
+
+/// The `PAN` entries written by [`channel_names_chunk`]: `(channel from 1, from, to, position)`.
+pub fn parse_pan_segments(ixml: &str) -> Vec<(usize, f64, f64, char)> {
+    let attr = |tag: &str, key: &str| -> Option<String> {
+        let at = tag.find(&format!("{key}=\""))? + key.len() + 2;
+        Some(tag[at..].split('"').next()?.to_string())
+    };
+    ixml.split("<PAN ")
+        .skip(1)
+        .filter_map(|rest| {
+            let tag = rest.split("/>").next()?;
+            Some((attr(tag, "CH")?.parse().ok()?, attr(tag, "T0")?.parse().ok()?, attr(tag, "T1")?.parse().ok()?, attr(tag, "POS")?.chars().next()?))
+        })
+        .collect()
 }
 
 /// Writes a WAVE header. Below `riff_limit` it is a classic RIFF header with a

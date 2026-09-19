@@ -29,7 +29,7 @@ Auftrag des Users vom 19.9.2026, wörtlich sinngemäss:
 dort null. Tests: `short_recordings_from_sixty_seconds_are_synchronised`,
 `unrelated_short_recordings_stay_apart`. Lange Aufnahmen unverändert.
 
-### P1 — Zusammenfügen nimmt alles
+### P1 — Zusammenfügen nimmt alles ✔ (19.9.)
 - `AUDIO_EXT` um `mov`, `m4v` (Hinweis an Symphonia: `mp4`); später `mkv`/`webm`.
 - `scan`: Nicht-WAV-Dateien einmal in den Cache dekodieren und als Teil führen (Name und Pfad
   des Originals, Audiodaten aus der Kopie). Startzeit: Name, dann Erstellungszeit im Container
@@ -40,7 +40,15 @@ dort null. Tests: `short_recordings_from_sixty_seconds_are_synchronised`,
 - Ausgabe immer WAV (dekodierte Teile: 32-bit float). Fortschritt beim Dekodieren zeigen.
 - Texte «Nur WAV» in vier Sprachen ersetzen.
 
-### P2 — N Sender, polyphone WAV
+### P2 — N Sender, polyphone WAV ✔ (19.9., Abnahme durch den User offen)
+
+Entscheide des Users vom 19.9.: eine Bahn je Sender, auch bei zwei Sendern. Jedes SEGMENT hat
+zwei Einstellungen: Ziel (gemeinsame Datei oder eigene Mono-Datei) und Position im Stereo-Mixdown
+(L, M, R; Standard nach Reihenfolge der Sender: erster L, letzter R, sonst M). Die Positionen
+stehen je Segment im iXML der gemeinsamen WAV (`<PREPAREAUDIO><PAN CH T0 T1 POS/>`), dazu
+`FUNCTION` je Kanal; `wav::parse_pan_segments` liest sie für das Mastern. Mono-Dateien bleiben
+beim Mastern in der Mitte.
+
 - `items_from_clips`: eine gemeinsame Datei hat N Kanäle, einer je Sender in fester Reihenfolge
   (`label_order`); fehlt ein Sender, ist sein Kanal still. Zwei Sender ergeben wie bisher zwei
   Kanäle. `write_stereo` wird `write_poly`.

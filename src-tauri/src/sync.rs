@@ -253,6 +253,53 @@ pub enum ClipMode {
     Mono,
 }
 
+/// Where a segment sits in the stereo mixdown of step 3: left, middle or right.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Pan {
+    L,
+    M,
+    R,
+}
+
+impl Pan {
+    /// Default by the sender's place in label order: first left, last right, the others in the middle.
+    pub fn default_for(lane: usize, senders: usize) -> Pan {
+        match (lane, senders) {
+            (_, 0 | 1) => Pan::M,
+            (0, _) => Pan::L,
+            (l, n) if l + 1 == n => Pan::R,
+            _ => Pan::M,
+        }
+    }
+
+    /// Linear gains (left, right) of the preview; the middle keeps the power.
+    pub fn gains(self) -> (f32, f32) {
+        match self {
+            Pan::L => (1.0, 0.0),
+            Pan::R => (0.0, 1.0),
+            Pan::M => (FRAC_1_SQRT_2 as f32, FRAC_1_SQRT_2 as f32),
+        }
+    }
+
+    pub fn code(self) -> &'static str {
+        match self {
+            Pan::L => "L",
+            Pan::M => "M",
+            Pan::R => "R",
+        }
+    }
+
+    /// iXML TRACK FUNCTION.
+    fn function(self) -> &'static str {
+        match self {
+            Pan::L => "LEFT",
+            Pan::M => "CENTER",
+            Pan::R => "RIGHT",
+        }
+    }
+}
+
 /// A stretch of one track (seconds in the track) and where it goes.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Clip {
@@ -262,6 +309,9 @@ pub struct Clip {
     pub mode: ClipMode,
     #[serde(default)]
     pub deleted: bool,
+    /// Position of this segment in the stereo mixdown; `None` = the sender's default.
+    #[serde(default)]
+    pub pan: Option<Pan>,
 }
 
 /// Part of an output channel: a track between two timeline seconds.
@@ -270,6 +320,8 @@ pub struct Source {
     pub track: usize,
     pub t0: f64,
     pub t1: f64,
+    /// Position of this stretch in the stereo mixdown.
+    pub pan: Pan,
 }
 
 /// One channel of a shared (polyphonic) file: a sender and the stretches it contributes.
@@ -2064,11 +2116,11 @@ fn clips_from_drafts(tracks: &[Track], pairs: &[Pair], drafts: &[Draft]) -> Vec<
     for d in drafts {
         let r = d.reference;
         let mode = if d.kind == "stereo" { ClipMode::Stereo } else { ClipMode::Mono };
-        clips.push(Clip { track: r, t0: d.t0, t1: d.t1, mode, deleted: false });
+        clips.push(Clip { track: r, t0: d.t0, t1: d.t1, mode, deleted: false, pan: None });
         for sp in &d.spans {
             let p = &pairs[sp.pair];
             let (a, b) = (map_time(p, r, sp.t0), map_time(p, r, sp.t1));
-            clips.push(Clip { track: sp.other, t0: a.min(b), t1: a.max(b), mode: ClipMode::Stereo, deleted: false });
+            clips.push(Clip { track: sp.other, t0: a.min(b), t1: a.max(b), mode: ClipMode::Stereo, deleted: false, pan: None });
         }
     }
     normalize_clips(tracks, clips)
@@ -2090,7 +2142,7 @@ fn clips_for_many(tracks: &[Track], pairs: &[Pair]) -> Vec<Clip> {
             }
         }
         if together.is_empty() {
-            clips.push(Clip { track: t.id, t0: 0.0, t1: t.duration, mode: ClipMode::Mono, deleted: false });
+            clips.push(Clip { track: t.id, t0: 0.0, t1: t.duration, mode: ClipMode::Mono, deleted: false, pan: None });
             continue;
         }
         let together = union(together);
@@ -2113,13 +2165,13 @@ fn clips_for_many(tracks: &[Track], pairs: &[Pair]) -> Vec<Clip> {
         let mut at = 0.0;
         for (s, e) in mono {
             if s - at >= MIN_CLIP_S {
-                clips.push(Clip { track: t.id, t0: at, t1: s, mode: ClipMode::Stereo, deleted: false });
+                clips.push(Clip { track: t.id, t0: at, t1: s, mode: ClipMode::Stereo, deleted: false, pan: None });
             }
-            clips.push(Clip { track: t.id, t0: s, t1: e, mode: ClipMode::Mono, deleted: false });
+            clips.push(Clip { track: t.id, t0: s, t1: e, mode: ClipMode::Mono, deleted: false, pan: None });
             at = e;
         }
         if t.duration - at >= MIN_CLIP_S {
-            clips.push(Clip { track: t.id, t0: at, t1: t.duration, mode: ClipMode::Stereo, deleted: false });
+            clips.push(Clip { track: t.id, t0: at, t1: t.duration, mode: ClipMode::Stereo, deleted: false, pan: None });
         }
     }
     normalize_clips(tracks, clips)
@@ -2166,7 +2218,7 @@ pub fn normalize_clips(tracks: &[Track], clips: Vec<Clip>) -> Vec<Clip> {
 fn same_clips(a: &[Clip], b: &[Clip]) -> bool {
     a.len() == b.len()
         && a.iter().zip(b).all(|(x, y)| {
-            x.track == y.track && x.mode == y.mode && x.deleted == y.deleted && (x.t0 - y.t0).abs() < 1e-3 && (x.t1 - y.t1).abs() < 1e-3
+            x.track == y.track && x.mode == y.mode && x.deleted == y.deleted && x.pan == y.pan && (x.t0 - y.t0).abs() < 1e-3 && (x.t1 - y.t1).abs() < 1e-3
         })
 }
 
@@ -2245,7 +2297,10 @@ pub fn items_from_clips(tracks: &[Track], pairs: &[Pair], places: &[Place], labe
     let mut ivs: Vec<(usize, usize, Source)> = clips
         .iter()
         .filter(|c| !c.deleted && is_stereo(c))
-        .map(|c| (group_of(&mut comp, c.track), lane(c.track), Source { track: c.track, t0: places[c.track].to_timeline(c.t0), t1: places[c.track].to_timeline(c.t1) }))
+        .map(|c| {
+            let pan = c.pan.unwrap_or_else(|| Pan::default_for(lane(c.track), labels.len()));
+            (group_of(&mut comp, c.track), lane(c.track), Source { track: c.track, t0: places[c.track].to_timeline(c.t0), t1: places[c.track].to_timeline(c.t1), pan })
+        })
         .collect();
     ivs.sort_by(|a, b| a.0.cmp(&b.0).then(a.2.t0.total_cmp(&b.2.t0)));
     let mut groups: Vec<Vec<(usize, Source)>> = Vec::new();
@@ -2303,7 +2358,15 @@ pub fn items_from_clips(tracks: &[Track], pairs: &[Pair], places: &[Place], labe
             ((tod / 3600.0) as i64, (tod % 3600.0 / 60.0) as i64, (tod % 60.0) as i64),
             (tod * rate as f64).round() as u64,
         );
-        trailer.extend(wav::channel_names_chunk(&names));
+        // Channel names with the position of the first stretch, and every stretch with its own
+        // position in file seconds: step 3 mixes the file down to stereo from these.
+        let functions: Vec<&str> = channels.iter().map(|c| c.sources.first().map_or(Pan::M, |s| s.pan).function()).collect();
+        let segments: Vec<(usize, f64, f64, &str)> = channels
+            .iter()
+            .enumerate()
+            .flat_map(|(ci, c)| c.sources.iter().map(move |s| (ci + 1, s.t0 - t0, s.t1 - t0, s.pan.code())))
+            .collect();
+        trailer.extend(wav::channel_names_chunk(&names, &functions, &segments));
         let fmt_len = wav::float_fmt(channels.len() as u16, rate).len();
         items.push(Item {
             id: 0,
@@ -2407,6 +2470,8 @@ struct EditClip {
     mode: ClipMode,
     #[serde(default)]
     deleted: bool,
+    #[serde(default)]
+    pan: Option<Pan>,
 }
 
 /// Where edits go when the folder of the sources cannot be written: in the App Store
@@ -2434,7 +2499,7 @@ fn load_edits(tracks: &[Track], root: &Path) -> Option<HashMap<usize, Vec<Clip>>
     let mut out = HashMap::new();
     for et in file.tracks {
         if let Some(t) = tracks.iter().find(|t| t.name == et.name && t.start_secs == et.start_secs && t.frames == et.frames) {
-            let clips = et.clips.into_iter().map(|c| Clip { track: t.id, t0: c.t0, t1: c.t1, mode: c.mode, deleted: c.deleted }).collect();
+            let clips = et.clips.into_iter().map(|c| Clip { track: t.id, t0: c.t0, t1: c.t1, mode: c.mode, deleted: c.deleted, pan: c.pan }).collect();
             out.insert(t.id, clips);
         }
     }
@@ -2468,7 +2533,7 @@ fn save_edits(plan: &SyncPlan) -> Result<(), String> {
                 name: t.name.clone(),
                 start_secs: t.start_secs,
                 frames: t.frames,
-                clips: plan.clips.iter().filter(|c| c.track == t.id).map(|c| EditClip { t0: c.t0, t1: c.t1, mode: c.mode, deleted: c.deleted }).collect(),
+                clips: plan.clips.iter().filter(|c| c.track == t.id).map(|c| EditClip { t0: c.t0, t1: c.t1, mode: c.mode, deleted: c.deleted, pan: c.pan }).collect(),
             })
             .collect(),
     };
