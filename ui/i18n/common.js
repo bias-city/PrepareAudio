@@ -178,8 +178,8 @@ I18N.add({
     it: '<b>Masterizzare:</b> misura la loudness secondo EBU R128 (ITU-R BS.1770-4), la porta a −16 LUFS, limita i picchi a −1,5 dBTP e scrive MP3 a 192 kbit/s. A scelta per la trascrizione (nessun intervento sulla dinamica) o per l’ascolto (livelli di chi parla pareggiati).',
   },
   'page.info.selfContained': {
-    de: 'Alles läuft in der App selbst, ohne installierte Zusatzprogramme. Originaldateien werden nie verändert oder überschrieben. Das Handbuch öffnet die Pille «Hilfe» unten links.',
-    en: 'Everything runs inside the app itself, without any additional programs installed. Original files are never changed or overwritten. The pill “Help” at the bottom left opens the handbook.',
+    de: 'Alles läuft in der App selbst, ohne installierte Zusatzprogramme. Originaldateien werden nie verändert oder überschrieben. Das Handbuch öffnet der Button «Hilfe» unten links.',
+    en: 'Everything runs inside the app itself, without any additional programs installed. Original files are never changed or overwritten. The “Help” button at the bottom left opens the handbook.',
     fr: 'Tout se passe dans l’app elle-même, sans programme supplémentaire installé. Les fichiers d’origine ne sont jamais modifiés ni écrasés. Le bouton « Aide » en bas à gauche ouvre le manuel.',
     it: 'Tutto avviene nell’app stessa, senza programmi aggiuntivi installati. I file originali non vengono mai modificati o sovrascritti. Il pulsante «Aiuto» in basso a sinistra apre il manuale.',
   },

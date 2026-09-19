@@ -112,7 +112,7 @@
         '**Trimmen und verlängern**: an den Kanten ziehen. Stossen zwei Clips aneinander, verschiebt das Ziehen die gemeinsame Grenze.',
         '**Löschen und wiederbringen**: Gelöschtes bleibt schraffiert sichtbar.',
         '**Zeitlich verschieben geht nicht.** Die gemessene Lage jeder Spur ist fest, damit die Sender synchron bleiben.',
-        '**Zoom**: ⌘ mit Mausrad, Zwei-Finger-Geste oder die Knöpfe. **Tag** zeigt alles.',
+        '**Zoom**: ⌘ mit Mausrad, Zwei-Finger-Geste oder die Buttons. **Tag** zeigt alles.',
         '**Vorhören**: Die Leertaste spielt ab dem Playhead, genau so, wie die Datei entstehen würde. **M** stellt einen Sender stumm, **S** stellt ihn solo.',
         '**Reset** verwirft alle Bearbeitungen und holt den Vorschlag der Analyse zurück.',
       ] },

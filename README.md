@@ -24,7 +24,7 @@ Nicht nur ein Namensmuster: Jede WAV-Datei ist ein Kandidat. Details, Recherche 
 
 ## Schritt 2: Synchronisieren
 
-Zweiter Reiter der App. Ordner mit Tracks (oder rohe Recorder-Ordner) hineinziehen. Ergebnis im Ordner `sync`: gemeinsame Abschnitte als Stereo-WAV (links der kleinere Sendername, z. B. `4`, rechts `5`), alles andere je Sender als Mono-WAV.
+Zweiter Tab der App. Ordner mit Tracks (oder rohe Recorder-Ordner) hineinziehen. Ergebnis im Ordner `sync`: gemeinsame Abschnitte als Stereo-WAV (links der kleinere Sendername, z. B. `4`, rechts `5`), alles andere je Sender als Mono-WAV.
 
 **Eingaben:** WAV (Tracks aus Schritt 1 oder rohe Aufnahme-Teile) sowie MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF und OGG Vorbis, etwa Handy-Aufnahmen. Jede Nicht-WAV-Datei wird einmal mit Symphonia (eingebaut) in ein 32-bit-float-WAV mit Original-Abtastrate und -Kanälen dekodiert, lückenlos wo das Format Encoder-Verzögerung und Auffüllung angibt (MP3 mit LAME-Tag, OGG). Die Kopie liegt unter `~/Library/Caches/city.bias.prepareaudio/decoded/<hash>.wav`; der Hash umfasst Pfad, Größe und Änderungszeit der Quelle, eine unveränderte Datei wird also nicht erneut dekodiert. Vorher wird der freie Platz geprüft, Kopien, die 30 Tage nicht benutzt wurden, entfernt die nächste Analyse. Name, Sender (Ordnername), Tag und die Bearbeitungsdatei beziehen sich weiter auf die Originaldatei; Analyse, Vorschau, Wellenform und Ausgabe lesen die Kopie. Startzeit: Datum mit Sekunden im Dateinamen, sonst die Erstellungszeit einer M4A (`mvhd`), sonst das Dateidatum (Änderungszeit − Dauer) wie in Schritt 1. Solche Dateien sind nie Aufnahme-Teile, jede ist ein Track. Die MP3-Kopien aus Schritt 3 (Ordner `master`) werden übergangen.
 
@@ -56,9 +56,9 @@ Kalibriert auf den Aufnahmen vom 6.–8.9.2026: Versatz auf ±3 ms gleich wie di
 
 ## Schritt 3: Mastern
 
-Dritter Reiter. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG Vorbis). Die App zeigt je Datei Format, Bittiefe, Abtastrate und Kanäle und misst die Lautheit nach EBU R128 (ITU-R BS.1770-4) mit True Peak und Lautheitsumfang.
+Dritter Tab. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG Vorbis). Die App zeigt je Datei Format, Bittiefe, Abtastrate und Kanäle und misst die Lautheit nach EBU R128 (ITU-R BS.1770-4) mit True Peak und Lautheitsumfang.
 
-- Zwei Profile, umschaltbar unten im Reiter:
+- Zwei Profile, umschaltbar unten im Tab:
   - **Für Transkription** (Standard): nur feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik. An echten Interviews geprüft: Spracherkennung und Sprechertrennung arbeiten damit besser als mit der geregelten Fassung. Mehrkanalige Dateien werden auch hier nach L/M/R auf Stereo gemischt. Bitgleich zu den Fassungen vor 0.3.0.
   - **Fürs Hören**: gleicht die Lautstärken der Sprechenden aus. Je Kanal Hochpass bei 80 Hz, Spracherkennung über den Pegelverlauf, feste Anhebung leiser Sprechender (bis 15 dB), mitlaufende Regelung auf die Kurzzeitlautheit (±12 dB, in Pausen gehalten, vorwärts und rückwärts geglättet, reagiert also vor dem Sprung), Absenken eines Kanals, auf dem gerade nur das Übersprechen einer anderen Person zu hören ist (−12 dB, weich). Danach ein leichter Bus-Kompressor (2:1 ab 6 dB über dem Sprachpegel). Mehrkanalige Dateien werden dabei nach den Positionen L/M/R aus Schritt 2 auf Stereo gemischt (etwa 80 % der Leistung auf der eigenen Seite); Mono bleibt Mono.
 - Danach in beiden Profilen ein Look-ahead-Limiter (5 ms, Release 50 ms) bei −1,5 dBTP.
