@@ -7,6 +7,8 @@
 //       Layout-Prüfung: jede Ansicht in jeder Fenstergrösse (Faktor 1, nur die erste Sprache)
 //   node scripts/screenshots.mjs ui/hilfe --handbuch   Bilder fürs Handbuch: hell und dunkel,
 //                                                     je Sprache ein Ordner, JPEG 1200 × 750
+//   node scripts/screenshots.mjs site/img --site      Bilder für bias.city/prepareaudio:
+//                                                     hero 1600×1000, Motive 1200×750, PNG, je Sprache
 // Braucht Playwright (npx playwright install webkit). Motive: leer, merge, sync, master, info.
 import fs from "node:fs";
 import path from "node:path";
@@ -19,7 +21,8 @@ const ZIEL = process.argv[2];
 if (!ZIEL || ZIEL.startsWith("--")) { console.error("Zielordner fehlt"); process.exit(1); }
 const STORE = process.argv.includes("--store");
 const HANDBUCH = process.argv.includes("--handbuch");
-const B = STORE ? 1440 : +arg("breite", 1200), H = STORE ? 900 : +arg("hoehe", 750), F = HANDBUCH ? 1 : +arg("faktor", 2);
+const SITE = process.argv.includes("--site");
+const B = STORE ? 1440 : +arg("breite", 1200), H = STORE ? 900 : +arg("hoehe", 750), F = HANDBUCH || SITE ? 1 : +arg("faktor", 2);
 const SPRACHEN = arg("sprachen", "de,en,fr,it").split(",");
 const DUNKEL = process.argv.includes("--dunkel");
 const require = createRequire(process.env.PLAYWRIGHT_FROM || import.meta.url);
@@ -48,7 +51,7 @@ async function lauf(lang, dunkel, motive, groesse) {
     if (!motive.includes(name)) return;
     await page.waitForTimeout(400);
     const key = dunkel ? `${name}-dunkel` : name;
-    const datei = HANDBUCH ? path.join(ZIEL, lang, dunkel ? "dunkel" : "hell", `${name}.jpg`) : groesse ? path.join(ZIEL, `${name}-${b}x${h}.png`) : STORE ? path.join(ZIEL, lang, `${String(REIHE.indexOf(key) + 1).padStart(2, "0")}-${key}.jpg`) : path.join(ZIEL, `${key}-${lang}.png`);
+    const datei = SITE ? path.join(ZIEL, `${name}-${lang}.png`) : HANDBUCH ? path.join(ZIEL, lang, dunkel ? "dunkel" : "hell", `${name}.jpg`) : groesse ? path.join(ZIEL, `${name}-${b}x${h}.png`) : STORE ? path.join(ZIEL, lang, `${String(REIHE.indexOf(key) + 1).padStart(2, "0")}-${key}.jpg`) : path.join(ZIEL, `${key}-${lang}.png`);
     fs.mkdirSync(path.dirname(datei), { recursive: true });
     await page.screenshot(STORE || HANDBUCH ? { path: datei, type: "jpeg", quality: HANDBUCH ? 82 : 92 } : { path: datei });
   };
@@ -56,7 +59,30 @@ async function lauf(lang, dunkel, motive, groesse) {
   await page.click("#pick"); await page.waitForTimeout(300);
   await page.evaluate(() => document.querySelectorAll(".partlist").forEach((d) => { d.open = true; }));
   await knips("merge");
-  await page.click("#tabs button[data-mode=sync]"); await page.click("#sync-pick"); await page.waitForTimeout(600); await knips("sync");
+  await page.click("#tabs button[data-mode=sync]"); await page.click("#sync-pick"); await page.waitForTimeout(600);
+  await knips("sync");
+  await knips("hero");
+  if (motive.includes("edit")) {
+    // Menü an einem Abschnitt: zeigt Ziel und Position
+    const box = await page.locator("#ed-canvas").boundingBox();
+    await page.mouse.click(box.x + 330, box.y + 24 + 18 + 23);
+    await page.waitForTimeout(300);
+    await knips("edit");
+    await page.keyboard.press("Escape");
+  }
+  if (motive.includes("done")) {
+    await page.evaluate(() => {
+      const f = document.querySelector("#sync-finished");
+      const done = window.syncState && window.syncState.plan ? window.syncState.plan.items.length : 4;
+      f.innerHTML = `<div class="finished-card"><div class="finished-icon">\u2713</div><h2>${done} von ${done} erledigt</h2>`
+        + `<p>${done} Dateien geschrieben</p><p class="path">/Users/demo/Gespraech/sync</p>`
+        + `<div class="finished-actions"><button class="btn">Ordner öffnen</button><button class="btn primary">Weiter zum Mastern</button></div></div>`;
+      f.hidden = false;
+      document.querySelector("#sync-results").hidden = true;
+    });
+    await knips("done");
+    await page.evaluate(() => { document.querySelector("#sync-finished").hidden = true; document.querySelector("#sync-results").hidden = false; });
+  }
   await page.click("#tabs button[data-mode=master]"); await page.click("#master-pick"); await knips("master");
   await page.evaluate(() => document.querySelector("#info-open") || window.__TAURI__.event.emit?.("ueber"));
   await page.evaluate(() => { const m = document.querySelector("#info"); if (m) m.hidden = false; });
@@ -65,7 +91,10 @@ async function lauf(lang, dunkel, motive, groesse) {
 }
 for (const g of GROESSEN) { await lauf(SPRACHEN[0], DUNKEL, ["leer", "merge", "sync", "master", "info"], g); console.log("✓", g.join("x")); }
 for (const lang of GROESSEN.length ? [] : SPRACHEN) {
-  if (HANDBUCH) { for (const d of [false, true]) await lauf(lang, d, ["leer", "merge", "sync", "master"]); }
+  if (SITE) {
+    await lauf(lang, false, ["hero"], [1600, 1000]);
+    await lauf(lang, false, ["merge", "sync", "edit", "done", "master", "info"], [1200, 750]);
+  } else if (HANDBUCH) { for (const d of [false, true]) await lauf(lang, d, ["leer", "merge", "sync", "master"]); }
   else if (STORE) { await lauf(lang, false, ["leer", "merge", "sync", "master", "info"]); await lauf(lang, true, ["sync"]); }
   else await lauf(lang, DUNKEL, ["leer", "merge", "sync", "master", "info"]);
   console.log("✓", lang);

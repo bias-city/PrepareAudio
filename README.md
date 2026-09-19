@@ -80,6 +80,10 @@ Die Bilder darin entstehen aus der echten Oberfläche, hell und dunkel, je Sprac
 node scripts/screenshots.mjs ui/hilfe --handbuch
 ```
 
+## Authorship and AI assistance
+
+UX/UI und Software-Architektur stammen vom **B/IAS – Basel Institut für angewandte Stadtforschung**. Der Code entstand mit den agentischen Coding-Fähigkeiten von Anthropics Claude Opus 5 und Claude Fable 5.1, angeleitet, geprüft und getestet am B/IAS. Die Verantwortung für die Software liegt beim B/IAS.
+
 ## Lizenz
 
 PrepareAudio ist freie Software unter der GNU Affero General Public License, Version 3 oder später (`LICENSE`), wie LocalTranscript. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung, <https://bias.city/prepareaudio>. Quellcode: <https://github.com/bias-city/PrepareAudio>.

@@ -3,10 +3,12 @@
 Alle nennenswerten Änderungen an PrepareAudio. Die GitHub-Release-Notizen einer Version
 sind der entsprechende Abschnitt dieser Datei.
 
-## Unveröffentlicht (Ziel 0.3.0)
+## 0.3.0 — 2026-09-19
 
-Erste Fassung für den Mac App Store; derselbe Code erscheint als signiertes und
-notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
+Aus dem Werkzeug für gestückelte Aufnahmen wird eine Kette für alles, was von einem
+Gesprächstag übrig bleibt: hineingeben, synchronisieren, mastern. Erste Fassung, die auch für
+den Mac App Store vorbereitet ist; derselbe Code erscheint hier als signiertes und
+notarisiertes DMG. Pläne: `docs/PLAN-0.4-PIPELINE.md`, `docs/PLAN-APPSTORE.md`.
 
 ### Behoben
 
