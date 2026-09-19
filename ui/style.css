@@ -408,3 +408,14 @@ body[data-mode="master"] .merge-only, body[data-mode="master"] .sync-only { disp
 @media (max-height: 520px) {
   .dropzone .fine { display: none; }
 }
+
+/* Symbole in Knöpfen: der Klick gehört immer dem Knopf, nie der Zeichnung darin. */
+button svg { pointer-events: none; flex: none; width: 14px; height: 14px; }
+.icon-btn.play svg { width: 13px; height: 13px; }
+
+/* Menü am Segment (Klick auf einen Clip): Ziel und Position mit Häkchen */
+.ed-menu button { justify-content: flex-start; gap: 0; }
+.ed-menu .mk { display: inline-block; width: 15px; flex: none; color: var(--accent); font-weight: 700; }
+.ed-menu kbd { margin-left: auto; padding-left: 18px; }
+.ed-menu hr { border: 0; border-top: 1px solid var(--line); margin: 4px 8px; }
+.ed-menu .head { padding: 5px 10px 2px 10px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }

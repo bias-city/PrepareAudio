@@ -149,13 +149,13 @@ fn run(rx: Receiver<Cmd>, on_position: impl Fn(Position)) {
                 playing = true;
             }
             Ok(Cmd::Pause) => {
-                if playing {
-                    let t = position(&shared, t_start, rate);
-                    stream = None;
-                    playing = false;
-                    reset(t, &shared, &mut t_start, &mut t_render);
-                    on_position(Position { t, playing: false, error: None });
-                }
+                // Always answer, even when nothing was playing: the interface may think it is
+                // playing (a lost event), and a pause that stays silent would leave it stuck.
+                let t = if playing { position(&shared, t_start, rate) } else { t_start };
+                stream = None;
+                playing = false;
+                reset(t, &shared, &mut t_start, &mut t_render);
+                on_position(Position { t, playing: false, error: None });
             }
             Ok(Cmd::Seek(t)) => {
                 reset(t, &shared, &mut t_start, &mut t_render);

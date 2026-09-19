@@ -38,6 +38,11 @@
   const signed = (v, d) => `${v < 0 ? '−' : '+'}${fixed(Math.abs(v), d)}`;
   const percent = (v) => (v == null ? '–' : `${Math.round(v * 100)} %`);
   const clone = (v) => JSON.parse(JSON.stringify(v));
+  const ICON = {
+    play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="4.5" width="4" height="15" rx="1"/><rect x="13.5" y="4.5" width="4" height="15" rx="1"/></svg>',
+  };
+  const setPlayIcon = (playing) => { E.play.innerHTML = playing ? ICON.pause : ICON.play; };
 
   /* ---------- geometry helpers ---------- */
 
@@ -587,7 +592,7 @@
       const key = keyOf(ed.clips[hit.idx]);
       if (e.shiftKey || e.metaKey) { if (ed.sel.has(key)) ed.sel.delete(key); else ed.sel.add(key); }
       else if (!ed.sel.has(key)) ed.sel = new Set([key]);
-      ed.drag = { type: 'move', idx: hit.idx, y0: y, targetRow: null, modifier: e.shiftKey || e.metaKey };
+      ed.drag = { type: 'move', idx: hit.idx, x0: x, y0: y, moved: false, targetRow: null, modifier: e.shiftKey || e.metaKey };
     } else {
       if (hit.type === 'lane' && !e.shiftKey) ed.sel.clear();
       ed.drag = { type: 'scrub' };
@@ -612,7 +617,8 @@
     } else if (ed.drag.type === 'move') {
       const clip = ed.clips[ed.drag.idx];
       const row = ed.rows.find((r) => y >= r.y && y <= r.y + r.h && r.label === labelOf(clip.track));
-      ed.drag.targetRow = null; // one lane per sender: shared or separate is set with ↑ ↓ or the toolbar
+      if (Math.abs(x - ed.drag.x0) > 3 || Math.abs(y - ed.drag.y0) > 3) ed.drag.moved = true;
+      ed.drag.targetRow = null; // one lane per sender: the menu of the segment sets target and position
       E.canvas.style.cursor = 'grabbing';
       draw();
     } else if (ed.drag.type === 'scrub') {
@@ -632,6 +638,11 @@
       if (JSON.stringify(drag.orig) !== JSON.stringify(ed.clips)) commit(ed.clips);
     } else if (drag.type === 'move' && !drag.targetRow) {
       if (!drag.modifier) { ed.sel = new Set([keyOf(ed.clips[drag.idx])]); updateToolbar(); }
+      // A click without dragging opens the options of this segment.
+      if (!drag.moved && !drag.modifier) {
+        const { x, y } = pointerPos(e);
+        showMenu(x, y, ed.clips[drag.idx]);
+      }
     } else if (drag.type === 'move' && drag.targetRow) {
       const mode = drag.targetRow.kind;
       const next = clone(ed.clips);
@@ -668,7 +679,7 @@
       const key = keyOf(ed.clips[hit.idx]);
       if (!ed.sel.has(key)) ed.sel = new Set([key]);
     }
-    showMenu(x, y);
+    showMenu(x, y, hit.type === 'clip' || hit.type === 'edge' ? ed.clips[hit.idx] : null);
     updateToolbar();
     draw();
   });
@@ -688,25 +699,43 @@
   E.overview.addEventListener('pointermove', (e) => { if (overviewDrag) overviewTo(e); });
   E.overview.addEventListener('pointerup', () => { overviewDrag = false; });
 
-  function showMenu(x, y) {
+  function showMenu(x, y, clip) {
     const n = ed.sel.size;
-    const items = [
-      ['split', tr('sync.menu.split'), 'S'], ['merge', tr('sync.menu.join'), 'J'],
+    const row = (op, label, kbd, on) =>
+      `<button data-op="${op}"><span class="lbl"><span class="mk">${on ? '✓' : ''}</span>${esc(label)}</span>${kbd ? `<kbd>${kbd}</kbd>` : ''}</button>`;
+    let html = '';
+    if (clip && !clip.deleted) {
+      html += `<div class="head">${esc(tr('sync.menu.target'))}</div>`;
+      html += row('stereo', tr('sync.menu.shared'), '↑', clip.mode === 'stereo');
+      html += row('mono', tr('sync.menu.separate'), '↓', clip.mode === 'mono');
+      if (clip.mode === 'stereo') {
+        html += `<div class="head">${esc(tr('sync.menu.position'))}</div>`;
+        const p = panOf(clip);
+        for (const [code, key] of [['l', 'sync.menu.left'], ['m', 'sync.menu.middle'], ['r', 'sync.menu.right']]) {
+          html += row(`pan-${code}`, tr(key), code.toUpperCase(), p === code);
+        }
+      }
+      html += '<hr>';
+    }
+    for (const [op, label, kbd] of [
+      ['split', tr('sync.menu.split'), 'S'],
+      ['merge', tr('sync.menu.join'), 'J'],
       ['delete', tr(selectionDeleted() ? 'sync.op.restore' : 'sync.op.delete'), tr('sync.kbd.delete')],
-      ['stereo', tr('sync.menu.toStereo'), '↑'], ['mono', tr('sync.menu.toMono'), '↓'],
       ['play', tr(ed.playing ? 'sync.menu.pause' : 'sync.menu.playHere'), '␣'],
-    ];
-    E.menu.innerHTML = items.map(([op, label, kbd]) => `<button data-op="${op}" ${!n && op !== 'split' && op !== 'play' ? 'disabled' : ''}>${esc(label)}<kbd>${kbd}</kbd></button>`).join('');
-    E.menu.style.left = `${Math.min(x, ed.width - 200)}px`;
-    E.menu.style.top = `${y}px`;
+    ]) {
+      html += `<button data-op="${op}" ${!n && op !== 'split' && op !== 'play' ? 'disabled' : ''}><span class="lbl"><span class="mk"></span>${esc(label)}</span><kbd>${kbd}</kbd></button>`;
+    }
+    E.menu.innerHTML = html;
     E.menu.hidden = false;
+    E.menu.style.left = `${Math.max(LABEL_W, Math.min(x, ed.width - E.menu.offsetWidth - 4))}px`;
+    E.menu.style.top = `${Math.max(0, Math.min(y, ed.height - E.menu.offsetHeight - 4))}px`;
   }
   function hideMenu() { E.menu.hidden = true; }
   E.menu.addEventListener('click', (e) => {
     const b = e.target.closest('[data-op]');
     if (!b) return;
     hideMenu();
-    if (b.dataset.op === 'play') { const t = T(parseFloat(E.menu.style.left)); seek(t); togglePlay(); return; }
+    if (b.dataset.op === 'play') { if (!ed.playing) seek(T(parseFloat(E.menu.style.left))); togglePlay(); return; }
     runOp(b.dataset.op);
   });
   document.addEventListener('pointerdown', (e) => { if (!E.menu.hidden && !E.menu.contains(e.target)) hideMenu(); });
@@ -874,8 +903,18 @@
   }
   function togglePlay() {
     if (!P()) return;
-    if (ed.playing) invoke('player_pause').catch((e) => toast(String(e), 'bad'));
-    else invoke('player_play', { t: ed.playhead }).catch((e) => toast(String(e), 'bad'));
+    const wasPlaying = ed.playing;
+    // Answer the click at once; the backend's next position event corrects the state if needed.
+    ed.playing = !wasPlaying;
+    setPlayIcon(ed.playing);
+    if (wasPlaying) {
+      invoke('player_pause').catch((e) => toast(String(e), 'bad'));
+    } else {
+      ed.posT = ed.playhead;
+      ed.posAt = performance.now();
+      requestAnimationFrame(loop);
+      invoke('player_play', { t: ed.playhead }).catch((e) => toast(String(e), 'bad'));
+    }
   }
   function followPlayhead() {
     const x = X(playheadNow());
@@ -904,7 +943,7 @@
       const next = ss.find((s, i) => i > 0 && p.t > ss[i - 1].t1 && p.t < s.t0);
       if (next) invoke('player_seek', { t: next.t0 }).catch(() => {});
     }
-    E.play.textContent = p.playing ? '❚❚' : '▶';
+    setPlayIcon(p.playing);
     if (p.playing && !was) requestAnimationFrame(loop);
     if (!p.playing) draw();
   });
@@ -1266,6 +1305,7 @@
   });
 
   window.addEventListener('resize', () => draw());
+  setPlayIcon(false);
   I18N.onChange(() => {
     hideMenu();
     if (!E.finished.hidden && sy.lastSum) showFinished(sy.lastSum);

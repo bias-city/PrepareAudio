@@ -97,7 +97,7 @@
       <div class="summary" id="sync-summary"></div>
       <div class="panel editor" id="sync-editor">
         <div class="ed-toolbar">
-          <button class="icon-btn play" id="ed-play" title="Abspielen oder anhalten (Leertaste)" data-i18n-title="page.ed.play.title">▶</button>
+          <button class="icon-btn play" id="ed-play" title="Abspielen oder anhalten (Leertaste)" data-i18n-title="page.ed.play.title" aria-label="Play"></button>
           <span class="ed-time" id="ed-time">00:00:00.0</span>
           <span class="pillgroup">
           <button class="btn small" data-op="split" title="Am Playhead trennen (S)" data-i18n-title="page.ed.split.title" data-i18n="page.ed.split">Trennen</button>
@@ -105,23 +105,14 @@
           <button class="btn small" data-op="delete" title="Löschen oder wiederbringen (Entf)" data-i18n-title="page.ed.delete.title" data-i18n="page.ed.delete">Löschen</button>
           </span>
           <span class="pillgroup">
-          <button class="btn small" data-op="stereo" title="Auf Stereo schieben (↑)" data-i18n-title="page.ed.stereo.title" data-i18n="page.ed.stereo">Stereo</button>
-          <button class="btn small" data-op="mono" title="Auf Mono schieben (↓)" data-i18n-title="page.ed.mono.title" data-i18n="page.ed.mono">Mono</button>
-          </span>
-          <span class="pillgroup" title="Position im Stereo-Mixdown beim Mastern" data-i18n-title="page.ed.pan.title">
-          <button class="btn small" data-op="pan-l">L</button>
-          <button class="btn small" data-op="pan-m">M</button>
-          <button class="btn small" data-op="pan-r">R</button>
-          </span>
-          <span class="pillgroup">
-          <button class="icon-btn" data-op="undo" title="Rückgängig (⌘Z)" data-i18n-title="page.ed.undo.title">↶</button>
-          <button class="icon-btn" data-op="redo" title="Wiederholen (⇧⌘Z)" data-i18n-title="page.ed.redo.title">↷</button>
+          <button class="icon-btn" data-op="undo" title="Rückgängig (⌘Z)" data-i18n-title="page.ed.undo.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+          <button class="icon-btn" data-op="redo" title="Wiederholen (⇧⌘Z)" data-i18n-title="page.ed.redo.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
           </span>
           <span class="ed-grow"></span>
-          <button class="btn small ghost" id="ed-reset" title="Alle Bearbeitungen verwerfen" data-i18n-title="page.ed.reset.title" data-i18n="page.ed.reset" hidden>Vorschlag wiederherstellen</button>
+          <button class="btn small ghost" id="ed-reset" title="Alle Bearbeitungen verwerfen" data-i18n-title="page.ed.reset.title" data-i18n="page.ed.reset" hidden>Reset</button>
           <span class="pillgroup">
-          <button class="icon-btn" data-op="zoom-out" title="Verkleinern (⌘−)" data-i18n-title="page.ed.zoomOut.title">−</button>
-          <button class="icon-btn" data-op="zoom-in" title="Vergrößern (⌘+)" data-i18n-title="page.ed.zoomIn.title">+</button>
+          <button class="icon-btn" data-op="zoom-out" title="Verkleinern (⌘−)" data-i18n-title="page.ed.zoomOut.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <button class="icon-btn" data-op="zoom-in" title="Vergrößern (⌘+)" data-i18n-title="page.ed.zoomIn.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
           <button class="btn small ghost" data-op="fit" title="Ganzen Tag zeigen (0)" data-i18n-title="page.ed.fit.title" data-i18n="page.ed.fit">Tag</button>
           </span>
         </div>

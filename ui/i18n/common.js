@@ -120,8 +120,8 @@ I18N.add({
   'page.ed.mono.title': { de: 'Als eigene Mono-Datei ausgeben (↓)', en: 'Write as a mono file of its own (↓)', fr: 'Écrire comme fichier mono à part (↓)', it: 'Scrivi come file mono a parte (↓)' },
   'page.ed.undo.title': { de: 'Rückgängig (⌘Z)', en: 'Undo (⌘Z)', fr: 'Annuler (⌘Z)', it: 'Annulla (⌘Z)' },
   'page.ed.redo.title': { de: 'Wiederholen (⇧⌘Z)', en: 'Redo (⇧⌘Z)', fr: 'Rétablir (⇧⌘Z)', it: 'Ripeti (⇧⌘Z)' },
-  'page.ed.reset': { de: 'Vorschlag wiederherstellen', en: 'Restore proposal', fr: 'Rétablir la proposition', it: 'Ripristina la proposta' },
-  'page.ed.reset.title': { de: 'Alle Bearbeitungen verwerfen', en: 'Discard all edits', fr: 'Abandonner toutes les modifications', it: 'Scarta tutte le modifiche' },
+  'page.ed.reset': { de: 'Reset', en: 'Reset', fr: 'Reset', it: 'Reset' },
+  'page.ed.reset.title': { de: 'Alle Bearbeitungen verwerfen und zum Vorschlag der Analyse zurück', en: 'Discard all edits and go back to the proposal of the analysis', fr: 'Abandonner toutes les modifications et revenir à la proposition de l’analyse', it: 'Annulla tutte le modifiche e torna alla proposta dell’analisi' },
   'page.ed.zoomOut.title': { de: 'Verkleinern (⌘−)', en: 'Zoom out (⌘−)', fr: 'Zoom arrière (⌘−)', it: 'Riduci (⌘−)' },
   'page.ed.zoomIn.title': { de: 'Vergrößern (⌘+)', en: 'Zoom in (⌘+)', fr: 'Zoom avant (⌘+)', it: 'Ingrandisci (⌘+)' },
   'page.ed.fit': { de: 'Tag', en: 'Day', fr: 'Jour', it: 'Giorno' },
@@ -133,10 +133,10 @@ I18N.add({
     it: 'Panoramica: clicca o trascina per spostarti',
   },
   'page.ed.hint': {
-    de: 'Kanten ziehen zum Trimmen oder Verlängern. Leertaste spielt, S trennt, J führt zusammen, ↑ nimmt in die gemeinsame Datei, ↓ macht eine eigene Mono-Datei, Entf löscht, ⌘Z macht rückgängig. ⌘ + Mausrad oder Zwei-Finger-Zoom zoomt.',
-    en: 'Drag edges to trim or extend. Space plays, S splits, J joins, ↑ puts into the shared file, ↓ makes a mono file of its own, Delete removes, ⌘Z undoes. ⌘ + scroll wheel or pinch zooms.',
-    fr: 'Glisse les bords pour rogner ou prolonger. Espace lit, S coupe, J joint, ↑ met dans le fichier commun, ↓ crée un fichier mono à part, Suppr supprime, ⌘Z annule. ⌘ + molette ou pincement pour zoomer.',
-    it: 'Trascina i bordi per rifilare o estendere. Spazio riproduce, S divide, J unisce, ↑ mette nel file comune, ↓ crea un file mono a parte, Canc elimina, ⌘Z annulla. ⌘ + rotellina o pizzico per lo zoom.',
+    de: 'Klick auf einen Abschnitt öffnet seine Optionen. Kanten ziehen zum Trimmen oder Verlängern. Leertaste spielt, S trennt, J führt zusammen, Entf löscht, ⌘Z macht rückgängig. ⌘ + Mausrad oder Zwei-Finger-Zoom zoomt.',
+    en: 'Click a segment to open its options. Drag edges to trim or extend. Space plays, S splits, J joins, Delete removes, ⌘Z undoes. ⌘ + scroll wheel or pinch zooms.',
+    fr: 'Clique sur un segment pour ouvrir ses options. Glisse les bords pour rogner ou prolonger. Espace lit, S coupe, J joint, Suppr supprime, ⌘Z annule. ⌘ + molette ou pincement pour zoomer.',
+    it: 'Clicca su un segmento per aprire le sue opzioni. Trascina i bordi per rifilare o estendere. Spazio riproduce, S divide, J unisce, Canc elimina, ⌘Z annulla. ⌘ + rotellina o pizzico per lo zoom.',
   },
 
   /* ---------- 3 master ---------- */
