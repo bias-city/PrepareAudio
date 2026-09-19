@@ -10,6 +10,14 @@ notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
 ### Neu
 
+- **Mastern mit zwei Profilen:** «Hörfassung» (neuer Standard) gleicht die Lautstärken der
+  Sprechenden aus, senkt Übersprechen und mischt mehrkanalige Dateien nach den Positionen L/M/R
+  aus Schritt 2 auf Stereo; «Dokumentarisch» arbeitet wie bisher mit fester Verstärkung
+  (bitgleich zu 0.2.0). Umschaltbar unten im Reiter, die Wahl bleibt gespeichert.
+- **Beliebig viele Mikrofone:** gemeinsame Abschnitte werden eine polyphone WAV mit einem Kanal
+  je Sender, Timecode (bext) und Spurnamen (iXML). Jedes Segment hat eine Position L, M oder R
+  für den Stereo-Mixdown beim Mastern; die Timeline zeigt eine Bahn je Sender.
+
 - **Zusammenfügen nimmt alles:** neben WAV auch MP3, M4A, FLAC, ALAC, AIFF, CAF, OGG Vorbis und
   der Ton aus MP4- und MOV-Videos. Nicht-WAV-Dateien werden einmal dekodiert, als Teile geführt
   und bei passender Zeit und Naht verkettet; die Ausgabe ist immer WAV (Plan:

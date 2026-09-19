@@ -58,14 +58,17 @@ Kalibriert auf den Aufnahmen vom 6.–8.9.2026: Versatz auf ±3 ms gleich wie di
 
 Dritter Reiter. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG Vorbis). Die App zeigt je Datei Format, Bittiefe, Abtastrate und Kanäle und misst die Lautheit nach EBU R128 (ITU-R BS.1770-4) mit True Peak und Lautheitsumfang.
 
-- Feste Verstärkung auf −16 LUFS, danach ein Look-ahead-Limiter (5 ms, Release 50 ms) bei −1,5 dBTP. Keine Kompression, die Sprachdynamik bleibt.
+- Zwei Profile, umschaltbar unten im Reiter:
+  - **Hörfassung** (Standard): gleicht die Lautstärken der Sprechenden aus. Je Kanal Hochpass bei 80 Hz, Spracherkennung über den Pegelverlauf, feste Anhebung leiser Sprechender (bis 15 dB), mitlaufende Regelung auf die Kurzzeitlautheit (±12 dB, in Pausen gehalten, vorwärts und rückwärts geglättet, reagiert also vor dem Sprung), Absenken eines Kanals, auf dem gerade nur das Übersprechen einer anderen Person zu hören ist (−12 dB, weich). Danach ein leichter Bus-Kompressor (2:1 ab 6 dB über dem Sprachpegel). Mehrkanalige Dateien werden dabei nach den Positionen L/M/R aus Schritt 2 auf Stereo gemischt (etwa 80 % der Leistung auf der eigenen Seite); Mono bleibt Mono.
+  - **Dokumentarisch**: nur feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik. Bitgleich zu den Fassungen vor 0.3.0.
+- Danach in beiden Profilen ein Look-ahead-Limiter (5 ms, Release 50 ms) bei −1,5 dBTP.
 - Ausgabe als MP3, CBR 192 kbit/s (LAME, Qualität 2), Mono bleibt Mono, 88,2/96/176,4/192 kHz werden auf 44,1 oder 48 kHz heruntergerechnet.
 - Verstärkung und Limiter werden zuerst ohne Kodieren auf dem begrenzten Signal eingestellt (schnell, mehrere Durchgänge), dann wird einmal kodiert. Der Limiter startet 0,5 dB unter −1,5 dBTP, weil MP3 auf stark begrenzten Aufnahmen Spitzen hinzufügt.
 - Das fertige MP3 wird nachgemessen. Liegt es mehr als 0,3 LU neben dem Ziel oder mit dem True Peak über −1,4 dBTP, wird nachgeregelt und neu kodiert.
 - Der Fortschrittsbalken zählt alle Durchgänge und nennt den aktuellen Schritt (Pegel einstellen, MP3 kodieren, Nachmessen). Mit `PA_MASTER_DEBUG=1` protokolliert der Test `real_master` jeden Durchgang.
 - Ergebnis im Ordner `master`. Vorhandene MP3s gleicher Länge werden erkannt und nicht neu geschrieben.
 
-Die App braucht dafür keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
+Das gewählte Profil steht im ID3-Kommentar des MP3. Die App braucht keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
 
 ## Lizenz
 

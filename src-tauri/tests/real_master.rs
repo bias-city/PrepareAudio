@@ -25,7 +25,7 @@ fn real_master() {
     if let (Ok(out), Ok(pat)) = (std::env::var("PA_MASTER_OUT"), std::env::var("PA_MASTER_MATCH")) {
         let ids: Vec<usize> = plan.files.iter().filter(|f| f.name.contains(&pat)).map(|f| f.id).collect();
         let t = std::time::Instant::now();
-        let sum = master::write(&plan, &ids, Path::new(&out), &AtomicBool::new(false), |_| {}).unwrap();
+        let sum = master::write(&plan, &ids, Path::new(&out), prepare_audio_lib::level::Profile::default(), &AtomicBool::new(false), |_| {}).unwrap();
         println!("write {:.1?}", t.elapsed());
         for o in &sum.outcomes {
             println!("OUT {:?} {:?} {:?} {:?}", o.status, o.path, o.result, o.message);

@@ -15,7 +15,9 @@
     ptext: q('#master-ptext'), done: q('#master-done'), sel: q('#master-sel'), go: q('#master-go'), cancel: q('#master-cancel'),
     analyzing: q('#master-analyzing'), abar: q('#master-abar'), atext: q('#master-atext'), topActions: q('#master-top-actions'),
   };
-  const ms = { inputs: [], plan: null, outDir: '', selected: new Set(), outcomes: new Map(), busy: false, activeId: null, stages: new Map() };
+  const PROFILE_KEY = 'prepareaudio.master.profile';
+  const storedProfile = () => { try { return localStorage.getItem(PROFILE_KEY) === 'documentary' ? 'documentary' : 'leveler'; } catch (e) { return 'leveler'; } };
+  const ms = { inputs: [], plan: null, outDir: '', selected: new Set(), outcomes: new Map(), busy: false, activeId: null, stages: new Map(), profile: storedProfile() };
   window.masterState = ms;
   // Remembered so a language switch can redraw texts that are not part of render().
   const ui = { finishedSum: null, partial: null, analyzeP: null, writeP: null, cancelling: false };
@@ -104,7 +106,7 @@
     E.ptext.textContent = tr('master.preparing');
     render();
     try {
-      const sum = await invoke('write_master', { ids, outDir: ms.outDir });
+      const sum = await invoke('write_master', { ids, outDir: ms.outDir, profile: ms.profile });
       for (const o of sum.outcomes) ms.outcomes.set(o.id, o);
       finishRun(sum);
     } catch (e) {
@@ -163,7 +165,24 @@
 
   /* ---------- rendering ---------- */
 
+  /* Profile: how much the app intervenes. Kept per computer, not per folder. */
+  const profileGroup = q('#master-profile');
+  function renderProfile() {
+    profileGroup.querySelectorAll('[data-profile]').forEach((b) => {
+      b.classList.toggle('on', b.dataset.profile === ms.profile);
+      b.disabled = ms.busy;
+    });
+  }
+  profileGroup.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-profile]');
+    if (!b || ms.busy) return;
+    ms.profile = b.dataset.profile;
+    try { localStorage.setItem(PROFILE_KEY, ms.profile); } catch (err) { /* storage unavailable */ }
+    renderProfile();
+  });
+
   function render() {
+    renderProfile();
     const P = ms.plan;
     E.empty.hidden = !!P || !E.finished.hidden;
     E.results.hidden = !P;

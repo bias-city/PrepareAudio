@@ -18,6 +18,7 @@ use crate::sync::{self, SyncProgress};
 use crate::wav;
 use ebur128::{EbuR128, Mode as R128};
 use crate::lame;
+use crate::level::{Prep, Profile};
 use serde::Serialize;
 use std::collections::{HashSet, VecDeque};
 use std::fs::{self, File};
@@ -46,6 +47,8 @@ const CODEC_MARGIN_DB: f64 = 0.5;
 const W_SEARCH: f64 = 0.35;
 const W_ENCODE: f64 = 1.0;
 const W_CHECK: f64 = 0.3;
+/// The analysis pass of the leveller (one read of the source).
+const W_PREP: f64 = 0.3;
 const ATTACK_S: f64 = 0.005;
 const RELEASE_S: f64 = 0.05;
 const MP3_RATES: [u32; 9] = [8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000];
@@ -613,7 +616,7 @@ struct Work {
 impl Work {
     fn new(duration: f64) -> Self {
         let dur_ms = (duration * 1000.0) as u64;
-        let expected = dur_ms as f64 * (2.0 * W_SEARCH + W_ENCODE + W_CHECK);
+        let expected = dur_ms as f64 * (W_PREP + 2.0 * W_SEARCH + W_ENCODE + W_CHECK);
         Work { done: AtomicU64::new(0), total: AtomicU64::new(expected as u64), base: AtomicU64::new(0), dur_ms }
     }
     /// Starts a pass of `weight`; `after` is the weight of the passes that must still follow.
@@ -634,14 +637,25 @@ impl Work {
     }
 }
 
-fn layout(f: &AudioFile) -> Result<(usize, u32), String> {
+fn layout(f: &AudioFile, prep: &Prep) -> Result<(usize, u32), String> {
     let (rate, _) = mp3_rate(f.sample_rate)?;
-    Ok(((f.channels as usize).clamp(1, 2), rate))
+    Ok((prep.out_ch, rate))
 }
 
-/// Decodes the source, applies gain and limiter, downsamples if needed and hands every block to `sink`.
+/// Analysis pass of the chosen profile: gain curves of the leveller and the positions of the
+/// segments of a shared file (see `level.rs`).
+fn prepare(f: &AudioFile, profile: Profile, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<Prep, String> {
+    let ext = extension(&f.path_buf);
+    let (mut reader, _) = open_reader(&f.path_buf, &ext)?;
+    let pans = if ext == "wav" || ext == "wave" { crate::wav::read_pan_segments(&f.path_buf) } else { Vec::new() };
+    Prep::analyze(reader.as_mut(), &pans, profile, cancel, on_secs)
+}
+
+/// Decodes the source, applies the profile (leveller, mixdown), gain and limiter, downsamples if
+/// needed and hands every block to `sink`.
 fn render(
     f: &AudioFile,
+    prep: &Prep,
     gain_db: f64,
     ceiling_db: f64,
     cancel: &AtomicBool,
@@ -651,7 +665,8 @@ fn render(
     let ext = extension(&f.path_buf);
     let (mut reader, _) = open_reader(&f.path_buf, &ext)?;
     let (ch_in, rate) = (reader.channels(), reader.rate());
-    let out_ch = ch_in.clamp(1, 2);
+    let out_ch = prep.out_ch;
+    let mut mixer = prep.mixer();
     let (_, factor) = mp3_rate(rate)?;
     let gain = 10f32.powf(gain_db as f32 / 20.0);
     let mut limiter = Limiter::new(out_ch, rate, 10f32.powf(ceiling_db as f32 / 20.0));
@@ -667,8 +682,10 @@ fn render(
         limited.clear();
         if more {
             let whole = input.len() - input.len() % ch_in;
+            let mut mixed = [0f32; 2];
             for frame in input[..whole].chunks_exact(ch_in) {
-                let scaled = [frame[0] * gain, frame[if out_ch == 2 { 1 } else { 0 }] * gain];
+                mixer.push(frame, &mut mixed);
+                let scaled = [mixed[0] * gain, mixed[1] * gain];
                 limiter.push(&scaled[..out_ch], &mut limited);
             }
             frames += (whole / ch_in) as u64;
@@ -696,10 +713,10 @@ fn render(
 
 /// Integrated loudness of the limited signal as it would go into the encoder
 /// (loudness only: the true peak is judged on the finished MP3).
-fn measure_render(f: &AudioFile, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<f64, String> {
-    let (ch, rate) = layout(f)?;
+fn measure_render(f: &AudioFile, prep: &Prep, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<f64, String> {
+    let (ch, rate) = layout(f, prep)?;
     let mut meter = EbuR128::new(ch as u32, rate, R128::I).map_err(|e| loudness_err(e))?;
-    render(f, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| meter.add_frames_f32(pcm).map_err(|e| loudness_err(e)))?;
+    render(f, prep, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| meter.add_frames_f32(pcm).map_err(|e| loudness_err(e)))?;
     Ok(meter.loudness_global().unwrap_or(f64::NEG_INFINITY))
 }
 
@@ -709,14 +726,19 @@ fn debug(f: &AudioFile, msg: String) {
     }
 }
 
-fn encode(f: &AudioFile, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<(), String> {
-    let (out_ch, out_rate) = layout(f)?;
+fn encode(f: &AudioFile, prep: &Prep, profile: Profile, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<(), String> {
+    let (out_ch, out_rate) = layout(f, prep)?;
     let stem = Path::new(&f.out_name).file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-    let comment = format!("PrepareAudio: {TARGET_LUFS} LUFS");
+    // The documentary profile writes exactly what earlier versions wrote (the byte comparison in
+    // the tests rests on it); the leveller names itself.
+    let comment = match profile {
+        Profile::Documentary => format!("PrepareAudio: {TARGET_LUFS} LUFS"),
+        Profile::Leveler => format!("PrepareAudio: {TARGET_LUFS} LUFS, speech leveller"),
+    };
     let mut encoder = lame::Encoder::new(out_ch, out_rate, &stem, &comment).map_err(lame_err)?;
     let mut file = BufWriter::with_capacity(1 << 20, File::create(out_path).map_err(|e| e.to_string())?);
     let mut mp3 = Vec::new();
-    render(f, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| {
+    render(f, prep, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| {
         encoder.encode(pcm, &mut mp3).map_err(lame_err)?;
         file.write_all(&mp3).map_err(|e| e.to_string())
     })?;
@@ -732,20 +754,28 @@ fn encode(f: &AudioFile, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel:
 /// between the last two tries), then encodes once and measures the MP3. Only
 /// if the MP3 is still off (more than 0.3 LU, or MP3 peaks above −1.5 dBTP
 /// + 0.1 dB) the search repeats with the correction and encodes again.
-fn encode_to_target(f: &AudioFile, part: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
+fn encode_to_target(f: &AudioFile, profile: Profile, part: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
     let mut gain = f.gain_db.ok_or(t(Msg::NoMeasurableLoudness))?;
+    stage(i18n::t(Msg::StageAnalyse));
+    work.begin(W_PREP, 2.0 * W_SEARCH + W_ENCODE + W_CHECK);
+    let prep = prepare(f, profile, cancel, &mut |secs| work.advance(secs, W_PREP))?;
+    work.end(W_PREP);
+    debug(f, format!("profile {}: static {:?} dB, active {:?}", profile.code(), prep.static_db, prep.active_share));
+    let prep = &prep;
     let mut ceiling = CEILING_DBTP - CODEC_MARGIN_DB;
     // Loudness the PCM must reach so that the MP3 lands on the target; MP3's
     // low-pass can take away a little of the (K-weighted) treble energy.
     let mut pcm_target = TARGET_LUFS + CODEC_LOUDNESS_LOSS;
     let mut last = None;
-    for round in 0..3 {
+    // A levelled signal is dense: the MP3 adds more overshoot and may need more corrections.
+    let rounds = if profile == Profile::Leveler { 5 } else { 3 };
+    for round in 0..rounds {
         let mut tries: Vec<(f64, f64)> = Vec::new();
         for _ in 0..5 {
             stage(i18n::t(Msg::StageLevel));
             work.begin(W_SEARCH, W_ENCODE + W_CHECK);
             let t = std::time::Instant::now();
-            let lufs = measure_render(f, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_SEARCH))?;
+            let lufs = measure_render(f, prep, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_SEARCH))?;
             work.end(W_SEARCH);
             debug(f, format!("search gain {gain:+.2} ceiling {ceiling:.2}: {lufs:.2} LUFS ({:.1?})", t.elapsed()));
             let err = pcm_target - lufs;
@@ -766,7 +796,7 @@ fn encode_to_target(f: &AudioFile, part: &Path, cancel: &AtomicBool, work: &Work
         stage(i18n::t(Msg::StageEncode));
         work.begin(W_ENCODE, W_CHECK);
         let t = std::time::Instant::now();
-        encode(f, part, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_ENCODE))?;
+        encode(f, prep, profile, part, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_ENCODE))?;
         work.end(W_ENCODE);
         debug(f, format!("encode ({:.1?})", t.elapsed()));
         stage(i18n::t(Msg::StageCheck));
@@ -781,11 +811,11 @@ fn encode_to_target(f: &AudioFile, part: &Path, cancel: &AtomicBool, work: &Work
         let loud_ok = !err.is_finite() || err.abs() <= LUFS_TOLERANCE;
         let peak_ok = !over.is_finite() || over <= PEAK_TOLERANCE;
         last = Some(result);
-        if (loud_ok && peak_ok) || round == 2 {
+        if (loud_ok && peak_ok) || round + 1 == rounds {
             break;
         }
         if !peak_ok {
-            ceiling -= over + 0.05;
+            ceiling -= if profile == Profile::Leveler { 1.3 * over + 0.1 } else { over + 0.05 };
         }
         if !loud_ok {
             pcm_target += err;
@@ -794,10 +824,10 @@ fn encode_to_target(f: &AudioFile, part: &Path, cancel: &AtomicBool, work: &Work
     last.ok_or_else(|| t(Msg::NoMeasurement).to_string())
 }
 
-fn master_one(f: &AudioFile, target: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
+fn master_one(f: &AudioFile, profile: Profile, target: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
     let name = target.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
     let part = target.with_file_name(format!(".{name}.part"));
-    let result = encode_to_target(f, &part, cancel, work, stage).and_then(|l| {
+    let result = encode_to_target(f, profile, &part, cancel, work, stage).and_then(|l| {
         if target.exists() {
             return Err(tf(Msg::ExistsMeanwhile, &[("path", &target.display())]));
         }
@@ -839,7 +869,7 @@ fn resolve(out_dir: &Path, f: &AudioFile, reserved: &mut HashSet<PathBuf>) -> Op
     None
 }
 
-pub fn write<F: FnMut(&Progress)>(plan: &MasterPlan, ids: &[usize], out_dir: &Path, cancel: &AtomicBool, mut progress: F) -> Result<MasterSummary, String> {
+pub fn write<F: FnMut(&Progress)>(plan: &MasterPlan, ids: &[usize], out_dir: &Path, profile: Profile, cancel: &AtomicBool, mut progress: F) -> Result<MasterSummary, String> {
     fs::create_dir_all(out_dir).map_err(|e| tf(Msg::CannotCreateDir, &[("path", &out_dir.display()), ("e", &e)]))?;
     let mut outcomes = Vec::new();
     let mut todo: Vec<(usize, &AudioFile, PathBuf)> = Vec::new();
@@ -889,7 +919,7 @@ pub fn write<F: FnMut(&Progress)>(plan: &MasterPlan, ids: &[usize], out_dir: &Pa
                         }
                     }
                 };
-                let r = master_one(f, target, cancel, &works[*i], &stage);
+                let r = master_one(f, profile, target, cancel, &works[*i], &stage);
                 if let Ok(mut s) = stages.lock() {
                     s.retain(|a| a.id != f.id);
                 }
@@ -1060,6 +1090,100 @@ mod tests {
     /// FNV-1a of the MP3s this test writes (LAME 3.100, CBR 192, quality 2).
     const MP3_GOLDEN: &[(&str, u64)] = &[("quiet_float.mp3", 0x5f72_568c_bd6c_32d9), ("pcm16.mp3", 0xa779_3f8f_1157_1548), ("hires.mp3", 0x0fc3_eec6_9bf4_807f)];
 
+    /// All decoded samples of a file, interleaved, with channel count and rate.
+    fn decoded(path: &Path) -> (Vec<f32>, usize, u32) {
+        let (mut r, _) = open_reader(path, &extension(path)).unwrap();
+        let (mut all, mut buf) = (Vec::new(), Vec::new());
+        loop {
+            buf.clear();
+            let more = r.read(&mut buf).unwrap();
+            all.extend_from_slice(&buf);
+            if !more {
+                break;
+            }
+        }
+        (all, r.channels(), r.rate())
+    }
+
+    /// RMS in dB of channel `ch` between two seconds.
+    fn rms_db(x: &[f32], channels: usize, rate: u32, ch: usize, from: f64, to: f64) -> f64 {
+        let (a, b) = ((from * rate as f64) as usize, (to * rate as f64) as usize);
+        let sum: f64 = (a..b).map(|k| (x[k * channels + ch] as f64).powi(2)).sum();
+        10.0 * (sum / (b - a) as f64 + 1e-12).log10()
+    }
+
+    /// One speaker who turns away for the second half (20 dB quieter): the documentary profile
+    /// keeps that difference, the leveller rides most of it out. Mono stays mono.
+    #[test]
+    fn leveller_rides_a_quiet_passage_up() {
+        let dir = tempdir("level-mono");
+        let sr = 16_000u32;
+        let mut x = speechy(21, sr, 60, 0.4);
+        let half = x.len() / 2;
+        x[half..].iter_mut().for_each(|v| *v *= 0.1);
+        x.iter_mut().for_each(|v| *v = v.clamp(-1.0, 1.0));
+        write_float_wav(&dir.join("in/talk.wav"), sr, &x);
+        let cancel = AtomicBool::new(false);
+        let plan = analyze(&[dir.join("in")], &cancel, &mut |_| {}).unwrap();
+        let ids: Vec<usize> = plan.files.iter().map(|f| f.id).collect();
+        let mut diff = Vec::new();
+        for (profile, out) in [(Profile::Documentary, "doc"), (Profile::Leveler, "lev")] {
+            let sum = write(&plan, &ids, &dir.join(out), profile, &cancel, |_| {}).unwrap();
+            assert_eq!(sum.outcomes[0].status, Status::Written, "{:?}", sum.outcomes[0]);
+            let (y, ch, rate) = decoded(&dir.join(out).join("talk.mp3"));
+            assert_eq!(ch, 1, "mono stays mono");
+            diff.push(rms_db(&y, ch, rate, 0, 5.0, 25.0) - rms_db(&y, ch, rate, 0, 35.0, 55.0));
+            let r = sum.outcomes[0].result.as_ref().unwrap();
+            assert!((r.lufs - TARGET_LUFS).abs() <= 0.5 && r.true_peak <= CEILING_DBTP + PEAK_TOLERANCE, "{r:?}");
+        }
+        assert!(diff[0] > 12.0, "documentary keeps the dynamics: {diff:?}");
+        assert!(diff[1] < diff[0] - 8.0, "the leveller closes most of the gap: {diff:?}");
+    }
+
+    /// A shared file of step 2: speaker A loud on channel 1 (left), speaker B quiet on channel 2
+    /// (right), each bleeding into the other microphone. The mixdown is stereo, both end up about
+    /// equally loud, each on their side, and the bleed of the other channel is turned down.
+    #[test]
+    fn leveller_mixes_a_shared_file_down_to_stereo() {
+        let dir = tempdir("level-poly");
+        let sr = 16_000u32;
+        let (a, b) = (speechy(31, sr, 40, 0.5), speechy(32, sr, 40, 0.5));
+        let n = a.len();
+        let turn = |k: usize| if k < n / 2 { (1.0f32, 0.0f32) } else { (0.0, 1.0) }; // A speaks first, then B
+        let mut data = Vec::with_capacity(n * 8);
+        for k in 0..n {
+            let (ga, gb) = turn(k);
+            let ch1 = (ga * a[k] + 0.15 * gb * b[k]).clamp(-1.0, 1.0); // A close, B as bleed
+            let ch2 = (0.12 * gb * b[k] + 0.03 * ga * a[k]).clamp(-1.0, 1.0); // B is 18 dB quieter on the own mic
+            data.extend_from_slice(&ch1.to_le_bytes());
+            data.extend_from_slice(&ch2.to_le_bytes());
+        }
+        let secs = n as f64 / sr as f64;
+        let trailer = crate::wav::channel_names_chunk(&["A".into(), "B".into()], &["LEFT", "RIGHT"], &[(1, 0.0, secs, "L"), (2, 0.0, secs, "R")]);
+        let path = dir.join("in/260101_S100000-E100040_D000040_stereo_L-A_R-B.wav");
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        let mut f = File::create(&path).unwrap();
+        crate::wav::write_header_with_trailer(&mut f, &crate::wav::float_fmt(2, sr), data.len() as u64, n as u64, crate::wav::RIFF_LIMIT, trailer.len() as u64).unwrap();
+        f.write_all(&data).unwrap();
+        f.write_all(&trailer).unwrap();
+        drop(f);
+        assert_eq!(crate::wav::read_pan_segments(&path).len(), 2);
+
+        let cancel = AtomicBool::new(false);
+        let plan = analyze(&[dir.join("in")], &cancel, &mut |_| {}).unwrap();
+        let ids: Vec<usize> = plan.files.iter().map(|f| f.id).collect();
+        let sum = write(&plan, &ids, &dir.join("out"), Profile::Leveler, &cancel, |_| {}).unwrap();
+        assert_eq!(sum.outcomes[0].status, Status::Written, "{:?}", sum.outcomes[0]);
+        let (y, ch, rate) = decoded(&sum.outcomes[0].path.as_ref().map(PathBuf::from).unwrap());
+        assert_eq!(ch, 2);
+        let level = |from: f64, to: f64| (rms_db(&y, 2, rate, 0, from, to), rms_db(&y, 2, rate, 1, from, to));
+        let (a_l, a_r) = level(3.0, 17.0);
+        let (b_l, b_r) = level(23.0, 37.0);
+        assert!(a_l - a_r > 4.0 && b_r - b_l > 4.0, "each speaker on the own side: A {a_l:.1}/{a_r:.1}, B {b_l:.1}/{b_r:.1}");
+        let (loud_a, loud_b) = (a_l.max(a_r), b_l.max(b_r));
+        assert!((loud_a - loud_b).abs() < 4.0, "both about equally loud: {loud_a:.1} vs {loud_b:.1}");
+    }
+
     #[test]
     fn detects_formats_masters_to_target_and_skips_existing() {
         let dir = tempdir("master");
@@ -1093,7 +1217,8 @@ mod tests {
         let ids: Vec<usize> = plan.files.iter().map(|f| f.id).collect();
         let out = PathBuf::from(&plan.default_out_dir);
         let mut events: Vec<(usize, u64, u64)> = Vec::new();
-        let sum = write(&plan, &ids, &out, &cancel, |p| events.push((p.index, p.done, p.total))).unwrap();
+        // The reference bytes belong to the documentary profile: fixed gain and limiter only.
+        let sum = write(&plan, &ids, &out, Profile::Documentary, &cancel, |p| events.push((p.index, p.done, p.total))).unwrap();
         assert!(!events.is_empty());
         for (index, done, total) in &events {
             assert!(done <= total);
@@ -1130,7 +1255,7 @@ mod tests {
             assert!((l.lufs - TARGET_LUFS).abs() <= 0.5, "{} {l:?}", f.name);
         }
 
-        let again = write(&plan, &ids, &out, &cancel, |_| {}).unwrap();
+        let again = write(&plan, &ids, &out, Profile::Documentary, &cancel, |_| {}).unwrap();
         assert!(again.outcomes.iter().all(|o| o.status == Status::Existing), "{:?}", again.outcomes);
     }
 }

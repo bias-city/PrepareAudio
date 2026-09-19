@@ -76,6 +76,14 @@ I18N.add({
     fr: '{from} à {to}',
     it: 'da {from} a {to}',
   },
+  'master.profile.leveler': { de: 'Hörfassung', en: 'Listening', fr: 'Écoute', it: 'Ascolto' },
+  'master.profile.documentary': { de: 'Dokumentarisch', en: 'Documentary', fr: 'Documentaire', it: 'Documentario' },
+  'master.profile.title': {
+    de: 'Hörfassung: gleicht die Lautstärken der Sprechenden aus, senkt Übersprechen und mischt mehrkanalige Dateien nach L/M/R auf Stereo. Dokumentarisch: nur feste Verstärkung, kein Eingriff in die Dynamik.',
+    en: 'Listening: evens out the levels of the speakers, turns down bleed and mixes multichannel files down to stereo by their L/M/R positions. Documentary: fixed gain only, no intervention in the dynamics.',
+    fr: 'Écoute : égalise le niveau des personnes qui parlent, atténue la diaphonie et mixe les fichiers multicanaux en stéréo selon leurs positions L/M/R. Documentaire : gain fixe uniquement, aucune intervention sur la dynamique.',
+    it: 'Ascolto: pareggia i livelli di chi parla, attenua la diafonia e miscela i file multicanale in stereo secondo le posizioni L/M/R. Documentario: solo guadagno fisso, nessun intervento sulla dinamica.',
+  },
   'master.stat.target': {
     de: 'LUFS Ziel · MP3 {kbps} kbit/s · Spitzen {peak} dBTP',
     en: 'LUFS target · MP3 {kbps} kbit/s · peaks {peak} dBTP',

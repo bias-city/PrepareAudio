@@ -61,7 +61,13 @@ beim Mastern in der Mitte.
   Anordnung «innen/aussen», die nur mit zwei Sendern aufgeht. **Entscheid des Users nötig.**
 - Vorschau: alle Kanäle gleichmässig im Stereobild verteilt.
 
-### P3 — Mastern als Sprach-Leveler mit Stereo-Mixdown
+### P3 — Mastern als Sprach-Leveler mit Stereo-Mixdown ✔ (19.9., Hörtest durch den User offen)
+
+Gebaut in `src-tauri/src/level.rs` (Voranalyse in 10-ms-Schritten, Gain-Kurven, Mixdown) und
+angebunden in `master.rs` (`Profile`, ein zusätzlicher Lesedurchgang `W_PREP`). Der Leveler ist
+Standard, «Dokumentarisch» bleibt bitgleich zu 0.2.0 (Test `MP3_GOLDEN`). VAD ist vorerst eine
+Pegel-Schwelle mit Nachlauf, nicht `webrtc-vad`.
+
 Je Kanal: DC weg, Hochpass 80 Hz → Sprache erkennen (zuerst Energie-Schwelle, später
 `webrtc-vad`) → Gain-Riding auf Kurzzeitlautheit (400 ms bis 3 s, ±12 dB, in Pausen halten,
 vorwärts und rückwärts geglättet) → Übersprechen: je Fenster die aktive Spur bestimmen,

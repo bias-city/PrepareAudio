@@ -374,6 +374,30 @@ pub fn channel_names_chunk(track_names: &[String], functions: &[&str], segments:
     chunk(b"iXML", x.as_bytes())
 }
 
+/// Positions per segment of a shared file written by step 2 (empty for any other file). The
+/// iXML chunk of those files follows the audio data.
+pub fn read_pan_segments(path: &Path) -> Vec<(usize, f64, f64, char)> {
+    let Ok(info) = read_info(path) else { return Vec::new() };
+    let Ok(mut f) = File::open(path) else { return Vec::new() };
+    let mut off = info.data_offset + info.data_len + (info.data_len & 1);
+    while off + 8 <= info.file_size {
+        let mut head = [0u8; 8];
+        if f.seek(SeekFrom::Start(off)).is_err() || f.read_exact(&mut head).is_err() {
+            break;
+        }
+        let size = u32::from_le_bytes(head[4..8].try_into().unwrap()) as u64;
+        if &head[0..4] == b"iXML" {
+            let mut body = vec![0u8; size.min(4 << 20).min(info.file_size - off - 8) as usize];
+            if f.read_exact(&mut body).is_ok() {
+                return parse_pan_segments(&String::from_utf8_lossy(&body));
+            }
+            break;
+        }
+        off += 8 + size + (size & 1);
+    }
+    Vec::new()
+}
+
 /// The `PAN` entries written by [`channel_names_chunk`]: `(channel from 1, from, to, position)`.
 pub fn parse_pan_segments(ixml: &str) -> Vec<(usize, f64, f64, char)> {
     let attr = |tag: &str, key: &str| -> Option<String> {

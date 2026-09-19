@@ -1,6 +1,7 @@
 pub mod decode;
 pub mod i18n;
 pub mod lame;
+pub mod level;
 pub mod master;
 pub mod merge;
 pub mod player;
@@ -318,6 +319,7 @@ async fn write_master(
     state: State<'_, AppState>,
     ids: Vec<usize>,
     out_dir: String,
+    profile: Option<level::Profile>,
 ) -> Result<master::MasterSummary, String> {
     let plan = state
         .master_plan
@@ -339,7 +341,7 @@ async fn write_master(
     let cancel = state.cancel.clone();
     let busy = state.busy.clone();
     let result = tauri::async_runtime::spawn_blocking(move || {
-        master::write(&plan, &ids, Path::new(&out_dir), &cancel, |p| {
+        master::write(&plan, &ids, Path::new(&out_dir), profile.unwrap_or_default(), &cancel, |p| {
             let _ = app.emit("master-write-progress", p);
         })
     })

@@ -259,6 +259,7 @@ messages! {
     EncoderSetting => ["MP3-Encoder: Einstellung nicht möglich", "MP3 encoder: setting not possible", "Encodeur MP3 : réglage impossible", "Encoder MP3: impostazione non possibile"],
     EncoderUnavailable => ["MP3-Encoder nicht verfügbar", "MP3 encoder not available", "Encodeur MP3 indisponible", "Encoder MP3 non disponibile"],
     EncodingFailed => ["MP3-Kodierung fehlgeschlagen", "MP3 encoding failed", "Échec de l'encodage MP3", "Codifica MP3 non riuscita"],
+    StageAnalyse => ["Sprache analysieren", "Analysing speech", "Analyse de la parole", "Analisi del parlato"],
     StageLevel => ["Pegel einstellen", "Setting level", "Réglage du niveau", "Regolazione del livello"],
     StageEncode => ["MP3 kodieren", "Encoding MP3", "Encodage MP3", "Codifica MP3"],
     StageCheck => ["Nachmessen", "Measuring again", "Nouvelle mesure", "Misura di controllo"],
