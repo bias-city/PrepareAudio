@@ -137,8 +137,8 @@
       { art: 'h', text: 'MP3 o WAV' },
       { art: 'p', text: 'Il formato lo scegli in basso a destra, accanto al profilo. La scelta resta memorizzata.' },
       { art: 'tabelle', kopf: ['Formato', 'Che cosa ottieni', 'Per che cosa'], zeilen: [
-        ['MP3', '192 kbit/s. Le frequenze di campionamento alte vengono ricalcolate a 44,1 o 48 kHz.', 'Trasmettere, caricare, servizi di trascrizione. Circa un decimo della dimensione.'],
-        ['WAV', '24 bit nella frequenza di campionamento della sorgente. Nulla viene ricampionato, nulla va perso.', 'Archivio, montaggio, lavorazione successiva. Anche frequenze che l’MP3 non conosce.'],
+        ['MP3', '192 kbit/s. Le frequenze di campionamento alte vengono ricalcolate a 44,1 o 48 kHz.', 'Trasmettere, caricare, servizi di trascrizione. Una frazione della dimensione.'],
+        ['WAV', '24 bit nella frequenza di campionamento della sorgente. Nulla viene ricampionato, nulla va perso.', 'Archivio, montaggio, lavorazione successiva. Anche frequenze che l’MP3 non conosce. Da quattro a dodici volte la dimensione dell’MP3, secondo frequenza e canali.'],
       ] },
       { art: 'h', text: 'Come viene impostata la loudness' },
       { art: 'liste', punkte: [
@@ -156,13 +156,24 @@
     kurz: 'Dove viene scritto tutto',
     bloecke: [
       { art: 'p', text: 'Ogni passo chiede all’avvio dove salvare, e vi crea la sua cartella: `tracks`, `sync` o `master`. Se scegli una cartella che si chiama già così, viene usata direttamente.' },
-      { art: 'h', text: 'I nomi' },
-      { art: 'liste', punkte: [
-        '`260512_S101500-E104000_D002500_1.wav` — data, inizio, fine, durata, poi la cartella di origine o i trasmettitori.',
-        '`…_stereo_L-4_R-5.wav` — file comune di due trasmettitori, a sinistra 4, a destra 5.',
-        '`…_poly_1-2-3.wav` — file comune con un canale per trasmettitore.',
-        '`…_mono_2.wav` — un trasmettitore da solo.',
+      { art: 'h', text: 'Lo schema dei nomi' },
+      { art: 'p', text: 'Tutti i file prodotti hanno la stessa forma: `AAMMGG_S<inizio>-E<fine>_D<durata>_<contenuto>`. Data e orari sono quelli della registrazione, non quelli dell’elaborazione.' },
+      { art: 'tabelle', kopf: ['Parte', 'Significato', 'Esempio'], zeilen: [
+        ['`AAMMGG`', 'Giorno della registrazione: anno, mese, giorno', '`260512` — 12 maggio 2026'],
+        ['`S<hhmmss>`', 'Inizio come hhmmss', '`S101500` — 10:15:00'],
+        ['`E<hhmmss>`', 'Fine come hhmmss', '`E104000` — 10:40:00'],
+        ['`D<hhmmss>`', 'Durata come hhmmss', '`D002500` — 25 minuti'],
+        ['`<contenuto>`', 'Chi c’è dentro', '`stereo_L-4_R-5`'],
       ] },
+      { art: 'p', text: 'Il contenuto dice che cosa c’è nel file. Un trasmettitore prende sempre il nome della sua cartella di origine.' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — passo 1: un’intera registrazione del trasmettitore `1`.',
+        '`…_stereo_L-4_R-5.wav` — passo 2: due trasmettitori insieme, `4` a sinistra, `5` a destra.',
+        '`…_poly_1-2-3.wav` — passo 2: un canale per trasmettitore, in quest’ordine.',
+        '`…_mono_2.wav` — passo 2: il trasmettitore `2` da solo.',
+        '`…_stereo_L-4_R-5.mp3` — il passo 3 mantiene il nome e cambia solo l’estensione, `.mp3` o `.wav` secondo il formato.',
+      ] },
+      { art: 'hinweis', text: 'Nel nome di un trasmettitore restano lettere, cifre, trattino e trattino basso; tutto il resto diventa `-`, e dopo 40 caratteri si ferma. Se un secondo file avesse lo stesso nome, riceve `_2`, `_3` e così via.' },
       { art: 'h', text: 'Non si perde nulla' },
       { art: 'liste', punkte: [
         'Un file esistente non viene mai sovrascritto. Se un file con lo stesso nome corrisponde al risultato, vale come già fatto; altrimenti quello nuovo riceve un numero.',

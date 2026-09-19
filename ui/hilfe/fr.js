@@ -137,8 +137,8 @@
       { art: 'h', text: 'MP3 ou WAV' },
       { art: 'p', text: 'Tu choisis le format en bas à droite, à côté du profil. Le choix est mémorisé.' },
       { art: 'tabelle', kopf: ['Format', 'Ce que tu obtiens', 'Pour quoi'], zeilen: [
-        ['MP3', '192 kbit/s. Les fréquences d’échantillonnage élevées sont ramenées à 44,1 ou 48 kHz.', 'Transmettre, téléverser, services de transcription. Environ un dixième de la taille.'],
-        ['WAV', '24 bits à la fréquence d’échantillonnage de la source. Rien n’est rééchantillonné, rien ne se perd.', 'Archivage, montage, suite du travail. Aussi les fréquences que le MP3 ne connaît pas.'],
+        ['MP3', '192 kbit/s. Les fréquences d’échantillonnage élevées sont ramenées à 44,1 ou 48 kHz.', 'Transmettre, téléverser, services de transcription. Une fraction de la taille.'],
+        ['WAV', '24 bits à la fréquence d’échantillonnage de la source. Rien n’est rééchantillonné, rien ne se perd.', 'Archivage, montage, suite du travail. Aussi les fréquences que le MP3 ne connaît pas. Quatre à douze fois la taille du MP3, selon la fréquence et les canaux.'],
       ] },
       { art: 'h', text: 'Comment la loudness est réglée' },
       { art: 'liste', punkte: [
@@ -156,13 +156,24 @@
     kurz: 'Où tout est écrit',
     bloecke: [
       { art: 'p', text: 'Chaque étape demande au démarrage où enregistrer, et y crée son dossier : `tracks`, `sync` ou `master`. Si tu choisis un dossier qui porte déjà ce nom, il est utilisé tel quel.' },
-      { art: 'h', text: 'Les noms' },
-      { art: 'liste', punkte: [
-        '`260512_S101500-E104000_D002500_1.wav` — date, début, fin, durée, puis le dossier source ou les émetteurs.',
-        '`…_stereo_L-4_R-5.wav` — fichier commun de deux émetteurs, à gauche 4, à droite 5.',
-        '`…_poly_1-2-3.wav` — fichier commun avec un canal par émetteur.',
-        '`…_mono_2.wav` — un émetteur seul.',
+      { art: 'h', text: 'Le schéma des noms' },
+      { art: 'p', text: 'Tous les fichiers produits ont la même forme : `AAMMJJ_S<début>-E<fin>_D<durée>_<contenu>`. La date et les heures sont celles de l’enregistrement, pas celles du calcul.' },
+      { art: 'tabelle', kopf: ['Partie', 'Signification', 'Exemple'], zeilen: [
+        ['`AAMMJJ`', 'Jour de l’enregistrement : année, mois, jour', '`260512` — 12 mai 2026'],
+        ['`S<hhmmss>`', 'Début en hhmmss', '`S101500` — 10:15:00'],
+        ['`E<hhmmss>`', 'Fin en hhmmss', '`E104000` — 10:40:00'],
+        ['`D<hhmmss>`', 'Durée en hhmmss', '`D002500` — 25 minutes'],
+        ['`<contenu>`', 'Qui s’y trouve', '`stereo_L-4_R-5`'],
       ] },
+      { art: 'p', text: 'Le contenu dit ce qu’il y a dans le fichier. Un émetteur porte toujours le nom de son dossier d’origine.' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — étape 1 : un enregistrement entier de l’émetteur `1`.',
+        '`…_stereo_L-4_R-5.wav` — étape 2 : deux émetteurs ensemble, `4` à gauche, `5` à droite.',
+        '`…_poly_1-2-3.wav` — étape 2 : un canal par émetteur, dans cet ordre.',
+        '`…_mono_2.wav` — étape 2 : l’émetteur `2` seul.',
+        '`…_stereo_L-4_R-5.mp3` — l’étape 3 garde le nom et ne change que l’extension, `.mp3` ou `.wav` selon le format.',
+      ] },
+      { art: 'hinweis', text: 'Dans le nom d’un émetteur restent lettres, chiffres, trait d’union et tiret bas ; tout le reste devient `-`, et cela s’arrête après 40 caractères. Si un deuxième fichier portait le même nom, il reçoit `_2`, `_3` et ainsi de suite.' },
       { art: 'h', text: 'Rien ne se perd' },
       { art: 'liste', punkte: [
         'Un fichier existant n’est jamais écrasé. Si un fichier de même nom correspond au résultat, il compte comme terminé ; sinon, le nouveau reçoit un numéro.',

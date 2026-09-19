@@ -137,8 +137,8 @@
       { art: 'h', text: 'MP3 oder WAV' },
       { art: 'p', text: 'Unten rechts neben dem Profil wählst du das Format. Die Wahl bleibt gespeichert.' },
       { art: 'tabelle', kopf: ['Format', 'Was du bekommst', 'Wofür'], zeilen: [
-        ['MP3', '192 kbit/s. Hohe Abtastraten werden auf 44,1 oder 48 kHz heruntergerechnet.', 'Weitergeben, hochladen, Transkriptionsdienste. Rund ein Zehntel der Grösse.'],
-        ['WAV', '24 Bit in der Abtastrate der Quelle. Nichts wird umgerechnet, nichts geht verloren.', 'Archiv, Schnitt, Weiterbearbeitung. Auch Abtastraten, die MP3 nicht kennt.'],
+        ['MP3', '192 kbit/s. Hohe Abtastraten werden auf 44,1 oder 48 kHz heruntergerechnet.', 'Weitergeben, hochladen, Transkriptionsdienste. Ein Bruchteil der Grösse.'],
+        ['WAV', '24 Bit in der Abtastrate der Quelle. Nichts wird umgerechnet, nichts geht verloren.', 'Archiv, Schnitt, Weiterbearbeitung. Auch Abtastraten, die MP3 nicht kennt. Je nach Abtastrate und Kanälen vier- bis zwölfmal so gross wie das MP3.'],
       ] },
       { art: 'h', text: 'Wie die Lautheit gesetzt wird' },
       { art: 'liste', punkte: [
@@ -156,13 +156,24 @@
     kurz: 'Wohin alles geschrieben wird',
     bloecke: [
       { art: 'p', text: 'Jeder Schritt fragt beim Start, wo gespeichert werden soll, und legt dort seinen Ordner an: `tracks`, `sync` oder `master`. Wählst du einen Ordner, der schon so heisst, wird er direkt benutzt.' },
-      { art: 'h', text: 'Die Namen' },
-      { art: 'liste', punkte: [
-        '`260512_S101500-E104000_D002500_1.wav` — Datum, Start, Ende, Dauer, dann der Quellordner oder die Sender.',
-        '`…_stereo_L-4_R-5.wav` — gemeinsame Datei zweier Sender, links 4, rechts 5.',
-        '`…_poly_1-2-3.wav` — gemeinsame Datei mit einem Kanal je Sender.',
-        '`…_mono_2.wav` — ein Sender allein.',
+      { art: 'h', text: 'Das Namensschema' },
+      { art: 'p', text: 'Alle erzeugten Dateien folgen derselben Form: `JJMMTT_S<Start>-E<Ende>_D<Dauer>_<Inhalt>`. Datum und Zeiten sind die der Aufnahme, nicht die des Rechnens.' },
+      { art: 'tabelle', kopf: ['Teil', 'Bedeutung', 'Beispiel'], zeilen: [
+        ['`JJMMTT`', 'Tag der Aufnahme: Jahr, Monat, Tag', '`260512` — 12. Mai 2026'],
+        ['`S<hhmmss>`', 'Beginn als hhmmss', '`S101500` — 10:15:00'],
+        ['`E<hhmmss>`', 'Ende als hhmmss', '`E104000` — 10:40:00'],
+        ['`D<hhmmss>`', 'Dauer als hhmmss', '`D002500` — 25 Minuten'],
+        ['`<Inhalt>`', 'Wer darin steckt', '`stereo_L-4_R-5`'],
       ] },
+      { art: 'p', text: 'Der Inhalt sagt, was in der Datei liegt. Der Name eines Senders ist immer der Name seines Quellordners.' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — Schritt 1: eine ganze Aufnahme des Senders `1`.',
+        '`…_stereo_L-4_R-5.wav` — Schritt 2: zwei Sender gemeinsam, `4` links, `5` rechts.',
+        '`…_poly_1-2-3.wav` — Schritt 2: ein Kanal je Sender, in dieser Reihenfolge.',
+        '`…_mono_2.wav` — Schritt 2: Sender `2` allein.',
+        '`…_stereo_L-4_R-5.mp3` — Schritt 3 behält den Namen und tauscht nur die Endung, je nach Format `.mp3` oder `.wav`.',
+      ] },
+      { art: 'hinweis', text: 'Im Sendernamen bleiben Buchstaben, Ziffern, Bindestrich und Unterstrich; alles andere wird zu `-`, nach 40 Zeichen ist Schluss. Trägt eine zweite Datei denselben Namen, bekommt sie `_2`, `_3` und so fort.' },
       { art: 'h', text: 'Nichts geht verloren' },
       { art: 'liste', punkte: [
         'Eine vorhandene Datei wird nie überschrieben. Passt eine gleichnamige Datei zum Ergebnis, gilt sie als erledigt; sonst bekommt die neue eine Nummer.',

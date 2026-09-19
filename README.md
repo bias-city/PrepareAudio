@@ -73,6 +73,34 @@ Dritter Tab. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/AAC,
 
 Das gewählte Profil steht im ID3-Kommentar des MP3. Gemeinsame Dateien aus Schritt 2 erkennt der Leveler an den Positionen im iXML, ältere an ihrem Namen (`…_stereo_L-4_R-5.wav`). Die App braucht keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
 
+## Namensschema der Ergebnisse
+
+Alle drei Schritte schreiben nach derselben Form:
+
+```
+JJMMTT_S<Start>-E<Ende>_D<Dauer>_<Inhalt>.<Endung>
+260512_S101500-E104000_D002500_1.wav
+```
+
+| Teil | Bedeutung | Beispiel |
+|---|---|---|
+| `JJMMTT` | Tag der Aufnahme, zweistelliges Jahr | `260512` — 12.5.2026 |
+| `S<hhmmss>` | Beginn der Aufnahme | `S101500` — 10:15:00 |
+| `E<hhmmss>` | Ende der Aufnahme | `E104000` — 10:40:00 |
+| `D<hhmmss>` | Dauer | `D002500` — 25 min |
+| `<Inhalt>` | wer in der Datei steckt, siehe unten | `stereo_L-4_R-5` |
+
+Datum und Zeiten sind die der Aufnahme (aus `bext`, Dateiname oder Dateidatum), nicht die des Laufs. Der Name eines Senders ist der Name seines Quellordners, bereinigt auf Buchstaben, Ziffern, `-` und `_` (alles andere wird `-`) und auf 40 Zeichen gekürzt (`scan::sanitize`).
+
+| Inhalt | Schritt | Bedeutung |
+|---|---|---|
+| `_1` | 1 | eine ganze Aufnahme des Senders `1` (`scan.rs`, `out_name`) |
+| `_stereo_L-4_R-5` | 2 | zwei Sender gemeinsam, `4` links, `5` rechts |
+| `_poly_1-2-3` | 2 | ein Kanal je Sender, in dieser Reihenfolge |
+| `_mono_2` | 2 | Sender `2` allein |
+
+Schritt 3 behält den Namen der Quelle und tauscht nur die Endung (`.mp3` oder `.wav`). Trägt eine zweite Datei denselben Namen, bekommt sie `_2`, `_3` und so fort; über eine vorhandene Datei schreibt die App nie (`sync.rs` `stamp`, `master.rs` `resolve`).
+
 ## Handbuch
 
 Das Fenster **PrepareAudio Handbook** (Menü Help, ⌘⇧/) erklärt die drei Schritte, die Timeline, die Profile beim Mastern, alle Tastenkürzel und was die App speichert — durchsuchbar und in denselben vier Sprachen wie die Oberfläche. Inhalt: `ui/hilfe/<sprache>.js` (Deutsch ist die Quelle, gleiche Kapitel-ids und Bilddateien in allen Sprachen), Gerüst: `ui/hilfe.html` und `ui/hilfe.js`.

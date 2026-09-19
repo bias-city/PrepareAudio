@@ -96,10 +96,10 @@ I18N.add({
   'master.format.mp3': { de: 'MP3', en: 'MP3', fr: 'MP3', it: 'MP3' },
   'master.format.wav': { de: 'WAV', en: 'WAV', fr: 'WAV', it: 'WAV' },
   'master.format.title': {
-    de: 'Format der Ausgabe. MP3 mit 192 kbit/s: klein, spielt überall, gut zum Weitergeben und Hochladen. WAV mit 24 Bit: verlustfrei und in der Abtastrate der Quelle, nichts wird umgerechnet — für Archiv und Weiterbearbeitung, dafür rund zehnmal so gross. Beide werden auf −16 LUFS gebracht.',
-    en: 'Format of the output. MP3 at 192 kbit/s: small, plays everywhere, good for passing on and uploading. WAV at 24 bit: lossless and in the sample rate of the source, nothing is resampled — for archiving and further editing, but about ten times as large. Both are brought to −16 LUFS.',
-    fr: 'Format de sortie. MP3 à 192 kbit/s : léger, se lit partout, pratique à transmettre et à téléverser. WAV 24 bits : sans perte et à la fréquence d’échantillonnage de la source, rien n’est rééchantillonné — pour l’archivage et le montage, mais environ dix fois plus volumineux. Les deux sont amenés à −16 LUFS.',
-    it: 'Formato di uscita. MP3 a 192 kbit/s: leggero, si riproduce ovunque, comodo da trasmettere e caricare. WAV a 24 bit: senza perdite e nella frequenza di campionamento della sorgente, nulla viene ricampionato — per archivio e post-produzione, ma circa dieci volte più grande. Entrambi vengono portati a −16 LUFS.',
+    de: 'Format der Ausgabe. MP3 mit 192 kbit/s: klein, spielt überall, gut zum Weitergeben und Hochladen. WAV mit 24 Bit: verlustfrei und in der Abtastrate der Quelle, nichts wird umgerechnet — für Archiv und Weiterbearbeitung, dafür je nach Abtastrate und Kanälen vier- bis zwölfmal so gross. Beide werden auf −16 LUFS gebracht.',
+    en: 'Format of the output. MP3 at 192 kbit/s: small, plays everywhere, good for passing on and uploading. WAV at 24 bit: lossless and in the sample rate of the source, nothing is resampled — for archiving and further editing, but four to twelve times as large, depending on sample rate and channels. Both are brought to −16 LUFS.',
+    fr: 'Format de sortie. MP3 à 192 kbit/s : léger, se lit partout, pratique à transmettre et à téléverser. WAV 24 bits : sans perte et à la fréquence d’échantillonnage de la source, rien n’est rééchantillonné — pour l’archivage et le montage, mais quatre à douze fois plus volumineux selon la fréquence d’échantillonnage et les canaux. Les deux sont amenés à −16 LUFS.',
+    it: 'Formato di uscita. MP3 a 192 kbit/s: leggero, si riproduce ovunque, comodo da trasmettere e caricare. WAV a 24 bit: senza perdite e nella frequenza di campionamento della sorgente, nulla viene ricampionato — per archivio e post-produzione, ma da quattro a dodici volte più grande secondo frequenza di campionamento e canali. Entrambi vengono portati a −16 LUFS.',
   },
   'master.stat.files.one': {
     de: 'Datei · {dur}',

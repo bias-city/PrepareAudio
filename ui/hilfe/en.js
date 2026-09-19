@@ -137,8 +137,8 @@
       { art: 'h', text: 'MP3 or WAV' },
       { art: 'p', text: 'You choose the format at the bottom right, next to the profile. The choice is remembered.' },
       { art: 'tabelle', kopf: ['Format', 'What you get', 'What for'], zeilen: [
-        ['MP3', '192 kbit/s. High sample rates are brought down to 44.1 or 48 kHz.', 'Passing on, uploading, transcription services. About a tenth of the size.'],
-        ['WAV', '24 bit in the sample rate of the source. Nothing is resampled, nothing is lost.', 'Archiving, editing, further work. Also sample rates MP3 does not know.'],
+        ['MP3', '192 kbit/s. High sample rates are brought down to 44.1 or 48 kHz.', 'Passing on, uploading, transcription services. A fraction of the size.'],
+        ['WAV', '24 bit in the sample rate of the source. Nothing is resampled, nothing is lost.', 'Archiving, editing, further work. Also sample rates MP3 does not know. Four to twelve times the size of the MP3, depending on sample rate and channels.'],
       ] },
       { art: 'h', text: 'How the loudness is set' },
       { art: 'liste', punkte: [
@@ -156,13 +156,24 @@
     kurz: 'Where everything is written',
     bloecke: [
       { art: 'p', text: 'Every step asks at the start where to save, and creates its folder there: `tracks`, `sync` or `master`. If you pick a folder that is already called that, it is used directly.' },
-      { art: 'h', text: 'The names' },
-      { art: 'liste', punkte: [
-        '`260512_S101500-E104000_D002500_1.wav` — date, start, end, duration, then the source folder or the transmitters.',
-        '`…_stereo_L-4_R-5.wav` — shared file of two transmitters, 4 on the left, 5 on the right.',
-        '`…_poly_1-2-3.wav` — shared file with one channel per transmitter.',
-        '`…_mono_2.wav` — one transmitter on its own.',
+      { art: 'h', text: 'The naming scheme' },
+      { art: 'p', text: 'Every file the app writes has the same shape: `YYMMDD_S<start>-E<end>_D<duration>_<content>`. Date and times are those of the recording, not of the run.' },
+      { art: 'tabelle', kopf: ['Part', 'Meaning', 'Example'], zeilen: [
+        ['`YYMMDD`', 'Day of the recording: year, month, day', '`260512` — 12 May 2026'],
+        ['`S<hhmmss>`', 'Start as hhmmss', '`S101500` — 10:15:00'],
+        ['`E<hhmmss>`', 'End as hhmmss', '`E104000` — 10:40:00'],
+        ['`D<hhmmss>`', 'Duration as hhmmss', '`D002500` — 25 minutes'],
+        ['`<content>`', 'Who is in it', '`stereo_L-4_R-5`'],
       ] },
+      { art: 'p', text: 'The content says what lies in the file. A transmitter is always named after its source folder.' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — step 1: one whole recording of transmitter `1`.',
+        '`…_stereo_L-4_R-5.wav` — step 2: two transmitters together, `4` on the left, `5` on the right.',
+        '`…_poly_1-2-3.wav` — step 2: one channel per transmitter, in that order.',
+        '`…_mono_2.wav` — step 2: transmitter `2` on its own.',
+        '`…_stereo_L-4_R-5.mp3` — step 3 keeps the name and only swaps the extension, `.mp3` or `.wav` depending on the format.',
+      ] },
+      { art: 'hinweis', text: 'A transmitter name keeps letters, digits, hyphen and underscore; everything else becomes `-`, and after 40 characters it stops. If a second file would carry the same name, it gets `_2`, `_3` and so on.' },
       { art: 'h', text: 'Nothing gets lost' },
       { art: 'liste', punkte: [
         'An existing file is never overwritten. If a file of the same name matches the result, it counts as done; otherwise the new one gets a number.',
