@@ -28,7 +28,8 @@ use symphonia::core::io::{MediaSource, MediaSourceStream};
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
-pub const AUDIO_EXT: [&str; 11] = ["wav", "wave", "mp3", "m4a", "mp4", "aac", "flac", "aif", "aiff", "ogg", "caf"];
+/// Audio files and the video containers whose sound track Symphonia reads (MP4/MOV with AAC, ALAC or PCM).
+pub const AUDIO_EXT: [&str; 13] = ["wav", "wave", "mp3", "m4a", "mp4", "mov", "m4v", "aac", "flac", "aif", "aiff", "ogg", "caf"];
 /// Bump when the cached file layout changes: old files are then simply not found again.
 const CACHE_VERSION: u32 = 1;
 const CACHE_MAX_AGE: Duration = Duration::from_secs(30 * 86_400);
@@ -46,7 +47,9 @@ pub fn container(ext: &str) -> &'static str {
     match ext {
         "wav" | "wave" => "WAV",
         "mp3" => "MP3",
-        "m4a" | "mp4" => "M4A",
+        "m4a" => "M4A",
+        "mp4" | "m4v" => "MP4",
+        "mov" => "MOV",
         "aac" => "AAC",
         "flac" => "FLAC",
         "aif" | "aiff" => "AIFF",
@@ -148,7 +151,8 @@ impl SymReader {
         let mss = MediaSourceStream::new(source, Default::default());
         let mut hint = Hint::new();
         if !ext.is_empty() {
-            hint.with_extension(ext);
+            // QuickTime and M4V are the same container family as MP4.
+            hint.with_extension(if matches!(ext, "mov" | "m4v") { "mp4" } else { ext });
         }
         let options = FormatOptions { enable_gapless: gapless, ..Default::default() };
         let probed = symphonia::default::get_probe()

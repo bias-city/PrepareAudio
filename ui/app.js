@@ -112,7 +112,7 @@ function fmtBytes(b) {
 function plural(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
 function isSplit(r) { return r.parts.length > 1; }
 /* Where a chunk's start time came from (scan.rs TimeSource). */
-const TIME_SOURCE_KEY = { bext: 'merge.timeSource.bext', name: 'merge.timeSource.name', file: 'merge.timeSource.file' };
+const TIME_SOURCE_KEY = { bext: 'merge.timeSource.bext', name: 'merge.timeSource.name', media: 'merge.timeSource.media', file: 'merge.timeSource.file' };
 /* How sure a chain of chunks is (scan.rs Confidence). */
 const CONFIDENCE_KEY = { high: 'merge.confidence.high', medium: 'merge.confidence.medium', low: 'merge.confidence.low' };
 function confLabel(level) { return tr('merge.confidence', { level: tr(CONFIDENCE_KEY[level]) }); }
@@ -139,6 +139,7 @@ async function chooseSource() {
 async function runScan(paths) {
   if (anyBusy() || !paths.length) return;
   st.inputs = paths;
+  el.scanning.querySelector('span').textContent = tr('page.scanning');
   el.scanning.hidden = false;
   try {
     const scan = await invoke('scan_paths', { paths });
@@ -306,7 +307,7 @@ function recHtml(r) {
     const src = TIME_SOURCE_KEY[p.time_source];
     const when = src ? ` · <span class="tsrc">${esc(tr(src))}</span>` : '';
     const link = CONFIDENCE_KEY[p.link_confidence] ? ` · <span class="pconf ${p.link_confidence}">${esc(confLabel(p.link_confidence))}</span>` : '';
-    return `<li><button data-reveal="${esc(p.path)}" title="${reveal}">${esc(p.path)}</button><span class="pmeta">${p.start.slice(11)} · ${fmtDur(p.duration)}${gap}${when}${link}</span></li>`;
+    return `<li><button data-reveal="${esc(p.path)}" title="${reveal}">${esc(p.path)}</button><span class="pmeta">${p.decoded_from ? `${esc(p.decoded_from)} · ` : ''}${p.start.slice(11)} · ${fmtDur(p.duration)}${gap}${when}${link}</span></li>`;
   }).join('');
   return `
   <div class="rec${on ? '' : ' off'}${st.activeId === r.id ? ' active' : ''}" data-id="${r.id}">
@@ -383,6 +384,11 @@ listen('merge-progress', ({ payload: p }) => {
   }
 });
 
+/* Non-WAV sources are decoded during the scan: the overlay says how far that is. */
+listen('scan-progress', ({ payload: p }) => {
+  const s = el.scanning.querySelector('span');
+  if (s && p.total) s.textContent = tr('merge.decoding', { pct: Math.floor((100 * p.done) / p.total) });
+});
 listen('tauri://drag-enter', () => { if (!anyBusy()) el.overlay.hidden = false; });
 listen('tauri://drag-leave', () => { el.overlay.hidden = true; });
 listen('tauri://drag-drop', ({ payload }) => {

@@ -591,7 +591,7 @@ fn compressed_start(path: &Path, duration: f64) -> Option<i64> {
         return Some(start);
     }
     let meta = fs::metadata(path).ok()?;
-    if matches!(decode::extension(path).as_str(), "m4a" | "mp4") {
+    if matches!(decode::extension(path).as_str(), "m4a" | "mp4" | "mov" | "m4v") {
         let modified = meta.modified().ok().and_then(|m| m.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs_f64());
         if let Some(created) = decode::mp4_creation_time(path) {
             if civil_from_secs(created).0 >= 2010 && modified.map_or(true, |m| created as f64 <= m + 5.0) {

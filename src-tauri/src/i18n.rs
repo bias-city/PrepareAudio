@@ -100,8 +100,8 @@ messages! {
     Cancelled => ["Abgebrochen.", "Cancelled.", "Annulé.", "Annullato."],
 
     // ---- scanning and reading files
-    NotWav => ["keine WAV-Datei", "not a WAV file", "pas un fichier WAV", "non è un file WAV"],
-    NoFoldersOrWavs => ["Keine Ordner oder WAV-Dateien angegeben.", "No folders or WAV files given.", "Aucun dossier ni fichier WAV indiqué.", "Nessuna cartella o file WAV indicato."],
+    NotWav => ["kein unterstütztes Audio- oder Videoformat", "not a supported audio or video format", "format audio ou vidéo non pris en charge", "formato audio o video non supportato"],
+    NoFoldersOrWavs => ["Keine Ordner oder Mediendateien angegeben.", "No folders or media files given.", "Aucun dossier ni fichier média indiqué.", "Nessuna cartella o file multimediale indicato."],
     UnreadableWith => ["nicht lesbar: {e}", "unreadable: {e}", "illisible : {e}", "non leggibile: {e}"],
     Unreadable => ["nicht lesbar", "unreadable", "illisible", "non leggibile"],
     NoAudioData => ["enthält keine Audiodaten", "contains no audio data", "ne contient aucune donnée audio", "non contiene dati audio"],

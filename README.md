@@ -5,6 +5,7 @@ Tauri-App (macOS) von **B/IAS – Basel Institut für angewandte Stadtforschung*
 Die Oberfläche spricht Deutsch, Englisch, Französisch und Italienisch (`docs/I18N.md`); gewählt wird im Info-Feld, beim ersten Start gilt die Systemsprache.
 
 - Ordner ins Fenster ziehen oder „Ordner wählen…“. Alle Unterordner werden durchsucht, egal wie sortiert.
+- Eingaben: WAV (mono, stereo, mehrkanalig) sowie MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF, OGG Vorbis und der Ton aus MP4- und MOV-Videos. Alles, was nicht WAV ist, wird einmal in eine 32-bit-float-Kopie im Cache dekodiert; Teile werden auch dort verkettet, wenn Startzeit (Dateiname oder Container) und Nahtstelle passen. Die Ausgabe ist immer WAV. Opus wird noch nicht gelesen.
 - „Zusammenfügen…“ fragt, wo gespeichert werden soll, und legt dort den Ordner `tracks` an (wählt man einen Ordner namens `tracks`, wird er direkt benutzt). Genauso entstehen `sync` und `master` in den anderen Schritten.
 - Während gerechnet wird, dreht sich ein Rad, solange das Backend Lebenszeichen sendet. Die Prozente zählen nur erledigte Arbeit. Nach dem Lauf leert sich die Liste; nur Fehlgeschlagene bleiben stehen, mit „Wiederholen“.
 - Ausgabe verlustfrei als WAV (Audiodaten bitidentisch kopiert, ab 4 GB automatisch RF64). Name: `yymmdd_SHHMMSS-EHHMMSS_DHHMMSS_<Ordner>.wav`.

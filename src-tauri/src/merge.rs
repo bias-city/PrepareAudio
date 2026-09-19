@@ -330,6 +330,35 @@ mod tests {
         assert_eq!(fs::read(&written).unwrap(), b"not ours");
     }
 
+    /// Anything that comes in: two MP3 files that follow each other by their names are decoded,
+    /// joined and written as one WAV; a WAV next to them stays its own recording.
+    #[test]
+    fn compressed_sources_are_decoded_joined_and_written_as_wav() {
+        let root = tempdir("merge-mp3");
+        let sr = 16_000u32;
+        let tone = sine(180.0, 0.4, sr, 0, 70 * sr as u64);
+        let (first, second) = tone.split_at(40 * sr as usize);
+        fs::create_dir_all(root.join("handy")).unwrap();
+        fs::write(root.join("handy/REC_20260101_100000.mp3"), crate::lame::encode_with_lame_tag(sr, 1, first)).unwrap();
+        fs::write(root.join("handy/REC_20260101_100040.mp3"), crate::lame::encode_with_lame_tag(sr, 1, second)).unwrap();
+        write_float_wav(&root.join("recorder/NOTE_20260101_150000.WAV"), sr, &sine(300.0, 0.3, sr, 0, 5 * sr as u64));
+
+        let cancel = AtomicBool::new(false);
+        let s = crate::scan::scan_with(&[root.clone()], &small(), &root.join("cache"), &cancel, &mut |_, _| {}).unwrap();
+        assert!(s.ignored.is_empty(), "{:?}", s.ignored);
+        assert_eq!(s.recordings.len(), 2, "{:?}", s.recordings.iter().map(|r| (&r.out_name, r.parts.len())).collect::<Vec<_>>());
+        let rec = s.recordings.iter().find(|r| r.parts.len() == 2).expect("the two MP3 files form one recording");
+        assert!(rec.parts.iter().all(|p| p.decoded_from.as_deref() == Some("MP3") && p.name.ends_with(".mp3")));
+        assert_eq!(rec.out_name, "260101_S100000-E100110_D000110_handy.wav");
+
+        let out = root.join("out");
+        let sum = run(&[rec], &out, &cancel, |_| {}).unwrap();
+        assert_eq!(sum.outcomes[0].status, Status::Written, "{:?}", sum.outcomes[0]);
+        let info = crate::wav::read_info(&out.join(&rec.out_name)).unwrap();
+        assert_eq!((info.sample_rate, info.channels), (sr, 1));
+        assert!((info.duration() - 70.0).abs() < 0.2, "{}", info.duration());
+    }
+
     #[test]
     fn cancel_leaves_no_partial_file() {
         let root = tempdir("cancel");

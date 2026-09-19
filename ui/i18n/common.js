@@ -65,18 +65,18 @@ I18N.add({
   'page.info.short': { de: 'Info', en: 'Info', fr: 'Infos', it: 'Info' },
 
   /* ---------- 1 merge ---------- */
-  'page.merge.drop': { de: 'Ordner mit Aufnahmen hierher ziehen', en: 'Drag a folder with recordings here', fr: 'Glissez ici un dossier d’enregistrements', it: 'Trascina qui una cartella con registrazioni' },
+  'page.merge.drop': { de: 'Ordner oder Dateien hierher ziehen', en: 'Drag folders or files here', fr: 'Glisse ici des dossiers ou des fichiers', it: 'Trascina qui cartelle o file' },
   'page.merge.text': {
-    de: 'Nur WAV. Aufnahme-Teile, die ein Audiorecorder bei langen Aufnahmen schreibt, werden an der Aufnahmezeit erkannt (aus Metadaten, Dateiname oder Dateidatum) und an der Nahtstelle per Audio geprüft. Sauber sortiert oder durcheinander: alle Unterordner werden durchsucht, Kopien erkannt, die Teile jeder Aufnahme wieder zusammengesetzt.',
-    en: 'WAV only. The recording chunks an audio recorder writes during long recordings are recognised by their recording time (from metadata, file name or file date) and checked by an audio test at the seam. Neatly sorted or jumbled: every subfolder is scanned, copies are detected and the chunks of each recording are put back together.',
-    fr: 'WAV uniquement. Les fragments d’enregistrement qu’un enregistreur audio crée lors de longs enregistrements sont reconnus à leur heure d’enregistrement (issue des métadonnées, du nom de fichier ou de la date du fichier) et vérifiés par un contrôle audio au raccord. Bien rangés ou en vrac : tous les sous-dossiers sont analysés, les copies détectées et les fragments de chaque enregistrement réassemblés.',
-    it: 'Solo WAV. I frammenti di registrazione che un registratore audio crea durante le registrazioni lunghe vengono riconosciuti dall’ora di registrazione (dai metadati, dal nome del file o dalla data del file) e verificati con un controllo audio al raccordo. In ordine o alla rinfusa: tutte le sottocartelle vengono scansionate, le copie riconosciute e i frammenti di ogni registrazione ricomposti.',
+    de: 'Audio und Video in jedem gängigen Format. Die App zieht den Ton heraus, erkennt Teile derselben Aufnahme an der Aufnahmezeit (Metadaten, Dateiname oder Dateidatum), prüft die Nahtstelle per Audio und hängt Zusammengehöriges aneinander. Alle Unterordner werden durchsucht, Kopien erkannt.',
+    en: 'Audio and video in any common format. The app extracts the sound, recognises chunks of the same recording by their recording time (metadata, file name or file date), checks the seam by an audio test and joins what belongs together. Every subfolder is scanned, copies are detected.',
+    fr: 'Audio et vidéo dans tous les formats courants. L’app extrait le son, reconnaît les fragments d’un même enregistrement à leur heure d’enregistrement (métadonnées, nom ou date du fichier), vérifie le raccord par un contrôle audio et assemble ce qui va ensemble. Tous les sous-dossiers sont analysés, les copies détectées.',
+    it: 'Audio e video in tutti i formati comuni. L’app estrae il suono, riconosce i frammenti della stessa registrazione dall’ora di registrazione (metadati, nome o data del file), verifica il raccordo con un controllo audio e unisce ciò che va insieme. Tutte le sottocartelle vengono scansionate, le copie riconosciute.',
   },
   'page.merge.fine': {
-    de: 'Die Originale bleiben unangetastet. Beim Start fragt die App, wo der Ordner <b>tracks</b> entstehen soll, verlustfrei als WAV.',
-    en: 'The originals stay untouched. When you start, the app asks where to create the <b>tracks</b> folder, lossless as WAV.',
-    fr: 'Les originaux restent intacts. Au démarrage, l’app demande où créer le dossier <b>tracks</b>, sans perte en WAV.',
-    it: 'Gli originali restano intatti. All’avvio l’app chiede dove creare la cartella <b>tracks</b>, senza perdita in WAV.',
+    de: 'Die Originale bleiben unangetastet. Beim Start fragt die App, wo der Ordner <b>tracks</b> entstehen soll. Ausgabe immer als WAV.',
+    en: 'The originals stay untouched. When you start, the app asks where to create the <b>tracks</b> folder. Output is always WAV.',
+    fr: 'Les originaux restent intacts. Au démarrage, l’app demande où créer le dossier <b>tracks</b>. La sortie est toujours en WAV.',
+    it: 'Gli originali restano intatti. All’avvio l’app chiede dove creare la cartella <b>tracks</b>. L’uscita è sempre in WAV.',
   },
   'page.merge.singles': {
     de: 'Einzelaufnahmen (nicht gestückelt) ebenfalls nach tracks kopieren',

@@ -14,6 +14,7 @@
 //! join, but not a foreign chunk. Folder and sequence number are weak
 //! tie-breakers. Rules and thresholds: docs/CHUNK-ERKENNUNG.md.
 
+use crate::decode;
 use crate::i18n::{t, tf, Msg};
 use crate::wav::{self, Bext, WavInfo};
 use serde::Serialize;
@@ -22,6 +23,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Arc;
 
 pub const OUTPUT_DIR_NAME: &str = "tracks";
 const MIB: u64 = 1 << 20;
@@ -97,6 +100,8 @@ impl Default for Options {
 pub enum TimeSource {
     Bext,
     Name,
+    /// Creation time stored in an MP4/MOV container (decoded, non-WAV sources).
+    Media,
     File,
 }
 
@@ -115,7 +120,7 @@ pub enum Confidence {
 impl TimeSource {
     fn tolerance(self, opt: &Options) -> f64 {
         match self {
-            TimeSource::Bext | TimeSource::Name => opt.gap_tolerance,
+            TimeSource::Bext | TimeSource::Name | TimeSource::Media => opt.gap_tolerance,
             TimeSource::File => opt.file_time_tolerance,
         }
     }
@@ -137,6 +142,9 @@ pub struct Part {
     pub link_confidence: Option<Confidence>,
     pub full_chunk: bool,
     pub repaired: bool,
+    /// Container of a non-WAV source ("MP3", "MOV", …): the audio is read from a decoded copy
+    /// in the cache, `path` and `name` stay those of the original.
+    pub decoded_from: Option<String>,
     #[serde(skip)]
     pub path_buf: PathBuf,
     #[serde(skip)]
@@ -154,6 +162,15 @@ pub struct Part {
     pub bext_day: Option<i64>,
     #[serde(skip)]
     pub info: WavInfo,
+}
+
+impl Part {
+    /// A part that may have a continuation: a chunk the recorder cut off, or a decoded source
+    /// (cameras split video files, and there is no chunk size to go by) whose start does not
+    /// come from the file dates. The seam test and the confidence still decide about the link.
+    fn continuable(&self) -> bool {
+        self.full_chunk || (self.decoded_from.is_some() && self.time_source != TimeSource::File)
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -202,6 +219,12 @@ pub struct Scan {
 }
 
 pub fn scan(inputs: &[PathBuf], opt: &Options) -> Result<Scan, String> {
+    scan_with(inputs, opt, &decode::cache_dir(), &AtomicBool::new(false), &mut |_, _| {})
+}
+
+/// Like [`scan`], with the cache folder for decoded copies, a cancel flag and a progress
+/// callback (bytes of compressed sources read, of total) for the decoding of non-WAV files.
+pub fn scan_with(inputs: &[PathBuf], opt: &Options, cache: &Path, cancel: &AtomicBool, progress: &mut dyn FnMut(u64, u64)) -> Result<Scan, String> {
     let mut roots: Vec<PathBuf> = Vec::new();
     let mut walk_dirs: Vec<PathBuf> = Vec::new();
     let mut files: Vec<PathBuf> = Vec::new();
@@ -212,7 +235,7 @@ pub fn scan(inputs: &[PathBuf], opt: &Options) -> Result<Scan, String> {
         if meta.is_dir() {
             push_unique(&mut roots, input.clone());
             push_unique(&mut walk_dirs, input.clone());
-        } else if is_wav_name(input) {
+        } else if is_wav_name(input) || decode::is_compressed(input) {
             files.push(input.clone());
             if let Some(parent) = input.parent() {
                 push_unique(&mut roots, parent.to_path_buf());
@@ -226,7 +249,8 @@ pub fn scan(inputs: &[PathBuf], opt: &Options) -> Result<Scan, String> {
     }
 
     let out_dir = default_out_dir(&roots);
-    let mut skip: Vec<PathBuf> = roots.iter().map(|r| r.join(OUTPUT_DIR_NAME)).collect();
+    // Results of all three steps next to the sources are not input.
+    let mut skip: Vec<PathBuf> = roots.iter().flat_map(|r| [OUTPUT_DIR_NAME, crate::sync::OUTPUT_DIR_NAME, crate::master::OUTPUT_DIR_NAME].map(|d| r.join(d))).collect();
     skip.push(out_dir.clone());
     for dir in &walk_dirs {
         walk(dir, 0, opt.max_depth, &skip, &mut files);
@@ -238,12 +262,18 @@ pub fn scan(inputs: &[PathBuf], opt: &Options) -> Result<Scan, String> {
     let files_seen = files.len();
 
     let mut parts = Vec::new();
+    let mut compressed = Vec::new();
     for path in files {
+        if decode::is_compressed(&path) {
+            compressed.push(path);
+            continue;
+        }
         match load_part(&path) {
             Ok(p) => parts.push(p),
             Err(reason) => ignored.push(Skipped { path: path.display().to_string(), reason }),
         }
     }
+    parts.extend(load_decoded(&compressed, cache, cancel, progress, &mut ignored)?);
 
     let (parts, duplicates) = dedupe(parts);
     let recordings = group(parts, opt);
@@ -282,7 +312,7 @@ fn is_own_output(name: &str) -> bool {
     let b = name.as_bytes();
     let digits = |r: std::ops::Range<usize>| b[r].iter().all(u8::is_ascii_digit);
     b.len() > 35
-        && name.to_ascii_lowercase().ends_with(".wav")
+        && decode::AUDIO_EXT.contains(&decode::extension(Path::new(name)).as_str())
         && digits(0..6)
         && &b[6..8] == b"_S"
         && digits(8..14)
@@ -318,10 +348,110 @@ fn walk(dir: &Path, depth: usize, max_depth: usize, skip: &[PathBuf], out: &mut 
             if depth < max_depth && !skip.contains(&path) {
                 walk(&path, depth + 1, max_depth, skip, out);
             }
-        } else if ft.is_file() && is_wav_name(&path) {
+        } else if ft.is_file() && (is_wav_name(&path) || decode::is_compressed(&path)) {
             out.push(path);
         }
     }
+}
+
+/// Decodes every non-WAV file once into the cache (or reuses the copy) and makes it a part.
+/// Failures go to `ignored`; only cancelling and a full cache volume stop the scan.
+fn load_decoded(paths: &[PathBuf], cache: &Path, cancel: &AtomicBool, progress: &mut dyn FnMut(u64, u64), ignored: &mut Vec<Skipped>) -> Result<Vec<Part>, String> {
+    if paths.is_empty() {
+        return Ok(Vec::new());
+    }
+    let mut sources = Vec::new();
+    for p in paths {
+        match decode::Source::new(p) {
+            Ok(src) => sources.push(src),
+            Err(e) => ignored.push(Skipped { path: p.display().to_string(), reason: tf(Msg::UnreadableWith, &[("e", &e)]) }),
+        }
+    }
+    let hits: Vec<Option<(PathBuf, WavInfo)>> = sources.iter().map(|s| decode::cached(cache, s)).collect();
+    let need: u64 = sources.iter().zip(&hits).filter(|(_, h)| h.is_none()).map(|(s, _)| decode::estimate_decoded_bytes(s)).sum();
+    decode::check_space(cache, need)?;
+    let total: u64 = sources.iter().map(|s| s.size).sum::<u64>().max(1);
+    let read: Vec<Arc<AtomicU64>> = sources.iter().zip(&hits).map(|(s, h)| Arc::new(AtomicU64::new(if h.is_some() { s.size } else { 0 }))).collect();
+    let jobs: Vec<usize> = (0..sources.len()).collect();
+    let results = {
+        let (sources, hits, read) = (&sources, &hits, &read);
+        crate::sync::run_parallel(
+            &jobs,
+            &mut || progress(read.iter().zip(sources).map(|(r, s)| r.load(Ordering::Relaxed).min(s.size)).sum::<u64>().min(total), total),
+            &|&i: &usize| match &hits[i] {
+                Some(hit) => Ok(hit.clone()),
+                None => decode::decode_to_cache(cache, &sources[i], cancel, read[i].clone()),
+            },
+        )
+    };
+    if cancel.load(Ordering::SeqCst) {
+        return Err(crate::i18n::cancelled());
+    }
+    let mut out = Vec::new();
+    for (src, r) in sources.iter().zip(results) {
+        let shown = src.path.display().to_string();
+        match r {
+            Some(Ok((wav_path, info))) => match decoded_part(&src.path, &wav_path, info) {
+                Ok(p) => out.push(p),
+                Err(reason) => ignored.push(Skipped { path: shown, reason }),
+            },
+            Some(Err(e)) if crate::i18n::is_cancelled(&e) => return Err(e),
+            Some(Err(reason)) => ignored.push(Skipped { path: shown, reason }),
+            None => ignored.push(Skipped { path: shown, reason: t(Msg::Unreadable).into() }),
+        }
+    }
+    Ok(out)
+}
+
+/// A part for a decoded source: name, folder and start belong to the original, the audio
+/// (and therefore format, size and duration) to the 32-bit float copy in the cache.
+fn decoded_part(orig: &Path, wav_path: &Path, info: WavInfo) -> Result<Part, String> {
+    if info.data_len == 0 {
+        return Err(t(Msg::NoAudioData).into());
+    }
+    let name = orig.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    let duration = info.duration();
+    let meta = fs::metadata(orig).ok();
+    let file_start = meta.as_ref().and_then(|m| file_start_time(m, duration));
+    let (seq, name_secs) = match parse_chunk_name(&name) {
+        Some((seq, secs)) => (Some(seq), Some(secs)),
+        None => (None, parse_name_time(&name)),
+    };
+    // Creation time of an MP4/MOV: only if set, 2010 or later and not after the last change.
+    let modified = meta.as_ref().and_then(|m| m.modified().ok()).and_then(|m| m.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs_f64());
+    let media = decode::mp4_creation_time(orig)
+        .filter(|&c| civil_from_secs(c).0 >= 2010 && modified.map_or(true, |m| c as f64 <= m + 5.0))
+        .map(|c| (c + local_offset(c)) as f64);
+    let (time_source, start_exact) = match (name_secs, media, file_start) {
+        (Some(secs), _, _) => (TimeSource::Name, secs as f64),
+        (None, Some(secs), _) => (TimeSource::Media, secs),
+        (None, None, Some(secs)) => (TimeSource::File, secs),
+        (None, None, None) => return Err(t(Msg::Unreadable).into()),
+    };
+    let start_secs = start_exact.floor() as i64;
+    let folder_path = orig.parent().map(Path::to_path_buf).unwrap_or_default();
+    Ok(Part {
+        path: orig.display().to_string(),
+        name,
+        folder: folder_path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default(),
+        seq,
+        start: fmt_datetime(start_secs),
+        time_source,
+        duration,
+        size: info.file_size,
+        gap_to_prev: None,
+        link_confidence: None,
+        full_chunk: false,
+        repaired: false,
+        decoded_from: Some(decode::container(&decode::extension(orig)).to_string()),
+        path_buf: wav_path.to_path_buf(),
+        folder_path,
+        start_secs,
+        start_exact,
+        file_start,
+        bext_day: None,
+        info,
+    })
 }
 
 /// Reads one candidate file. Errors are user-facing reasons for skipping it.
@@ -360,6 +490,7 @@ pub fn load_part(path: &Path) -> Result<Part, String> {
         link_confidence: None,
         full_chunk: false,
         repaired: info.repaired,
+        decoded_from: None,
         path_buf: path.to_path_buf(),
         folder_path,
         start_secs,
@@ -897,7 +1028,7 @@ fn group(mut parts: Vec<Part>, opt: &Options) -> Vec<Recording> {
     let can_continue: Vec<bool> = parts
         .iter()
         .map(|p| {
-            p.full_chunk
+            p.continuable()
                 || (!known_size[&p.info.fmt] && p.info.data_len >= opt.min_chunk_bytes && p.size == largest[&p.info.fmt])
         })
         .collect();
@@ -967,7 +1098,7 @@ fn group(mut parts: Vec<Part>, opt: &Options) -> Vec<Recording> {
             ambiguous[c.a] = true;
             ambiguous[c.b] = true;
         }
-        join[c.b] = Some(Join { gap: c.gap(), file_only: c.file_only(), confidence: c.confidence(parts[c.a].full_chunk, rival) });
+        join[c.b] = Some(Join { gap: c.gap(), file_only: c.file_only(), confidence: c.confidence(parts[c.a].continuable(), rival) });
     }
 
     let mut slots: Vec<Option<Part>> = parts.into_iter().map(Some).collect();
@@ -1057,7 +1188,7 @@ fn build_recording(mut parts: Vec<Part>, joins: &[Option<Join>], ambiguous: bool
         if joins[k].map_or(false, |j| j.file_only) {
             warnings.push(tf(Msg::WarnFileTimes, &[("a", &k), ("b", &(k + 1))]));
         }
-        if k + 1 < count && !p.full_chunk {
+        if k + 1 < count && !p.continuable() {
             warnings.push(tf(Msg::WarnShortWithNext, &[("n", &(k + 1))]));
         }
     }

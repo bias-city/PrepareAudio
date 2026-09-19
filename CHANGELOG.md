@@ -10,6 +10,16 @@ notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
 ### Neu
 
+- **Zusammenfügen nimmt alles:** neben WAV auch MP3, M4A, FLAC, ALAC, AIFF, CAF, OGG Vorbis und
+  der Ton aus MP4- und MOV-Videos. Nicht-WAV-Dateien werden einmal dekodiert, als Teile geführt
+  und bei passender Zeit und Naht verkettet; die Ausgabe ist immer WAV (Plan:
+  `docs/PLAN-0.4-PIPELINE.md`).
+- **Synchronisieren ab 60 Sekunden:** kurze Überlappungen werden in 20-s-Fenstern gemessen.
+- **Timeline ohne Leerzeiten:** Zeit, in der kein Sender aufnahm, entfällt; eine Sessiongrenze
+  nennt die entfernte Dauer, die Wiedergabe springt zur nächsten Session.
+- **Layout nach Fenstergrösse:** Segment-Steuerelement, Symbolknöpfe, Statuszeile statt Kacheln,
+  Listen als Zeilen über die ganze Breite.
+
 - **Oberfläche an ResearchTranscript angeglichen:** Knöpfe und Reiter als Pillen mit
   Haarlinie, flache Kopfzeile, «Info» als Pille unten links, Grautöne der Slate-Skala,
   Zeiten in Festbreitenschrift. Die Werte stehen in `ui/tokens.css`. Aubergine und die

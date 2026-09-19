@@ -74,7 +74,16 @@ fn player<'a>(app: &AppHandle, state: &'a AppState) -> &'a player::Player {
 async fn scan_paths(app: AppHandle, state: State<'_, AppState>, paths: Vec<String>) -> Result<scan::Scan, String> {
     let _beat = Heartbeat::start(&app, "scan");
     let inputs: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
-    let result = tauri::async_runtime::spawn_blocking(move || scan::scan(&inputs, &scan::Options::default()))
+    let emitter = app.clone();
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        let mut last = std::time::Instant::now();
+        scan::scan_with(&inputs, &scan::Options::default(), &decode::cache_dir(), &std::sync::atomic::AtomicBool::new(false), &mut |done, total| {
+            if last.elapsed() >= Duration::from_millis(150) {
+                last = std::time::Instant::now();
+                let _ = emitter.emit("scan-progress", serde_json::json!({ "done": done, "total": total }));
+            }
+        })
+    })
         .await
         .map_err(|e| e.to_string())??;
     *state.scan.lock().map_err(|e| e.to_string())? = Some(Arc::new(result.clone()));
