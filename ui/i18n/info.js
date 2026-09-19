@@ -39,6 +39,7 @@ I18N.add({
     fr: 'Cette version provient du Mac App Store ; les mises à jour arrivent par là. C’est le même code source que sur GitHub : {license}, avec une permission additionnelle (article 7) pour la distribution via l’App Store. Tes droits sur le code source — le lire, le modifier, le partager — restent intacts. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung.',
     it: 'Questa versione proviene dal Mac App Store; gli aggiornamenti arrivano da lì. È lo stesso codice sorgente di GitHub: {license}, con un permesso aggiuntivo (sezione 7) per la distribuzione tramite l’App Store. I tuoi diritti sul codice sorgente — leggerlo, modificarlo, condividerlo — restano intatti. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung.',
   },
+  'info.handbook': { de: 'Handbuch öffnen', en: 'Open the handbook', fr: 'Ouvrir le manuel', it: 'Apri il manuale' },
   'info.link.exception': {
     de: 'Zusatzerlaubnis (App Store)',
     en: 'Additional permission (App Store)',

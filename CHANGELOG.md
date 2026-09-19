@@ -10,6 +10,13 @@ notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
 ### Neu
 
+- **Handbuch in der App** (Menü Help, ⌘⇧/): durchsuchbar, mit Bildern aus der echten Oberfläche
+  in hell und dunkel, in allen vier Sprachen. Erklärt die drei Schritte, die Timeline, die Profile
+  beim Mastern, alle Tastenkürzel und was die App lokal speichert.
+- **Menü auf das Nötige gekürzt** (kein File, kein View) mit eigenem Über-Eintrag, der das
+  Info-Feld der App öffnet statt des kargen macOS-Panels. Im Fenster stehen Logo und Name nicht
+  mehr: der Fenstertitel nennt die App.
+
 - **Mastern mit zwei Profilen**, benannt nach ihrem Zweck: «Für Transkription» (Standard)
   arbeitet wie bisher mit fester Verstärkung und lässt die Dynamik unangetastet — an echten
   Interviews geprüft, Spracherkennung und Sprechertrennung arbeiten damit besser. «Fürs Hören»

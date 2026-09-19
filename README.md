@@ -70,6 +70,16 @@ Dritter Reiter. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/A
 
 Das gewählte Profil steht im ID3-Kommentar des MP3. Gemeinsame Dateien aus Schritt 2 erkennt der Leveler an den Positionen im iXML, ältere an ihrem Namen (`…_stereo_L-4_R-5.wav`). Die App braucht keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
 
+## Handbuch
+
+Das Fenster **PrepareAudio Handbook** (Menü Help, ⌘⇧/) erklärt die drei Schritte, die Timeline, die Profile beim Mastern, alle Tastenkürzel und was die App speichert — durchsuchbar und in denselben vier Sprachen wie die Oberfläche. Inhalt: `ui/hilfe/<sprache>.js` (Deutsch ist die Quelle, gleiche Kapitel-ids und Bilddateien in allen Sprachen), Gerüst: `ui/hilfe.html` und `ui/hilfe.js`.
+
+Die Bilder darin entstehen aus der echten Oberfläche, hell und dunkel, je Sprache:
+
+```bash
+node scripts/screenshots.mjs ui/hilfe --handbuch
+```
+
 ## Lizenz
 
 PrepareAudio ist freie Software unter der GNU Affero General Public License, Version 3 oder später (`LICENSE`), wie LocalTranscript. Copyright © 2026 B/IAS – Basel Institut für angewandte Stadtforschung, <https://bias.city/prepareaudio>. Quellcode: <https://github.com/bias-city/PrepareAudio>.

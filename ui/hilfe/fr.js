@@ -1,0 +1,212 @@
+'use strict';
+
+/* Manuel, traduction française du fichier source allemand (utilisateur 2026-09-19). Toutes les
+   langues ont les mêmes ids de chapitres et les mêmes fichiers d’images. Balisage : **libellé**, [[touche]], `chemin`. */
+(window.HILFE = window.HILFE || {}).fr = [
+  {
+    id: 'ueberblick',
+    titel: 'Vue d’ensemble',
+    kurz: 'Trois étapes, un chemin',
+    bloecke: [
+      { art: 'p', text: 'PrepareAudio transforme ce que livrent les enregistreurs audio et les micros-cravate en enregistrements prêts à l’emploi. Trois étapes, chacune utilisable seule, pensées dans cet ordre :' },
+      { art: 'schritte', punkte: [
+        '**Assembler** : le son est extrait de tout ce que tu fais glisser dans la fenêtre, et les fragments d’un même enregistrement sont remis bout à bout. Résultat : des enregistrements complets en WAV dans le dossier `tracks`.',
+        '**Synchroniser** : plusieurs micros sont placés sur un axe de temps commun. Résultat : un fichier commun par conversation dans le dossier `sync`, plus des fichiers mono pour tout ce qui a tourné seul.',
+        '**Masteriser** : tout devient également fort et bien audible. Résultat : des fichiers MP3 dans le dossier `master`.',
+      ] },
+      { art: 'p', text: 'Tout se passe sur ton Mac. Il n’y a ni compte, ni serveur, ni télémétrie, et l’app n’ouvre aucune connexion réseau.' },
+      { art: 'hinweis', text: 'Tes originaux restent intacts. L’app ne modifie ni n’écrase jamais un fichier source, et elle reconnaît les résultats déjà présents pour les ignorer.' },
+      { art: 'bild', datei: 'leer', text: 'Le début : faire glisser des dossiers ou des fichiers dans la fenêtre.' },
+    ],
+  },
+  {
+    id: 'dateien',
+    titel: 'Ajouter des fichiers',
+    kurz: 'Formats, dossiers, copies',
+    bloecke: [
+      { art: 'p', text: 'Fais glisser des dossiers ou des fichiers isolés dans la fenêtre, ou passe par **Choisir un dossier…**. Tous les sous-dossiers sont parcourus, quel que soit leur classement.' },
+      { art: 'h', text: 'Quels formats' },
+      { art: 'liste', punkte: [
+        'Le WAV en mono, en stéréo et en multicanal, y compris RF64 et 32 bits flottant.',
+        'MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF et OGG Vorbis.',
+        'Le son des vidéos : MP4, MOV et M4V.',
+      ] },
+      { art: 'p', text: 'Tout ce qui n’est pas du WAV est décodé une fois en copie de travail. Cette copie se trouve dans le cache de l’app, pas à côté de tes fichiers, et disparaît d’elle-même après 30 jours sans usage. Un fichier inchangé n’est jamais décodé deux fois.' },
+      { art: 'h', text: 'Ce que l’app laisse de côté' },
+      { art: 'liste', punkte: [
+        'Les copies identiques octet pour octet d’un même enregistrement ; elles sont comptées malgré tout.',
+        'Ses propres résultats dans les dossiers `tracks`, `sync` et `master`.',
+        'Les fichiers que macOS crée en copiant (`._…`) et les dossiers masqués.',
+      ] },
+      { art: 'hinweis', text: 'Opus n’est pas encore lu, par exemple les messages vocaux des messageries. Convertis-les d’abord en M4A ou en WAV.' },
+    ],
+  },
+  {
+    id: 'zusammenfuegen',
+    titel: '1 · Assembler',
+    kurz: 'Des fragments aux enregistrements complets',
+    bloecke: [
+      { art: 'p', text: 'Beaucoup d’enregistreurs découpent les longs enregistrements en fragments, souvent toutes les 30 minutes ou à 4 Go. PrepareAudio les réassemble — au bit près, sans réencoder.' },
+      { art: 'bild', datei: 'merge', text: 'Les enregistrements trouvés avec leurs fragments, la fiabilité de l’enchaînement et le nom du résultat.' },
+      { art: 'h', text: 'À quoi les fragments se reconnaissent' },
+      { art: 'schritte', punkte: [
+        '**Heure d’enregistrement de chaque fragment**, la meilleure source d’abord : les métadonnées Broadcast WAV, puis la date et l’heure dans le nom du fichier, enfin la date du fichier. La liste indique pour chaque fragment d’où vient l’heure.',
+        '**Fragment plein** : seul un fragment que l’enregistreur a coupé peut avoir une suite. Un fragment court termine l’enregistrement.',
+        '**Raccord** : deux fragments vont ensemble quand leurs heures se touchent sans trou et que le format est le même. Les métadonnées Broadcast et l’iXML le prouvent directement.',
+        '**Contrôle du raccord** : si plusieurs fragments conviennent, c’est l’audio au raccord qui tranche. Un modèle de prédiction vérifie si un côté explique l’autre.',
+      ] },
+      { art: 'h', text: 'Fiabilité de l’enchaînement : élevée, moyenne, faible' },
+      { art: 'tabelle', kopf: ['Niveau', 'Signification'], zeilen: [
+        ['élevée', 'Les métadonnées prouvent le raccord sans ambiguïté.'],
+        ['moyenne', 'Les heures concordent, le fragment est plein, le raccord le confirme.'],
+        ['faible', 'Ambigu, ou le raccord contredit. Non présélectionné — va voir toi-même.'],
+      ] },
+      { art: 'h', text: 'Résultat' },
+      { art: 'liste', punkte: [
+        'Toujours du WAV. Copié au bit près depuis des sources WAV, automatiquement en RF64 au-delà de 4 Go.',
+        'Nom selon le modèle `yymmdd_SHHMMSS-EHHMMSS_DHHMMSS_<dossier>.wav` : date, début, fin, durée, dossier source.',
+        'Avec **Copier aussi les enregistrements uniques**, les enregistrements non fragmentés passent eux aussi dans `tracks`.',
+      ] },
+    ],
+  },
+  {
+    id: 'synchronisieren',
+    titel: '2 · Synchroniser',
+    kurz: 'Plusieurs micros, un seul axe de temps',
+    bloecke: [
+      { art: 'p', text: 'Deux personnes, deux micros-cravate, deux horloges qui divergent légèrement. PrepareAudio trouve les événements communs et superpose toutes les pistes.' },
+      { art: 'bild', datei: 'sync', text: 'Après l’analyse : une voie par émetteur, et en dessous les événements communs.' },
+      { art: 'h', text: 'Ce qui est mesuré' },
+      { art: 'liste', punkte: [
+        '**Décalage** : de combien un enregistrement a commencé plus tard, à la milliseconde près.',
+        '**Dérive** : à quel point les horloges divergent, en ppm. Sur une heure, cela fait vite un dixième de seconde.',
+        '**Dispersion** : à quel point la mesure reste cohérente sur tout l’enregistrement.',
+        '**Concordances** : dans combien de fenêtres de temps les mêmes événements se trouvent dans les deux enregistrements.',
+      ] },
+      { art: 'p', text: 'Ce que l’app cherche, ce sont des événements communs avec un décalage constant, pas une ressemblance de timbre. Avec deux micros-cravate, la source la plus forte est souvent inverse d’un micro à l’autre ; ce qui relie, ce sont les attaques : syllabes, chaise qu’on déplace, vaisselle. Des enregistrements se laissent mesurer à partir d’environ une minute de chevauchement.' },
+      { art: 'h', text: 'Commun ou séparé' },
+      { art: 'liste', punkte: [
+        'Là où des émetteurs enregistrent la même scène naît un **fichier commun** avec un canal par émetteur : à deux émetteurs, à gauche et à droite ; à plusieurs, un WAV polyphonique avec timecode et noms de pistes.',
+        'Là où un émetteur enregistre autre chose que les autres naît un **fichier mono**.',
+        'Si un seul émetteur tourne — avant, après, ou une panne entre les deux — cela reste dans le fichier commun, et le canal manquant est silencieux.',
+      ] },
+      { art: 'hinweis', text: 'Des émetteurs qui n’ont jamais pu être mesurés l’un contre l’autre ne se retrouvent jamais dans le même fichier. Deux conversations qui se sont déroulées au même moment dans des pièces différentes restent séparées.' },
+    ],
+  },
+  {
+    id: 'timeline',
+    titel: 'Modifier la timeline',
+    kurz: 'Segments, destination, position',
+    bloecke: [
+      { art: 'p', text: 'La timeline montre la proposition de l’analyse : une voie par émetteur, les segments sous forme de clips avec leur forme d’onde. Couleur pleine veut dire que le segment ira dans le fichier commun ; clair veut dire qu’il deviendra un fichier mono à part.' },
+      { art: 'h', text: 'Un clic sur un segment' },
+      { art: 'p', text: 'Un clic ouvre les options de ce segment :' },
+      { art: 'liste', punkte: [
+        '**Destination** : Fichier commun ou Fichier mono à part.',
+        '**Position au mastering** : Gauche, Milieu ou Droite. Elle détermine où le segment se placera plus tard dans le mixage stéréo, et vaut par segment, pas par émetteur.',
+        'Et aussi **Couper à la tête de lecture**, **Joindre**, **Supprimer** et **Lire à partir d’ici**.',
+      ] },
+      { art: 'h', text: 'Ce que tu peux faire d’autre' },
+      { art: 'liste', punkte: [
+        '**Rogner et prolonger** : glisse les bords. Si deux clips se touchent, le glissement déplace leur limite commune.',
+        '**Supprimer et rétablir** : ce qui est supprimé reste visible en hachuré.',
+        '**Déplacer dans le temps est impossible.** La position mesurée de chaque piste est fixe, pour que les émetteurs restent synchrones.',
+        '**Zoom** : ⌘ avec la molette, le geste à deux doigts ou les boutons. **Jour** montre tout.',
+        '**Pré-écoute** : la barre d’espace lit à partir de la tête de lecture, exactement comme le fichier serait créé. **M** met un émetteur en sourdine, **S** le passe en solo.',
+        '**Reset** abandonne toutes les modifications et ramène la proposition de l’analyse.',
+      ] },
+      { art: 'h', text: 'Limites de session' },
+      { art: 'p', text: 'Le temps pendant lequel aucun émetteur n’enregistrait est retiré de la timeline. À sa place apparaît une ligne pointillée avec la durée du trou. Ainsi, une journée entière avec peu de conversations reste lisible, et la lecture saute à la fin d’une session vers la suivante.' },
+      { art: 'hinweis', text: 'Tes modifications sont enregistrées dans un petit fichier à côté des sources et rétablies à la prochaine analyse. Si le dossier n’est pas inscriptible, l’app les garde elle-même en mémoire.' },
+    ],
+  },
+  {
+    id: 'mastern',
+    titel: '3 · Masteriser',
+    kurz: 'Loudness et profils',
+    bloecke: [
+      { art: 'p', text: 'Fais glisser des fichiers ou des dossiers, par exemple le dossier `sync` de l’étape 2. Pour chaque fichier, l’app affiche le format, la profondeur de bits, la fréquence d’échantillonnage et les canaux, et mesure la loudness selon EBU R128 avec True Peak et plage de loudness.' },
+      { art: 'bild', datei: 'master', text: 'La loudness mesurée pour chaque fichier, en bas le choix du profil.' },
+      { art: 'h', text: 'Les deux profils' },
+      { art: 'tabelle', kopf: ['Profil', 'Ce qu’il fait', 'Pour quoi'], zeilen: [
+        ['Pour la transcription', 'Gain fixe à −16 LUFS, aucune intervention sur la dynamique.', 'La reconnaissance vocale et la séparation des locuteurs. Vérifié sur de vrais entretiens : elles fonctionnent mieux ainsi.'],
+        ['Pour l’écoute', 'Égalise en plus le niveau des personnes qui parlent, remonte les passages faibles et atténue la diaphonie.', 'Écouter, transmettre, publier.'],
+      ] },
+      { art: 'p', text: 'Dans les deux profils, les fichiers multicanaux sont mixés en stéréo selon les positions L, M et R de l’étape 2. Le mono reste mono et au milieu.' },
+      { art: 'h', text: 'Comment la loudness est réglée' },
+      { art: 'liste', punkte: [
+        'La cible est −16 LUFS, ensuite un limiteur à anticipation intercepte les crêtes à −1,5 dBTP.',
+        'Le gain est d’abord réglé sans encoder, puis l’encodage a lieu une seule fois.',
+        'Le MP3 terminé est remesuré. S’il tombe à côté, l’app corrige et réencode.',
+        'Sortie en MP3 à 192 kbit/s. Le mono reste mono, les fréquences d’échantillonnage élevées sont ramenées à 44,1 ou 48 kHz.',
+      ] },
+      { art: 'hinweis', text: 'La progression ne compte que le travail réellement fait. Elle nomme aussi l’étape en cours : analyser la parole, régler le niveau, encoder le MP3, remesurer.' },
+    ],
+  },
+  {
+    id: 'ergebnisse',
+    titel: 'Dossiers et noms',
+    kurz: 'Où tout est écrit',
+    bloecke: [
+      { art: 'p', text: 'Chaque étape demande au démarrage où enregistrer, et y crée son dossier : `tracks`, `sync` ou `master`. Si tu choisis un dossier qui porte déjà ce nom, il est utilisé tel quel.' },
+      { art: 'h', text: 'Les noms' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — date, début, fin, durée, puis le dossier source ou les émetteurs.',
+        '`…_stereo_L-4_R-5.wav` — fichier commun de deux émetteurs, à gauche 4, à droite 5.',
+        '`…_poly_1-2-3.wav` — fichier commun avec un canal par émetteur.',
+        '`…_mono_2.wav` — un émetteur seul.',
+      ] },
+      { art: 'h', text: 'Rien ne se perd' },
+      { art: 'liste', punkte: [
+        'Un fichier existant n’est jamais écrasé. Si un fichier de même nom correspond au résultat, il compte comme terminé ; sinon, le nouveau reçoit un numéro.',
+        'Les traitements interrompus ne laissent pas de fichiers à moitié écrits.',
+        'Après le traitement, l’app montre ce qui a été écrit et ouvre le dossier si tu le souhaites. Ce qui a échoué reste affiché avec **Réessayer**.',
+      ] },
+    ],
+  },
+  {
+    id: 'tasten',
+    titel: 'Clavier',
+    kurz: 'Tous les raccourcis clavier',
+    bloecke: [
+      { art: 'h', text: 'Dans la timeline' },
+      { art: 'tasten', zeilen: [
+        ['[[Espace]]', 'Lire ou mettre en pause'],
+        ['[[S]]', 'Couper à la tête de lecture'],
+        ['[[J]]', 'Joindre au segment suivant'],
+        ['[[↑]]', 'Mettre dans le fichier commun'],
+        ['[[↓]]', 'Écrire comme fichier mono à part'],
+        ['[[Suppr]]', 'Supprimer ou rétablir'],
+        ['[[⌘]] [[Z]]', 'Annuler'],
+        ['[[⇧]] [[⌘]] [[Z]]', 'Rétablir'],
+        ['[[⌘]] [[+]] · [[⌘]] [[−]]', 'Zoom'],
+        ['[[0]]', 'Afficher toute la journée'],
+        ['[[Esc]]', 'Annuler la sélection'],
+      ] },
+      { art: 'h', text: 'Dans le manuel' },
+      { art: 'tasten', zeilen: [
+        ['[[⌘]] [[F]]', 'Aller à la recherche'],
+        ['[[Esc]]', 'Vider la recherche'],
+      ] },
+    ],
+  },
+  {
+    id: 'daten',
+    titel: 'Données et licence',
+    kurz: 'Ce que l’app enregistre',
+    bloecke: [
+      { art: 'h', text: 'Ce qui reste sur l’ordinateur' },
+      { art: 'liste', punkte: [
+        'L’app ne collecte aucune donnée, n’a pas de télémétrie, n’exige pas de compte et ne télécharge rien.',
+        'Elle n’enregistre rien et n’a pas besoin d’accès au micro ; elle ne fait que lire.',
+        'Les copies de travail des fichiers décodés se trouvent dans le cache de l’app et disparaissent d’elles-mêmes après 30 jours sans usage.',
+        'Tes modifications de la timeline se trouvent dans un petit fichier à côté des sources ou dans le dossier de données de l’app.',
+        'L’app retient localement la langue choisie et le profil de mastering.',
+      ] },
+      { art: 'p', text: 'Ce que contiennent les résultats : les noms de fichiers portent la date, l’heure et le nom du dossier source. Les fichiers communs portent un timecode et des noms de pistes. Les fichiers MP3 portent une entrée ID3 avec le nom du fichier et le profil utilisé. L’app n’inscrit nulle part un identifiant de ton appareil ou de ta personne.' },
+      { art: 'h', text: 'Licence' },
+      { art: 'p', text: 'PrepareAudio est un logiciel libre sous GNU AGPL, version 3 ou ultérieure. Le code source est ouvert sur GitHub. La version du Mac App Store est le même code source, avec une autorisation supplémentaire selon le §7 pour la distribution là-bas. Tous les paquets tiers inclus et leurs licences figurent dans le champ Infos en bas à gauche.' },
+      { art: 'p', text: 'Développé au B/IAS – Basel Institut für angewandte Stadtforschung.' },
+    ],
+  },
+];

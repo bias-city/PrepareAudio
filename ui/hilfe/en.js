@@ -1,0 +1,212 @@
+'use strict';
+
+/* Handbook, English, translated from the German source (User 2026-09-19). All languages share
+   the same chapter ids and image files. Markup: **label**, [[key]], `path`. */
+(window.HILFE = window.HILFE || {}).en = [
+  {
+    id: 'ueberblick',
+    titel: 'Overview',
+    kurz: 'Three steps, one path',
+    bloecke: [
+      { art: 'p', text: 'PrepareAudio turns what audio recorders and lavalier microphones deliver into finished recordings. Three steps, each of them useful on its own, meant to run in this order:' },
+      { art: 'schritte', punkte: [
+        '**Merge**: The sound is pulled out of everything you drag in, and chunks of the same recording are joined back together. Result: whole recordings as WAV in the folder `tracks`.',
+        '**Synchronise**: Several microphones are laid onto a shared timeline. Result: one shared file per conversation in the folder `sync`, plus mono files for everything that ran on its own.',
+        '**Master**: Everything gets the same loudness and becomes easy to hear. Result: MP3 files in the folder `master`.',
+      ] },
+      { art: 'p', text: 'Everything runs on your Mac. There is no account, no server, no telemetry, and the app opens no network connection.' },
+      { art: 'hinweis', text: 'Your originals stay untouched. The app never changes or overwrites a source file, and it recognises results that already exist and skips them.' },
+      { art: 'bild', datei: 'leer', text: 'The start: drag folders or files into the window.' },
+    ],
+  },
+  {
+    id: 'dateien',
+    titel: 'Putting files in',
+    kurz: 'Formats, folders, copies',
+    bloecke: [
+      { art: 'p', text: 'Drag folders or single files into the window, or use **Choose folder…**. Every subfolder is searched, no matter how things are sorted.' },
+      { art: 'h', text: 'Which formats' },
+      { art: 'liste', punkte: [
+        'WAV in mono, stereo and multichannel, including RF64 and 32-bit float.',
+        'MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF and OGG Vorbis.',
+        'The sound from videos: MP4, MOV and M4V.',
+      ] },
+      { art: 'p', text: 'Anything that is not WAV is decoded once into a working copy. The copy lives in the app’s cache, not next to your files, and removes itself again after 30 days without use. An unchanged file is never decoded twice.' },
+      { art: 'h', text: 'What the app passes over' },
+      { art: 'liste', punkte: [
+        'Byte-identical copies of the same recording; they are counted all the same.',
+        'Its own results in the folders `tracks`, `sync` and `master`.',
+        'Files that macOS creates when copying (`._…`) and hidden folders.',
+      ] },
+      { art: 'hinweis', text: 'Opus is not read yet, for example voice messages from messenger apps. Convert them to M4A or WAV first.' },
+    ],
+  },
+  {
+    id: 'zusammenfuegen',
+    titel: '1 · Merge',
+    kurz: 'Chunks into whole recordings',
+    bloecke: [
+      { art: 'p', text: 'Many recorders cut long recordings into chunks, often every 30 minutes or at 4 GB. PrepareAudio puts them back together — bit for bit, without re-encoding.' },
+      { art: 'bild', datei: 'merge', text: 'The recordings found, with their chunks, chain confidence and result names.' },
+      { art: 'h', text: 'How the chunks are recognised' },
+      { art: 'schritte', punkte: [
+        '**Recording time per chunk**, best source first: Broadcast WAV metadata, then date and time in the file name, and last the file date. For every chunk the list shows where the time comes from.',
+        '**A full chunk**: Only a chunk that the recorder cut off can have a follow-up. A short chunk ends the recording.',
+        '**The join**: Chunks belong together when their times meet without a gap and the format is the same. Broadcast metadata and iXML prove that directly.',
+        '**Seam test**: If several chunks fit, the audio at the seam decides. A prediction model checks whether the one side explains the other.',
+      ] },
+      { art: 'h', text: 'Chain confidence: high, medium, low' },
+      { art: 'tabelle', kopf: ['Level', 'What it means'], zeilen: [
+        ['high', 'Metadata prove the join beyond doubt.'],
+        ['medium', 'The times fit, the chunk is full, the seam confirms it.'],
+        ['low', 'Ambiguous, or the seam disagrees. Not preselected — take a look yourself.'],
+      ] },
+      { art: 'h', text: 'Result' },
+      { art: 'liste', punkte: [
+        'Always WAV. Copied bit for bit from WAV sources, from 4 GB on automatically as RF64.',
+        'Name following the pattern `yymmdd_SHHMMSS-EHHMMSS_DHHMMSS_<folder>.wav`: date, start, end, duration, source folder.',
+        'With **Also copy single recordings** switched on, recordings that were never split go to `tracks` too.',
+      ] },
+    ],
+  },
+  {
+    id: 'synchronisieren',
+    titel: '2 · Synchronise',
+    kurz: 'Several microphones, one timeline',
+    bloecke: [
+      { art: 'p', text: 'Two people, two lavalier microphones, two clocks that drift apart a little. PrepareAudio finds the shared events and lays all the tracks on top of each other.' },
+      { art: 'bild', datei: 'sync', text: 'After the analysis: one lane per transmitter, with the shared events below.' },
+      { art: 'h', text: 'What gets measured' },
+      { art: 'liste', punkte: [
+        '**Offset**: How much later one recording began, accurate to the millisecond.',
+        '**Drift**: How far the clocks run apart, in ppm. Over an hour that quickly adds up to a tenth of a second.',
+        '**Spread**: How cleanly the measurement holds together across the whole recording.',
+        '**Hits**: In how many time windows the same events lie in both recordings.',
+      ] },
+      { art: 'p', text: 'What is looked for are shared events with a constant time offset, not similarity of sound. With two lavalier microphones the loudest source often runs the other way; what connects them are onsets like syllables, a chair scraping and dishes. Recordings with about a minute of overlap or more can be measured.' },
+      { art: 'h', text: 'Shared or separate' },
+      { art: 'liste', punkte: [
+        'Where transmitters record the same scene, a **shared file** is created with one channel per transmitter: left and right with two transmitters, a polyphonic WAV with timecode and track names with more.',
+        'Where one transmitter records something other than the rest, a **mono file** is created.',
+        'If only one transmitter is running — before, after, or a dropout in between — that stays in the shared file, and the missing channel is silent.',
+      ] },
+      { art: 'hinweis', text: 'Transmitters that could never be measured against each other never end up in the same file. Two conversations that ran at the same time in different rooms stay apart.' },
+    ],
+  },
+  {
+    id: 'timeline',
+    titel: 'Editing the timeline',
+    kurz: 'Segments, destination, position',
+    bloecke: [
+      { art: 'p', text: 'The timeline shows what the analysis proposes: one lane per transmitter, the segments as clips with a waveform. Full colour means the segment goes into the shared file; light means it becomes a mono file of its own.' },
+      { art: 'h', text: 'Clicking a segment' },
+      { art: 'p', text: 'A click opens the options of that segment:' },
+      { art: 'liste', punkte: [
+        '**Goes to**: Shared file or mono file of its own.',
+        '**Position when mastering**: Left, Middle or Right. It decides where the segment sits later in the stereo mixdown, and it applies per segment, not per transmitter.',
+        'Plus **Split at playhead**, **Join**, **Delete** and **Play from here**.',
+      ] },
+      { art: 'h', text: 'What else you can do' },
+      { art: 'liste', punkte: [
+        '**Trim and extend**: drag the edges. Where two clips meet, dragging moves the shared boundary.',
+        '**Delete and restore**: what you delete stays visible, hatched.',
+        '**Moving in time is not possible.** The measured position of every track is fixed, so that the transmitters stay in sync.',
+        '**Zoom**: ⌘ with the scroll wheel, a two-finger gesture, or the buttons. **Day** shows everything.',
+        '**Preview**: the space bar plays from the playhead, exactly as the file would turn out. **M** mutes a transmitter, **S** solos it.',
+        '**Reset** discards all edits and brings back the proposal of the analysis.',
+      ] },
+      { art: 'h', text: 'Session boundaries' },
+      { art: 'p', text: 'Time in which no transmitter was recording is taken out of the timeline. In its place stands a dashed line with the length of the gap. That keeps a whole day with a few conversations readable, and playback jumps to the next session at the end of one.' },
+      { art: 'hinweis', text: 'Your edits are saved as a small file next to the sources and restored the next time you analyse. If the folder is not writable, the app remembers them itself.' },
+    ],
+  },
+  {
+    id: 'mastern',
+    titel: '3 · Master',
+    kurz: 'Loudness and profiles',
+    bloecke: [
+      { art: 'p', text: 'Drag files or folders in, for example the folder `sync` from step 2. For every file the app shows format, bit depth, sample rate and channels, and measures the loudness according to EBU R128 with True Peak and loudness range.' },
+      { art: 'bild', datei: 'master', text: 'Measured loudness per file, with the choice of profile below.' },
+      { art: 'h', text: 'The two profiles' },
+      { art: 'tabelle', kopf: ['Profile', 'What it does', 'What for'], zeilen: [
+        ['For transcription', 'Fixed gain to −16 LUFS, no intervention in the dynamics.', 'Speech recognition and speaker separation. Tested on real interviews: they work better with it.'],
+        ['For listening', 'Additionally evens out the levels of the speakers, lifts quiet passages and turns down bleed.', 'Listening, passing on, publishing.'],
+      ] },
+      { art: 'p', text: 'In both profiles, multichannel files are mixed down to stereo by the positions L, M and R from step 2. Mono stays mono and in the middle.' },
+      { art: 'h', text: 'How the loudness is set' },
+      { art: 'liste', punkte: [
+        'The target is −16 LUFS, then a limiter with look-ahead catches the peaks at −1.5 dBTP.',
+        'The gain is set first without encoding, then everything is encoded once.',
+        'The finished MP3 is measured again. If it is off, the app readjusts and encodes anew.',
+        'Output as MP3 at 192 kbit/s. Mono stays mono, high sample rates are brought down to 44.1 or 48 kHz.',
+      ] },
+      { art: 'hinweis', text: 'The progress counts only work that is done. It also names the step: analysing speech, setting the level, encoding MP3, measuring again.' },
+    ],
+  },
+  {
+    id: 'ergebnisse',
+    titel: 'Folders and names',
+    kurz: 'Where everything is written',
+    bloecke: [
+      { art: 'p', text: 'Every step asks at the start where to save, and creates its folder there: `tracks`, `sync` or `master`. If you pick a folder that is already called that, it is used directly.' },
+      { art: 'h', text: 'The names' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — date, start, end, duration, then the source folder or the transmitters.',
+        '`…_stereo_L-4_R-5.wav` — shared file of two transmitters, 4 on the left, 5 on the right.',
+        '`…_poly_1-2-3.wav` — shared file with one channel per transmitter.',
+        '`…_mono_2.wav` — one transmitter on its own.',
+      ] },
+      { art: 'h', text: 'Nothing gets lost' },
+      { art: 'liste', punkte: [
+        'An existing file is never overwritten. If a file of the same name matches the result, it counts as done; otherwise the new one gets a number.',
+        'Cancelled runs leave no half-written files behind.',
+        'After the run the app shows what was written and opens the folder if you want. Whatever failed stays there with **Retry**.',
+      ] },
+    ],
+  },
+  {
+    id: 'tasten',
+    titel: 'Keyboard',
+    kurz: 'All keyboard shortcuts',
+    bloecke: [
+      { art: 'h', text: 'In the timeline' },
+      { art: 'tasten', zeilen: [
+        ['[[Space]]', 'Play or pause'],
+        ['[[S]]', 'Split at the playhead'],
+        ['[[J]]', 'Join with the next segment'],
+        ['[[↑]]', 'Put into the shared file'],
+        ['[[↓]]', 'Write as a mono file of its own'],
+        ['[[Delete]]', 'Delete or restore'],
+        ['[[⌘]] [[Z]]', 'Undo'],
+        ['[[⇧]] [[⌘]] [[Z]]', 'Redo'],
+        ['[[⌘]] [[+]] · [[⌘]] [[−]]', 'Zoom'],
+        ['[[0]]', 'Show the whole day'],
+        ['[[Esc]]', 'Clear the selection'],
+      ] },
+      { art: 'h', text: 'In the handbook' },
+      { art: 'tasten', zeilen: [
+        ['[[⌘]] [[F]]', 'Jump to the search'],
+        ['[[Esc]]', 'Clear the search'],
+      ] },
+    ],
+  },
+  {
+    id: 'daten',
+    titel: 'Data and licence',
+    kurz: 'What the app stores',
+    bloecke: [
+      { art: 'h', text: 'What stays on your computer' },
+      { art: 'liste', punkte: [
+        'The app collects no data, has no telemetry, asks for no account and downloads nothing.',
+        'It records nothing and needs no access to the microphone; it only plays back.',
+        'Working copies of decoded files live in the app’s cache and disappear by themselves after 30 days without use.',
+        'Your edits to the timeline live as a small file next to the sources or in the app’s data folder.',
+        'The app remembers the chosen language and the profile for mastering locally.',
+      ] },
+      { art: 'p', text: 'What is in the results: file names carry the date, the time and the name of the source folder. Shared files carry timecode and track names. MP3 files carry an ID3 entry with the file name and the profile used. The app writes an identifier of your device or of you nowhere at all.' },
+      { art: 'h', text: 'Licence' },
+      { art: 'p', text: 'PrepareAudio is free software under the GNU AGPL, version 3 or later. The source code is open on GitHub. The version from the Mac App Store is the same source code, with an additional permission under §7 for distribution there. All bundled third-party packages and their licences are listed in the Info panel at the bottom left.' },
+      { art: 'p', text: 'Developed at B/IAS – Basel Institut für angewandte Stadtforschung.' },
+    ],
+  },
+];

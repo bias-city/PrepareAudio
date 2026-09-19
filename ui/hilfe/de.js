@@ -1,0 +1,212 @@
+'use strict';
+
+/* Handbuch, Quellsprache Deutsch (User 2026-09-19). Die anderen Sprachen haben dieselben
+   Kapitel-ids und Bilddateien. Auszeichnung: **Beschriftung**, [[Taste]], `Pfad`. */
+(window.HILFE = window.HILFE || {}).de = [
+  {
+    id: 'ueberblick',
+    titel: 'Überblick',
+    kurz: 'Drei Schritte, ein Weg',
+    bloecke: [
+      { art: 'p', text: 'PrepareAudio macht aus dem, was Audiorecorder und Ansteckmikrofone abliefern, fertige Aufnahmen. Drei Schritte, jeder für sich nutzbar, in dieser Reihenfolge gedacht:' },
+      { art: 'schritte', punkte: [
+        '**Zusammenfügen**: Der Ton wird aus allem herausgezogen, was du hineinziehst, und Teile derselben Aufnahme werden wieder aneinandergehängt. Ergebnis: ganze Aufnahmen als WAV im Ordner `tracks`.',
+        '**Synchronisieren**: Mehrere Mikrofone werden auf eine gemeinsame Zeitachse gelegt. Ergebnis: eine gemeinsame Datei je Gespräch im Ordner `sync`, dazu Mono-Dateien für alles, was allein lief.',
+        '**Mastern**: Alles wird gleich laut und gut hörbar. Ergebnis: MP3-Dateien im Ordner `master`.',
+      ] },
+      { art: 'p', text: 'Alles läuft auf deinem Mac. Es gibt kein Konto, keinen Server, keine Telemetrie, und die App öffnet keine Netzverbindung.' },
+      { art: 'hinweis', text: 'Deine Originale bleiben unangetastet. Die App verändert oder überschreibt nie eine Quelldatei, und schon vorhandene Ergebnisse erkennt sie und überspringt sie.' },
+      { art: 'bild', datei: 'leer', text: 'Der Start: Ordner oder Dateien ins Fenster ziehen.' },
+    ],
+  },
+  {
+    id: 'dateien',
+    titel: 'Dateien hineingeben',
+    kurz: 'Formate, Ordner, Kopien',
+    bloecke: [
+      { art: 'p', text: 'Zieh Ordner oder einzelne Dateien ins Fenster, oder nimm **Ordner wählen…**. Alle Unterordner werden durchsucht, egal wie sortiert.' },
+      { art: 'h', text: 'Welche Formate' },
+      { art: 'liste', punkte: [
+        'WAV in mono, stereo und mehrkanalig, auch RF64 und 32-bit float.',
+        'MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF und OGG Vorbis.',
+        'Der Ton aus Videos: MP4, MOV und M4V.',
+      ] },
+      { art: 'p', text: 'Alles, was nicht WAV ist, wird einmal in eine Arbeitskopie dekodiert. Die Kopie liegt im Zwischenspeicher der App, nicht bei deinen Dateien, und wird nach 30 Tagen ohne Gebrauch selbst wieder entfernt. Eine unveränderte Datei wird nie zweimal dekodiert.' },
+      { art: 'h', text: 'Was die App übergeht' },
+      { art: 'liste', punkte: [
+        'Byte-gleiche Kopien derselben Aufnahme; gezählt werden sie trotzdem.',
+        'Ihre eigenen Ergebnisse in den Ordnern `tracks`, `sync` und `master`.',
+        'Dateien, die macOS beim Kopieren anlegt (`._…`) und versteckte Ordner.',
+      ] },
+      { art: 'hinweis', text: 'Opus wird noch nicht gelesen, zum Beispiel Sprachnachrichten aus Messenger-Programmen. Wandle sie vorher in M4A oder WAV um.' },
+    ],
+  },
+  {
+    id: 'zusammenfuegen',
+    titel: '1 · Zusammenfügen',
+    kurz: 'Teile zu ganzen Aufnahmen',
+    bloecke: [
+      { art: 'p', text: 'Viele Recorder schneiden lange Aufnahmen in Teile, oft alle 30 Minuten oder bei 4 GB. PrepareAudio setzt sie wieder zusammen — bitgenau, ohne neu zu kodieren.' },
+      { art: 'bild', datei: 'merge', text: 'Gefundene Aufnahmen mit ihren Teilen, Verkettung und Ergebnisnamen.' },
+      { art: 'h', text: 'Woran die Teile erkannt werden' },
+      { art: 'schritte', punkte: [
+        '**Aufnahmezeit je Teil**, beste Quelle zuerst: Broadcast-WAV-Metadaten, dann Datum und Uhrzeit im Dateinamen, zuletzt das Dateidatum. Die Liste zeigt bei jedem Teil, woher die Zeit kommt.',
+        '**Voller Teil**: Nur ein Teil, den der Recorder abgeschnitten hat, kann einen Folgeteil haben. Ein kurzer Teil beendet die Aufnahme.',
+        '**Anschluss**: Teile passen zusammen, wenn ihre Zeiten lückenlos aneinanderstossen und das Format gleich ist. Broadcast-Metadaten und iXML belegen das direkt.',
+        '**Nahtprobe**: Passen mehrere Teile, entscheidet das Audio an der Nahtstelle. Ein Vorhersagemodell prüft, ob die eine Seite die andere erklärt.',
+      ] },
+      { art: 'h', text: 'Verkettung: hoch, mittel, niedrig' },
+      { art: 'tabelle', kopf: ['Stufe', 'Bedeutung'], zeilen: [
+        ['hoch', 'Metadaten belegen den Anschluss eindeutig.'],
+        ['mittel', 'Die Zeiten passen, der Teil ist voll, die Naht bestätigt es.'],
+        ['niedrig', 'Mehrdeutig, oder die Naht widerspricht. Nicht vorausgewählt — sieh selbst nach.'],
+      ] },
+      { art: 'h', text: 'Ergebnis' },
+      { art: 'liste', punkte: [
+        'Immer WAV. Aus WAV-Quellen bitgenau kopiert, ab 4 GB automatisch als RF64.',
+        'Name nach dem Muster `yymmdd_SHHMMSS-EHHMMSS_DHHMMSS_<Ordner>.wav`: Datum, Start, Ende, Dauer, Quellordner.',
+        'Mit **Einzelaufnahmen ebenfalls kopieren** wandern auch ungestückelte Aufnahmen nach `tracks`.',
+      ] },
+    ],
+  },
+  {
+    id: 'synchronisieren',
+    titel: '2 · Synchronisieren',
+    kurz: 'Mehrere Mikrofone, eine Zeitachse',
+    bloecke: [
+      { art: 'p', text: 'Zwei Personen, zwei Ansteckmikrofone, zwei Uhren, die leicht auseinanderlaufen. PrepareAudio findet die gemeinsamen Ereignisse und legt alle Spuren übereinander.' },
+      { art: 'bild', datei: 'sync', text: 'Nach der Analyse: eine Bahn je Sender, darunter die gemeinsamen Ereignisse.' },
+      { art: 'h', text: 'Was gemessen wird' },
+      { art: 'liste', punkte: [
+        '**Versatz**: Wie viel später eine Aufnahme begann, auf Millisekunden genau.',
+        '**Drift**: Wie stark die Uhren auseinanderlaufen, in ppm. Über eine Stunde macht das schnell eine Zehntelsekunde aus.',
+        '**Streuung**: Wie sauber die Messung über die ganze Aufnahme zusammenpasst.',
+        '**Treffer**: In wie vielen Zeitfenstern dieselben Ereignisse in beiden Aufnahmen liegen.',
+      ] },
+      { art: 'p', text: 'Gesucht werden gemeinsame Ereignisse mit gleichbleibendem Zeitversatz, nicht Klangähnlichkeit. Bei zwei Ansteckmikrofonen ist die lauteste Quelle oft gegenläufig; verbindend sind Einsätze wie Silben, Stuhlrücken und Geschirr. Aufnahmen ab etwa einer Minute Überlappung lassen sich messen.' },
+      { art: 'h', text: 'Gemeinsam oder einzeln' },
+      { art: 'liste', punkte: [
+        'Wo Sender dasselbe Geschehen aufnehmen, entsteht eine **gemeinsame Datei** mit einem Kanal je Sender: bei zwei Sendern links und rechts, bei mehreren eine polyphone WAV mit Timecode und Spurnamen.',
+        'Wo ein Sender etwas anderes aufnimmt als die übrigen, entsteht eine **Mono-Datei**.',
+        'Läuft nur ein Sender — Vorlauf, Nachlauf, Ausfall dazwischen — bleibt das in der gemeinsamen Datei, und der fehlende Kanal ist still.',
+      ] },
+      { art: 'hinweis', text: 'Sender, die nie gegeneinander vermessen werden konnten, landen nie in derselben Datei. Zwei Gespräche, die zur selben Zeit in verschiedenen Räumen liefen, bleiben getrennt.' },
+    ],
+  },
+  {
+    id: 'timeline',
+    titel: 'Die Timeline bearbeiten',
+    kurz: 'Abschnitte, Ziel, Position',
+    bloecke: [
+      { art: 'p', text: 'Die Timeline zeigt den Vorschlag der Analyse: eine Bahn je Sender, die Abschnitte als Clips mit Wellenform. Volle Farbe heisst, der Abschnitt kommt in die gemeinsame Datei; hell heisst, er wird eine eigene Mono-Datei.' },
+      { art: 'h', text: 'Klick auf einen Abschnitt' },
+      { art: 'p', text: 'Ein Klick öffnet die Optionen dieses Abschnitts:' },
+      { art: 'liste', punkte: [
+        '**Ziel**: Gemeinsame Datei oder eigene Mono-Datei.',
+        '**Position beim Mastern**: Links, Mitte oder Rechts. Sie bestimmt, wo der Abschnitt später im Stereo-Mixdown sitzt, und gilt je Abschnitt, nicht je Sender.',
+        'Dazu **Am Playhead trennen**, **Zusammenführen**, **Löschen** und **Ab hier abspielen**.',
+      ] },
+      { art: 'h', text: 'Was du sonst tun kannst' },
+      { art: 'liste', punkte: [
+        '**Trimmen und verlängern**: an den Kanten ziehen. Stossen zwei Clips aneinander, verschiebt das Ziehen die gemeinsame Grenze.',
+        '**Löschen und wiederbringen**: Gelöschtes bleibt schraffiert sichtbar.',
+        '**Zeitlich verschieben geht nicht.** Die gemessene Lage jeder Spur ist fest, damit die Sender synchron bleiben.',
+        '**Zoom**: ⌘ mit Mausrad, Zwei-Finger-Geste oder die Knöpfe. **Tag** zeigt alles.',
+        '**Vorhören**: Die Leertaste spielt ab dem Playhead, genau so, wie die Datei entstehen würde. **M** stellt einen Sender stumm, **S** stellt ihn solo.',
+        '**Reset** verwirft alle Bearbeitungen und holt den Vorschlag der Analyse zurück.',
+      ] },
+      { art: 'h', text: 'Sessiongrenzen' },
+      { art: 'p', text: 'Zeit, in der kein Sender aufnahm, wird aus der Timeline herausgenommen. An ihrer Stelle steht eine gestrichelte Linie mit der Dauer der Lücke. So bleibt ein ganzer Tag mit wenigen Gesprächen übersichtlich, und die Wiedergabe springt am Ende einer Session zur nächsten.' },
+      { art: 'hinweis', text: 'Deine Bearbeitung wird als kleine Datei neben den Quellen gespeichert und beim nächsten Analysieren wiederhergestellt. Ist der Ordner nicht beschreibbar, merkt die App sie sich selbst.' },
+    ],
+  },
+  {
+    id: 'mastern',
+    titel: '3 · Mastern',
+    kurz: 'Lautheit und Profile',
+    bloecke: [
+      { art: 'p', text: 'Zieh Dateien oder Ordner hinein, zum Beispiel den Ordner `sync` aus Schritt 2. Die App zeigt je Datei Format, Bittiefe, Abtastrate und Kanäle und misst die Lautheit nach EBU R128 mit True Peak und Lautheitsumfang.' },
+      { art: 'bild', datei: 'master', text: 'Gemessene Lautheit je Datei, unten die Wahl des Profils.' },
+      { art: 'h', text: 'Die beiden Profile' },
+      { art: 'tabelle', kopf: ['Profil', 'Was es tut', 'Wofür'], zeilen: [
+        ['Für Transkription', 'Feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik.', 'Spracherkennung und Sprechertrennung. An echten Interviews geprüft: sie arbeiten damit besser.'],
+        ['Fürs Hören', 'Gleicht zusätzlich die Lautstärken der Sprechenden aus, hebt leise Passagen an und senkt Übersprechen.', 'Anhören, Weitergeben, Veröffentlichen.'],
+      ] },
+      { art: 'p', text: 'Mehrkanalige Dateien werden in beiden Profilen nach den Positionen L, M und R aus Schritt 2 auf Stereo gemischt. Mono bleibt Mono und in der Mitte.' },
+      { art: 'h', text: 'Wie die Lautheit gesetzt wird' },
+      { art: 'liste', punkte: [
+        'Ziel ist −16 LUFS, danach fängt ein Limiter mit Vorausschau die Spitzen bei −1,5 dBTP.',
+        'Die Verstärkung wird zuerst ohne Kodieren eingestellt, dann wird einmal kodiert.',
+        'Das fertige MP3 wird nachgemessen. Liegt es daneben, regelt die App nach und kodiert neu.',
+        'Ausgabe als MP3 mit 192 kbit/s. Mono bleibt Mono, hohe Abtastraten werden auf 44,1 oder 48 kHz heruntergerechnet.',
+      ] },
+      { art: 'hinweis', text: 'Der Fortschritt zählt nur erledigte Arbeit. Er nennt auch den Schritt: Sprache analysieren, Pegel einstellen, MP3 kodieren, Nachmessen.' },
+    ],
+  },
+  {
+    id: 'ergebnisse',
+    titel: 'Ordner und Namen',
+    kurz: 'Wohin alles geschrieben wird',
+    bloecke: [
+      { art: 'p', text: 'Jeder Schritt fragt beim Start, wo gespeichert werden soll, und legt dort seinen Ordner an: `tracks`, `sync` oder `master`. Wählst du einen Ordner, der schon so heisst, wird er direkt benutzt.' },
+      { art: 'h', text: 'Die Namen' },
+      { art: 'liste', punkte: [
+        '`260512_S101500-E104000_D002500_1.wav` — Datum, Start, Ende, Dauer, dann der Quellordner oder die Sender.',
+        '`…_stereo_L-4_R-5.wav` — gemeinsame Datei zweier Sender, links 4, rechts 5.',
+        '`…_poly_1-2-3.wav` — gemeinsame Datei mit einem Kanal je Sender.',
+        '`…_mono_2.wav` — ein Sender allein.',
+      ] },
+      { art: 'h', text: 'Nichts geht verloren' },
+      { art: 'liste', punkte: [
+        'Eine vorhandene Datei wird nie überschrieben. Passt eine gleichnamige Datei zum Ergebnis, gilt sie als erledigt; sonst bekommt die neue eine Nummer.',
+        'Abgebrochene Läufe hinterlassen keine halben Dateien.',
+        'Nach dem Lauf zeigt die App, was geschrieben wurde, und öffnet auf Wunsch den Ordner. Fehlgeschlagenes bleibt mit **Wiederholen** stehen.',
+      ] },
+    ],
+  },
+  {
+    id: 'tasten',
+    titel: 'Tastatur',
+    kurz: 'Alle Tastenkürzel',
+    bloecke: [
+      { art: 'h', text: 'In der Timeline' },
+      { art: 'tasten', zeilen: [
+        ['[[Leertaste]]', 'Abspielen oder anhalten'],
+        ['[[S]]', 'Am Playhead trennen'],
+        ['[[J]]', 'Mit dem nächsten Abschnitt zusammenführen'],
+        ['[[↑]]', 'In die gemeinsame Datei nehmen'],
+        ['[[↓]]', 'Als eigene Mono-Datei ausgeben'],
+        ['[[Entf]]', 'Löschen oder wiederbringen'],
+        ['[[⌘]] [[Z]]', 'Rückgängig'],
+        ['[[⇧]] [[⌘]] [[Z]]', 'Wiederholen'],
+        ['[[⌘]] [[+]] · [[⌘]] [[−]]', 'Zoom'],
+        ['[[0]]', 'Ganzen Tag zeigen'],
+        ['[[Esc]]', 'Auswahl aufheben'],
+      ] },
+      { art: 'h', text: 'Im Handbuch' },
+      { art: 'tasten', zeilen: [
+        ['[[⌘]] [[F]]', 'In die Suche springen'],
+        ['[[Esc]]', 'Suche leeren'],
+      ] },
+    ],
+  },
+  {
+    id: 'daten',
+    titel: 'Daten und Lizenz',
+    kurz: 'Was die App speichert',
+    bloecke: [
+      { art: 'h', text: 'Was auf dem Rechner bleibt' },
+      { art: 'liste', punkte: [
+        'Die App erhebt keine Daten, hat keine Telemetrie, verlangt kein Konto und lädt nichts nach.',
+        'Sie nimmt nichts auf und braucht keinen Zugriff auf das Mikrofon; sie spielt nur ab.',
+        'Arbeitskopien dekodierter Dateien liegen im Zwischenspeicher der App und verschwinden nach 30 Tagen ohne Gebrauch von selbst.',
+        'Deine Bearbeitung der Timeline liegt als kleine Datei neben den Quellen oder im Datenordner der App.',
+        'Die gewählte Sprache und das Profil beim Mastern merkt sich die App lokal.',
+      ] },
+      { art: 'p', text: 'Was in Ergebnissen steht: Dateinamen tragen Datum, Uhrzeit und den Namen des Quellordners. Gemeinsame Dateien tragen Timecode und Spurnamen. MP3-Dateien tragen einen ID3-Eintrag mit dem Dateinamen und dem verwendeten Profil. Eine Kennung deines Geräts oder deiner Person schreibt die App nirgends hinein.' },
+      { art: 'h', text: 'Lizenz' },
+      { art: 'p', text: 'PrepareAudio ist freie Software unter der GNU AGPL, Version 3 oder später. Der Quellcode liegt offen auf GitHub. Die Fassung aus dem Mac App Store ist derselbe Quellcode, mit einer Zusatzerlaubnis nach §7 für den Vertrieb dort. Alle enthaltenen Fremdpakete und ihre Lizenzen stehen im Info-Feld unten links.' },
+      { art: 'p', text: 'Entwickelt am B/IAS – Basel Institut für angewandte Stadtforschung.' },
+    ],
+  },
+];

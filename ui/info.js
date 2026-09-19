@@ -32,6 +32,7 @@
     q('#info-version').textContent = tr('info.version', { version: (app && app.version) || '–', license });
     q('#info-about').innerHTML = `
       <p>${esc(tr('info.about'))}</p>
+      <div class="info-links"><button type="button" id="info-handbuch">${esc(tr('info.handbook'))}</button></div>
       <div class="info-links">${link(PUBLISHER_SITE, tr('info.link.site'))}${link(SOURCE_URL, tr('info.link.source'))}${link(EXCEPTION_URL, tr('info.link.exception'))}${link(PRIVACY_URL, tr('info.link.privacy'))}</div>`;
     const cur = I18N.lang();
     q('#info-lang-section').innerHTML = `
@@ -101,6 +102,12 @@
   q('#info-close').addEventListener('click', () => { modal.hidden = true; });
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.hidden = true;
+    if (e.target.closest('#info-handbuch')) {
+      const core = window.__TAURI__ && window.__TAURI__.core;
+      if (core) core.invoke('handbuch_oeffnen').catch(() => {});
+      else window.open('hilfe.html', '_blank');
+      return;
+    }
     const b = e.target.closest('[data-link]');
     if (b && window.openLink) window.openLink(b.dataset.link);
     const l = e.target.closest('[data-lang]');

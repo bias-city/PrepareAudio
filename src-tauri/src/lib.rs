@@ -439,7 +439,37 @@ fn menue(handle: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wr
             &PredefinedMenuItem::close_window(handle, None)?,
         ],
     )?;
-    Menu::with_items(handle, &[&app, &text, &fenster])
+    // Help: the handbook in its own window (⌘⇧/ like everywhere on macOS). Older macOS refuses
+    // the accelerator on this key — then the entry simply has none.
+    let eintrag = MenuItem::with_id(handle, "handbuch", "PrepareAudio Handbook", true, Some("CmdOrCtrl+Shift+/"))
+        .or_else(|_| MenuItem::with_id(handle, "handbuch", "PrepareAudio Handbook", true, None::<&str>))?;
+    let hilfe = Submenu::with_items(handle, "Help", true, &[&eintrag])?;
+    let menu = Menu::with_items(handle, &[&app, &text, &fenster, &hilfe])?;
+    #[cfg(target_os = "macos")]
+    let _ = hilfe.set_as_help_menu_for_nsapp();
+    Ok(menu)
+}
+
+/// The handbook window (`ui/hilfe.html`), or focus it if it is already open.
+fn hilfe_fenster(handle: &tauri::AppHandle) {
+    use tauri::Manager;
+    if let Some(w) = handle.get_webview_window("hilfe") {
+        let _ = w.unminimize();
+        let _ = w.set_focus();
+        return;
+    }
+    let _ = tauri::WebviewWindowBuilder::new(handle, "hilfe", tauri::WebviewUrl::App("hilfe.html".into()))
+        .title("PrepareAudio Handbook")
+        .inner_size(980.0, 760.0)
+        .min_inner_size(560.0, 420.0)
+        .build();
+}
+
+/// Opens the handbook from the interface (the pill in the info panel).
+#[tauri::command]
+async fn handbuch_oeffnen(app: AppHandle) {
+    let h = app.clone();
+    let _ = app.run_on_main_thread(move || hilfe_fenster(&h));
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -449,6 +479,19 @@ pub fn run() {
         .on_menu_event(|handle, event| {
             if event.id() == "ueber" {
                 let _ = handle.emit("ueber", ());
+            } else if event.id() == "handbuch" {
+                hilfe_fenster(handle);
+            }
+        })
+        // The handbook window does not keep the app alive: it goes with the main window.
+        .on_window_event(|fenster, ereignis| {
+            use tauri::Manager;
+            if fenster.label() == "main" {
+                if let tauri::WindowEvent::Destroyed = ereignis {
+                    if let Some(w) = fenster.app_handle().get_webview_window("hilfe") {
+                        let _ = w.close();
+                    }
+                }
             }
         })
         .plugin(tauri_plugin_dialog::init())
@@ -474,7 +517,8 @@ pub fn run() {
             set_language,
             reveal,
             open_link,
-            channel
+            channel,
+            handbuch_oeffnen
         ])
         .run(tauri::generate_context!())
         .expect("PrepareAudio konnte nicht gestartet werden");
