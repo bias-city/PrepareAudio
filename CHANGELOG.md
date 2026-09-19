@@ -3,7 +3,7 @@
 Alle nennenswerten Änderungen an PrepareAudio. Die GitHub-Release-Notizen einer Version
 sind der entsprechende Abschnitt dieser Datei.
 
-## Unveröffentlicht
+## 0.4.0 — noch nicht veröffentlicht
 
 ### Neu
 

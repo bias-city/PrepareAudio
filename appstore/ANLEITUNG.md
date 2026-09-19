@@ -1,4 +1,4 @@
-# PrepareAudio 0.3.0 im Mac App Store — Anleitung fürs Apple-Portal
+# PrepareAudio 0.4.0 im Mac App Store — Anleitung fürs Apple-Portal
 
 Alles Nötige liegt bereit. Texte: `appstore/texte/<sprache>/` (erzeugt von
 `scripts/appstore-texte.py`, Längen werden geprüft). Bilder: `appstore/upload/<sprache>/`
@@ -22,7 +22,7 @@ Schlüsselbund (von ResearchTranscript).
 Plattform macOS · Name `PrepareAudio` · Hauptsprache wie bei ResearchTranscript · Bundle-ID
 `city.bias.prepareaudio` · SKU `prepareaudio-mac` · Zugriff uneingeschränkt.
 
-## C. Versionsseite 0.3.0, je Sprache (Deutsch, Englisch (UK), Französisch, Italienisch)
+## C. Versionsseite 0.4.0, je Sprache (Deutsch, Englisch (UK), Französisch, Italienisch)
 
 | Feld | Datei |
 |---|---|
@@ -70,4 +70,4 @@ signiert mit der Developer ID, und lässt sich lokal starten.
 - Demo-Paket für die Prüfer: <https://bias.city/prepareaudio/demo/prepareaudio-demo.zip>
 - LAME-Quellen (LGPL): <https://bias.city/prepareaudio/quellen/lame-3.100.tar.gz>
 - Zusatzerlaubnis AGPL §7: `LICENSE-EXCEPTION`, im App-Paket und auf GitHub
-- Website und GitHub-Release stehen auf 0.3.0
+- Website und GitHub-Release stehen auf 0.4.0
