@@ -160,16 +160,16 @@ I18N.add({
   /* ---------- info modal (static parts) ---------- */
   'page.info.what': { de: 'Was die App macht', en: 'What the app does', fr: 'Ce que fait l’app', it: 'Cosa fa l’app' },
   'page.info.step1': {
-    de: '<b>Zusammenfügen:</b> setzt die Aufnahme-Teile eines Audiorecorders bitgenau zu ganzen WAV-Aufnahmen zusammen.',
-    en: '<b>Merge:</b> puts the recording chunks of an audio recorder back together into whole WAV recordings, bit for bit.',
-    fr: '<b>Assembler :</b> réassemble au bit près les fragments d’enregistrement d’un enregistreur audio en enregistrements WAV complets.',
-    it: '<b>Unire:</b> ricompone bit per bit i frammenti di registrazione di un registratore audio in registrazioni WAV complete.',
+    de: '<b>Zusammenfügen:</b> zieht den Ton aus Audio- und Videodateien heraus und setzt die Teile einer Aufnahme wieder zu ganzen WAV-Aufnahmen zusammen, aus WAV-Quellen bitgenau.',
+    en: '<b>Merge:</b> extracts the sound from audio and video files and puts the chunks of a recording back together into whole WAV recordings, bit for bit from WAV sources.',
+    fr: '<b>Assembler :</b> extrait le son des fichiers audio et vidéo et réunit les fragments d’un enregistrement en enregistrements WAV complets, bit à bit depuis des sources WAV.',
+    it: '<b>Unire:</b> estrae il suono da file audio e video e ricompone i frammenti di una registrazione in registrazioni WAV complete, bit per bit dalle sorgenti WAV.',
   },
   'page.info.step2': {
-    de: '<b>Synchronisieren:</b> findet gemeinsame Ereignisse mit gleichbleibendem Zeitversatz und schreibt gemeinsame Abschnitte als Stereo, parallele verschiedene Gespräche als Mono.',
-    en: '<b>Synchronise:</b> finds shared events with a constant time offset and writes shared sections as stereo, separate conversations running in parallel as mono.',
-    fr: '<b>Synchroniser :</b> trouve des événements communs avec un décalage constant et écrit les passages communs en stéréo, les conversations distinctes en parallèle en mono.',
-    it: '<b>Sincronizzare:</b> trova eventi comuni con uno sfasamento costante e scrive le parti comuni in stereo, le conversazioni diverse in parallelo in mono.',
+    de: '<b>Synchronisieren:</b> findet gemeinsame Ereignisse mit gleichbleibendem Zeitversatz und schreibt je Gespräch eine gemeinsame Datei mit einem Kanal je Sender, getrennte Gespräche als Mono.',
+    en: '<b>Synchronise:</b> finds shared events with a constant time offset and writes one shared file per conversation with one channel per transmitter; separate conversations become mono.',
+    fr: '<b>Synchroniser :</b> trouve les événements communs à décalage constant et écrit un fichier commun par conversation, avec un canal par émetteur ; les conversations séparées deviennent mono.',
+    it: '<b>Sincronizzare:</b> trova gli eventi comuni con scarto temporale costante e scrive un file comune per conversazione, con un canale per trasmettitore; le conversazioni separate diventano mono.',
   },
   'page.info.step3': {
     de: '<b>Mastern:</b> misst die Lautheit nach EBU R128 (ITU-R BS.1770-4), bringt sie auf −16 LUFS, begrenzt Spitzen bei −1,5 dBTP und schreibt MP3 mit 192 kbit/s. Wahlweise für die Transkription (ohne Eingriff in die Dynamik) oder fürs Hören (Lautstärken der Sprechenden ausgeglichen).',
@@ -178,10 +178,10 @@ I18N.add({
     it: '<b>Masterizzare:</b> misura la loudness secondo EBU R128 (ITU-R BS.1770-4), la porta a −16 LUFS, limita i picchi a −1,5 dBTP e scrive MP3 a 192 kbit/s. A scelta per la trascrizione (nessun intervento sulla dinamica) o per l’ascolto (livelli di chi parla pareggiati).',
   },
   'page.info.selfContained': {
-    de: 'Alles läuft in der App selbst, ohne installierte Zusatzprogramme. Originaldateien werden nie verändert oder überschrieben.',
-    en: 'Everything runs inside the app itself, without any additional programs installed. Original files are never changed or overwritten.',
-    fr: 'Tout s’exécute dans l’app elle-même, sans programme supplémentaire installé. Les fichiers originaux ne sont jamais modifiés ni écrasés.',
-    it: 'Tutto avviene nell’app stessa, senza programmi aggiuntivi installati. I file originali non vengono mai modificati né sovrascritti.',
+    de: 'Alles läuft in der App selbst, ohne installierte Zusatzprogramme. Originaldateien werden nie verändert oder überschrieben. Das Handbuch öffnet die Pille «Hilfe» unten links.',
+    en: 'Everything runs inside the app itself, without any additional programs installed. Original files are never changed or overwritten. The pill “Help” at the bottom left opens the handbook.',
+    fr: 'Tout se passe dans l’app elle-même, sans programme supplémentaire installé. Les fichiers d’origine ne sont jamais modifiés ni écrasés. Le bouton « Aide » en bas à gauche ouvre le manuel.',
+    it: 'Tutto avviene nell’app stessa, senza programmi aggiuntivi installati. I file originali non vengono mai modificati o sovrascritti. Il pulsante «Aiuto» in basso a sinistra apre il manuale.',
   },
   'page.info.licence': { de: 'Lizenz', en: 'Licence', fr: 'Licence', it: 'Licenza' },
   /* Placeholder until info.js fills #info-license with version details. */

@@ -12,6 +12,9 @@ notarisiertes DMG. Pläne: `docs/PLAN-0.4-PIPELINE.md`, `docs/PLAN-APPSTORE.md`.
 
 ### Behoben
 
+- Das Info-Feld beschrieb die ersten beiden Schritte noch in der alten Fassung: Es nennt jetzt
+  alle Formate samt Video und die gemeinsame Datei mit einem Kanal je Sender.
+
 - **Kein Ordner im Ordner mehr:** Heisst der gewählte Ordner schon `tracks`, `sync` oder
   `master` — gleich wie geschrieben —, schreibt die App direkt hinein statt einen weiteren
   Unterordner anzulegen.
