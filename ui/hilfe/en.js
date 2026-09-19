@@ -12,7 +12,7 @@
       { art: 'schritte', punkte: [
         '**Merge**: The sound is pulled out of everything you drag in, and chunks of the same recording are joined back together. Result: whole recordings as WAV in the folder `tracks`.',
         '**Synchronise**: Several microphones are laid onto a shared timeline. Result: one shared file per conversation in the folder `sync`, plus mono files for everything that ran on its own.',
-        '**Master**: Everything gets the same loudness and becomes easy to hear. Result: MP3 files in the folder `master`.',
+        '**Master**: Everything gets the same loudness and becomes easy to hear. Result: MP3 or WAV files in the folder `master`.',
       ] },
       { art: 'p', text: 'Everything runs on your Mac. There is no account, no server, no telemetry, and the app opens no network connection.' },
       { art: 'hinweis', text: 'Your originals stay untouched. The app never changes or overwrites a source file, and it recognises results that already exist and skips them.' },
@@ -127,21 +127,27 @@
     kurz: 'Loudness and profiles',
     bloecke: [
       { art: 'p', text: 'Drag files or folders in, for example the folder `sync` from step 2. For every file the app shows format, bit depth, sample rate and channels, and measures the loudness according to EBU R128 with True Peak and loudness range.' },
-      { art: 'bild', datei: 'master', text: 'Measured loudness per file, with the choice of profile below.' },
+      { art: 'bild', datei: 'master', text: 'Measured loudness per file, with the choice of profile and format below.' },
       { art: 'h', text: 'The two profiles' },
       { art: 'tabelle', kopf: ['Profile', 'What it does', 'What for'], zeilen: [
         ['For transcription', 'Fixed gain to −16 LUFS, no intervention in the dynamics.', 'Speech recognition and speaker separation. Tested on real interviews: they work better with it.'],
         ['For listening', 'Additionally evens out the levels of the speakers, lifts quiet passages and turns down bleed.', 'Listening, passing on, publishing.'],
       ] },
       { art: 'p', text: 'In both profiles, multichannel files are mixed down to stereo by the positions L, M and R from step 2. Mono stays mono and in the middle.' },
+      { art: 'h', text: 'MP3 or WAV' },
+      { art: 'p', text: 'You choose the format at the bottom right, next to the profile. The choice is remembered.' },
+      { art: 'tabelle', kopf: ['Format', 'What you get', 'What for'], zeilen: [
+        ['MP3', '192 kbit/s. High sample rates are brought down to 44.1 or 48 kHz.', 'Passing on, uploading, transcription services. About a tenth of the size.'],
+        ['WAV', '24 bit in the sample rate of the source. Nothing is resampled, nothing is lost.', 'Archiving, editing, further work. Also sample rates MP3 does not know.'],
+      ] },
       { art: 'h', text: 'How the loudness is set' },
       { art: 'liste', punkte: [
         'The target is −16 LUFS, then a limiter with look-ahead catches the peaks at −1.5 dBTP.',
         'The gain is set first without encoding, then everything is encoded once.',
-        'The finished MP3 is measured again. If it is off, the app readjusts and encodes anew.',
-        'Output as MP3 at 192 kbit/s. Mono stays mono, high sample rates are brought down to 44.1 or 48 kHz.',
+        'For MP3 the finished file is measured again. If it is off, the app readjusts and encodes anew.',
+        'A WAV needs none of that: it holds exactly the signal that was measured. Mono stays mono either way.',
       ] },
-      { art: 'hinweis', text: 'The progress counts only work that is done. It also names the step: analysing speech, setting the level, encoding MP3, measuring again.' },
+      { art: 'hinweis', text: 'The progress counts only work that is done. It also names the step: analysing speech, setting the level, encoding MP3 or writing WAV, measuring again.' },
     ],
   },
   {

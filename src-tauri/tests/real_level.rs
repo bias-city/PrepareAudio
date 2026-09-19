@@ -2,7 +2,8 @@
 //! changed (not run by default; never writes next to the sources):
 //!   PA_LEVEL_IN=/path/file.wav PA_LEVEL_OUT=/tmp/out \
 //!     cargo test --release --test real_level -- --ignored --nocapture
-use prepare_audio_lib::{level::Profile, master};
+//!   optional: PA_LEVEL_FORMAT=wav (default: mp3)
+use prepare_audio_lib::{level::Profile, master, master::Format};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 
@@ -11,6 +12,7 @@ use std::sync::atomic::AtomicBool;
 fn master_one_recording_with_both_profiles() {
     let input = PathBuf::from(std::env::var("PA_LEVEL_IN").expect("PA_LEVEL_IN"));
     let out = PathBuf::from(std::env::var("PA_LEVEL_OUT").expect("PA_LEVEL_OUT"));
+    let format = if std::env::var("PA_LEVEL_FORMAT").as_deref() == Ok("wav") { Format::Wav } else { Format::Mp3 };
     let cancel = AtomicBool::new(false);
     let plan = master::analyze(&[input.clone()], &cancel, &mut |_| {}).unwrap();
     let f = &plan.files[0];
@@ -21,7 +23,7 @@ fn master_one_recording_with_both_profiles() {
     for (profile, sub) in [(Profile::Documentary, "dokumentarisch"), (Profile::Leveler, "hoerfassung")] {
         let dir = out.join(sub);
         let t = std::time::Instant::now();
-        let sum = master::write(&plan, &[f.id], Path::new(&dir), profile, &cancel, |_| {}).unwrap();
+        let sum = master::write(&plan, &[f.id], Path::new(&dir), profile, format, &cancel, |_| {}).unwrap();
         let o = &sum.outcomes[0];
         let path = o.path.as_ref().expect("path");
         let Some(r) = o.result.as_ref() else {

@@ -1,7 +1,7 @@
 //! Mastering against real files (not run by default).
 //!
 //!   PA_MASTER_DIR=/path cargo test --release --test real_master -- --ignored --nocapture
-//!   optional: PA_MASTER_OUT=/tmp/out PA_MASTER_MATCH=part-of-name
+//!   optional: PA_MASTER_OUT=/tmp/out PA_MASTER_MATCH=part-of-name PA_MASTER_FORMAT=wav
 
 use prepare_audio_lib::master;
 use std::path::{Path, PathBuf};
@@ -24,8 +24,9 @@ fn real_master() {
     }
     if let (Ok(out), Ok(pat)) = (std::env::var("PA_MASTER_OUT"), std::env::var("PA_MASTER_MATCH")) {
         let ids: Vec<usize> = plan.files.iter().filter(|f| f.name.contains(&pat)).map(|f| f.id).collect();
+        let format = if std::env::var("PA_MASTER_FORMAT").as_deref() == Ok("wav") { master::Format::Wav } else { master::Format::Mp3 };
         let t = std::time::Instant::now();
-        let sum = master::write(&plan, &ids, Path::new(&out), prepare_audio_lib::level::Profile::default(), &AtomicBool::new(false), |_| {}).unwrap();
+        let sum = master::write(&plan, &ids, Path::new(&out), prepare_audio_lib::level::Profile::default(), format, &AtomicBool::new(false), |_| {}).unwrap();
         println!("write {:.1?}", t.elapsed());
         for o in &sum.outcomes {
             println!("OUT {:?} {:?} {:?} {:?}", o.status, o.path, o.result, o.message);

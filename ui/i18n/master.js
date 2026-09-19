@@ -22,10 +22,10 @@ I18N.add({
     it: '{text} · {done} di {total}',
   },
   'master.outTitle': {
-    de: 'Wo sollen die MP3s gespeichert werden?',
-    en: 'Where should the MP3s be saved?',
-    fr: 'Où enregistrer les MP3 ?',
-    it: 'Dove salvare gli MP3?',
+    de: 'Wo sollen die gemasterten Dateien gespeichert werden?',
+    en: 'Where should the mastered files be saved?',
+    fr: 'Où enregistrer les fichiers masterisés ?',
+    it: 'Dove salvare i file master?',
   },
   'master.preparing': {
     de: 'Vorbereiten…',
@@ -39,8 +39,10 @@ I18N.add({
     fr: '{index} sur {count} terminés · {pct} %',
     it: '{index} di {count} completati · {pct}%',
   },
-  'master.noun.one': { de: 'MP3', en: 'MP3', fr: 'MP3', it: 'MP3' },
-  'master.noun.other': { de: 'MP3s', en: 'MP3s', fr: 'MP3', it: 'MP3' },
+  'master.noun.mp3.one': { de: 'MP3', en: 'MP3', fr: 'MP3', it: 'MP3' },
+  'master.noun.mp3.other': { de: 'MP3s', en: 'MP3s', fr: 'MP3', it: 'MP3' },
+  'master.noun.wav.one': { de: 'WAV', en: 'WAV', fr: 'WAV', it: 'WAV' },
+  'master.noun.wav.other': { de: 'WAVs', en: 'WAVs', fr: 'WAV', it: 'WAV' },
   'master.openLabel': {
     de: 'master öffnen',
     en: 'Open master',
@@ -79,11 +81,25 @@ I18N.add({
     fr: 'Pour la transcription : uniquement un gain fixe à −16 LUFS, aucune intervention sur la dynamique. La reconnaissance vocale et la séparation des locuteurs fonctionnent manifestement mieux ainsi. Pour l’écoute : égalise en plus le niveau des personnes qui parlent et atténue la diaphonie — plus agréable à écouter et à transmettre. Les fichiers multicanaux sont mixés en stéréo selon leurs positions L/M/R dans les deux cas.',
     it: 'Per la trascrizione: solo guadagno fisso a −16 LUFS, nessun intervento sulla dinamica. Il riconoscimento vocale e la separazione dei parlanti funzionano dimostrabilmente meglio. Per l’ascolto: pareggia inoltre i livelli di chi parla e attenua la diafonia — più gradevole da ascoltare e da trasmettere. I file multicanale vengono miscelati in stereo secondo le posizioni L/M/R in entrambi i casi.',
   },
-  'master.stat.target': {
+  'master.stat.target.mp3': {
     de: 'LUFS Ziel · MP3 {kbps} kbit/s · Spitzen {peak} dBTP',
     en: 'LUFS target · MP3 {kbps} kbit/s · peaks {peak} dBTP',
     fr: 'LUFS cible · MP3 {kbps} kbit/s · crêtes {peak} dBTP',
     it: 'LUFS obiettivo · MP3 {kbps} kbit/s · picchi {peak} dBTP',
+  },
+  'master.stat.target.wav': {
+    de: 'LUFS Ziel · WAV {bits} Bit · Spitzen {peak} dBTP',
+    en: 'LUFS target · WAV {bits}-bit · peaks {peak} dBTP',
+    fr: 'LUFS cible · WAV {bits} bits · crêtes {peak} dBTP',
+    it: 'LUFS obiettivo · WAV {bits} bit · picchi {peak} dBTP',
+  },
+  'master.format.mp3': { de: 'MP3', en: 'MP3', fr: 'MP3', it: 'MP3' },
+  'master.format.wav': { de: 'WAV', en: 'WAV', fr: 'WAV', it: 'WAV' },
+  'master.format.title': {
+    de: 'Format der Ausgabe. MP3 mit 192 kbit/s: klein, spielt überall, gut zum Weitergeben und Hochladen. WAV mit 24 Bit: verlustfrei und in der Abtastrate der Quelle, nichts wird umgerechnet — für Archiv und Weiterbearbeitung, dafür rund zehnmal so gross. Beide werden auf −16 LUFS gebracht.',
+    en: 'Format of the output. MP3 at 192 kbit/s: small, plays everywhere, good for passing on and uploading. WAV at 24 bit: lossless and in the sample rate of the source, nothing is resampled — for archiving and further editing, but about ten times as large. Both are brought to −16 LUFS.',
+    fr: 'Format de sortie. MP3 à 192 kbit/s : léger, se lit partout, pratique à transmettre et à téléverser. WAV 24 bits : sans perte et à la fréquence d’échantillonnage de la source, rien n’est rééchantillonné — pour l’archivage et le montage, mais environ dix fois plus volumineux. Les deux sont amenés à −16 LUFS.',
+    it: 'Formato di uscita. MP3 a 192 kbit/s: leggero, si riproduce ovunque, comodo da trasmettere e caricare. WAV a 24 bit: senza perdite e nella frequenza di campionamento della sorgente, nulla viene ricampionato — per archivio e post-produzione, ma circa dieci volte più grande. Entrambi vengono portati a −16 LUFS.',
   },
   'master.stat.files.one': {
     de: 'Datei · {dur}',

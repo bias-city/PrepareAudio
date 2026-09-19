@@ -263,6 +263,7 @@ messages! {
     StageAnalyse => ["Sprache analysieren", "Analysing speech", "Analyse de la parole", "Analisi del parlato"],
     StageLevel => ["Pegel einstellen", "Setting level", "Réglage du niveau", "Regolazione del livello"],
     StageEncode => ["MP3 kodieren", "Encoding MP3", "Encodage MP3", "Codifica MP3"],
+    StageWrite => ["WAV schreiben", "Writing WAV", "Écriture du WAV", "Scrittura del WAV"],
     StageCheck => ["Nachmessen", "Measuring again", "Nouvelle mesure", "Misura di controllo"],
     NoMeasurableLoudness => ["keine messbare Lautheit", "no measurable loudness", "loudness non mesurable", "loudness non misurabile"],
     NoMeasurement => ["keine Messung", "no measurement", "aucune mesure", "nessuna misura"],

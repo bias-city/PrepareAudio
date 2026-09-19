@@ -12,7 +12,7 @@
       { art: 'schritte', punkte: [
         '**Assembler** : le son est extrait de tout ce que tu fais glisser dans la fenêtre, et les fragments d’un même enregistrement sont remis bout à bout. Résultat : des enregistrements complets en WAV dans le dossier `tracks`.',
         '**Synchroniser** : plusieurs micros sont placés sur un axe de temps commun. Résultat : un fichier commun par conversation dans le dossier `sync`, plus des fichiers mono pour tout ce qui a tourné seul.',
-        '**Masteriser** : tout devient également fort et bien audible. Résultat : des fichiers MP3 dans le dossier `master`.',
+        '**Masteriser** : tout devient également fort et bien audible. Résultat : des fichiers MP3 ou WAV dans le dossier `master`.',
       ] },
       { art: 'p', text: 'Tout se passe sur ton Mac. Il n’y a ni compte, ni serveur, ni télémétrie, et l’app n’ouvre aucune connexion réseau.' },
       { art: 'hinweis', text: 'Tes originaux restent intacts. L’app ne modifie ni n’écrase jamais un fichier source, et elle reconnaît les résultats déjà présents pour les ignorer.' },
@@ -127,21 +127,27 @@
     kurz: 'Loudness et profils',
     bloecke: [
       { art: 'p', text: 'Fais glisser des fichiers ou des dossiers, par exemple le dossier `sync` de l’étape 2. Pour chaque fichier, l’app affiche le format, la profondeur de bits, la fréquence d’échantillonnage et les canaux, et mesure la loudness selon EBU R128 avec True Peak et plage de loudness.' },
-      { art: 'bild', datei: 'master', text: 'La loudness mesurée pour chaque fichier, en bas le choix du profil.' },
+      { art: 'bild', datei: 'master', text: 'La loudness mesurée pour chaque fichier, en bas le choix du profil et du format.' },
       { art: 'h', text: 'Les deux profils' },
       { art: 'tabelle', kopf: ['Profil', 'Ce qu’il fait', 'Pour quoi'], zeilen: [
         ['Pour la transcription', 'Gain fixe à −16 LUFS, aucune intervention sur la dynamique.', 'La reconnaissance vocale et la séparation des locuteurs. Vérifié sur de vrais entretiens : elles fonctionnent mieux ainsi.'],
         ['Pour l’écoute', 'Égalise en plus le niveau des personnes qui parlent, remonte les passages faibles et atténue la diaphonie.', 'Écouter, transmettre, publier.'],
       ] },
       { art: 'p', text: 'Dans les deux profils, les fichiers multicanaux sont mixés en stéréo selon les positions L, M et R de l’étape 2. Le mono reste mono et au milieu.' },
+      { art: 'h', text: 'MP3 ou WAV' },
+      { art: 'p', text: 'Tu choisis le format en bas à droite, à côté du profil. Le choix est mémorisé.' },
+      { art: 'tabelle', kopf: ['Format', 'Ce que tu obtiens', 'Pour quoi'], zeilen: [
+        ['MP3', '192 kbit/s. Les fréquences d’échantillonnage élevées sont ramenées à 44,1 ou 48 kHz.', 'Transmettre, téléverser, services de transcription. Environ un dixième de la taille.'],
+        ['WAV', '24 bits à la fréquence d’échantillonnage de la source. Rien n’est rééchantillonné, rien ne se perd.', 'Archivage, montage, suite du travail. Aussi les fréquences que le MP3 ne connaît pas.'],
+      ] },
       { art: 'h', text: 'Comment la loudness est réglée' },
       { art: 'liste', punkte: [
         'La cible est −16 LUFS, ensuite un limiteur à anticipation intercepte les crêtes à −1,5 dBTP.',
         'Le gain est d’abord réglé sans encoder, puis l’encodage a lieu une seule fois.',
-        'Le MP3 terminé est remesuré. S’il tombe à côté, l’app corrige et réencode.',
-        'Sortie en MP3 à 192 kbit/s. Le mono reste mono, les fréquences d’échantillonnage élevées sont ramenées à 44,1 ou 48 kHz.',
+        'Pour le MP3, le fichier terminé est remesuré. S’il tombe à côté, l’app corrige et réencode.',
+        'Le WAV n’en a pas besoin : il contient exactement le signal mesuré. Dans les deux cas, le mono reste mono.',
       ] },
-      { art: 'hinweis', text: 'La progression ne compte que le travail réellement fait. Elle nomme aussi l’étape en cours : analyser la parole, régler le niveau, encoder le MP3, remesurer.' },
+      { art: 'hinweis', text: 'La progression ne compte que le travail réellement fait. Elle nomme aussi l’étape en cours : analyser la parole, régler le niveau, encoder le MP3 ou écrire le WAV, remesurer.' },
     ],
   },
   {

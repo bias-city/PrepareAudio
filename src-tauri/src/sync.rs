@@ -3370,7 +3370,8 @@ mod tests {
         let seg = 200_000..208_000usize;
         let best = (-8i64..=8)
             .max_by(|&x, &y| {
-                let score = |d: i64| seg.clone().map(|k| lr[k].1 as f64 * b[(f0 + k) as usize - shift + d as usize - 0] as f64).sum::<f64>();
+                // i64 throughout: a negative d must not wrap around when it is added to the index.
+                let score = |d: i64| seg.clone().map(|k| lr[k].1 as f64 * b[((f0 + k - shift) as i64 + d) as usize] as f64).sum::<f64>();
                 score(x).total_cmp(&score(y))
             })
             .unwrap();

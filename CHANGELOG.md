@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an PrepareAudio. Die GitHub-Release-Notizen einer Version
 sind der entsprechende Abschnitt dieser Datei.
 
+## Unveröffentlicht
+
+### Neu
+
+- **MP3 oder WAV beim Mastern:** Neben dem Profil steht jetzt die Wahl des Ausgabeformats, sie
+  bleibt gespeichert. **MP3** ist wie bisher 192 kbit/s. **WAV** schreibt 24 Bit in der
+  Abtastrate der Quelle: nichts wird umgerechnet, nichts geht verloren — für Archiv und
+  Weiterbearbeitung. Beide Formate erreichen dasselbe Ziel von −16 LUFS mit Spitzen bei
+  −1,5 dBTP; beim WAV entfallen der Abschlag für den Codec und die Nachmessung, weil in der
+  Datei genau das Signal steht, das gemessen wurde. Abtastraten, die MP3 nicht kennt, werden
+  jetzt je Datei vermerkt und nur beim MP3 übergangen — als WAV gehen sie durch.
+- Über eine Quelldatei schreibt das Mastern nie, auch wenn der gewählte Zielordner der
+  Quellordner ist; in dem Fall entsteht ein Name mit `_2`.
+
 ## 0.3.0 — 2026-09-19
 
 Aus dem Werkzeug für gestückelte Aufnahmen wird eine Kette für alles, was von einem
@@ -24,9 +38,9 @@ notarisiertes DMG. Pläne: `docs/PLAN-0.4-PIPELINE.md`, `docs/PLAN-APPSTORE.md`.
 
 ### Geändert
 
-- **Ablageflächen** in allen drei Schritten in derselben Form: Schrittnummer, ein Satz, der Knopf,
+- **Ablageflächen** in allen drei Schritten in derselben Form: Schrittnummer, ein Satz, der Button,
   das Kleingedruckte. Die gezeichneten Wellenformen als Illustration sind entfallen.
-- Die Pille unten links führt jetzt zum **Handbuch**; das Info-Feld mit den Lizenzen öffnet der
+- Der Button unten links führt jetzt zum **Handbuch**; das Info-Feld mit den Lizenzen öffnet der
   Menüeintrag **About PrepareAudio**.
 
 - Der Übersichtsbalken über der Timeline ist entfallen: seit die Leerzeiten zwischen Sessions
@@ -49,7 +63,7 @@ notarisiertes DMG. Pläne: `docs/PLAN-0.4-PIPELINE.md`, `docs/PLAN-APPSTORE.md`.
   Interviews geprüft, Spracherkennung und Sprechertrennung arbeiten damit besser. «Fürs Hören»
   gleicht zusätzlich die Lautstärken der Sprechenden aus und senkt Übersprechen. Mehrkanalige
   Dateien werden in beiden Fällen nach den Positionen L/M/R aus Schritt 2 auf Stereo gemischt.
-  Umschaltbar unten im Reiter, die Wahl bleibt gespeichert.
+  Umschaltbar unten im Tab, die Wahl bleibt gespeichert.
 - **Beliebig viele Mikrofone:** gemeinsame Abschnitte werden eine polyphone WAV mit einem Kanal
   je Sender, Timecode (bext) und Spurnamen (iXML). Jedes Segment hat eine Position L, M oder R
   für den Stereo-Mixdown beim Mastern; die Timeline zeigt eine Bahn je Sender.
@@ -61,11 +75,11 @@ notarisiertes DMG. Pläne: `docs/PLAN-0.4-PIPELINE.md`, `docs/PLAN-APPSTORE.md`.
 - **Synchronisieren ab 60 Sekunden:** kurze Überlappungen werden in 20-s-Fenstern gemessen.
 - **Timeline ohne Leerzeiten:** Zeit, in der kein Sender aufnahm, entfällt; eine Sessiongrenze
   nennt die entfernte Dauer, die Wiedergabe springt zur nächsten Session.
-- **Layout nach Fenstergrösse:** Segment-Steuerelement, Symbolknöpfe, Statuszeile statt Kacheln,
+- **Layout nach Fenstergrösse:** Segment-Steuerelement, Symbol-Buttons, Statuszeile statt Kacheln,
   Listen als Zeilen über die ganze Breite.
 
-- **Oberfläche an ResearchTranscript angeglichen:** Knöpfe und Reiter als Pillen mit
-  Haarlinie, flache Kopfzeile, «Info» als Pille unten links, Grautöne der Slate-Skala,
+- **Oberfläche an ResearchTranscript angeglichen:** Buttons und Tabs in Pillenform mit
+  Haarlinie, flache Kopfzeile, «Info» als Button unten links, Grautöne der Slate-Skala,
   Zeiten in Festbreitenschrift. Die Werte stehen in `ui/tokens.css`. Aubergine und die
   Timeline bleiben, wie sie waren.
 - **Store-Kanal:** Cargo-Feature `mas`, eigener Lizenzabsatz im Info-Feld, Links auf die

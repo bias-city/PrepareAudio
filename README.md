@@ -1,6 +1,6 @@
 # PrepareAudio
 
-Tauri-App (macOS) von **B/IAS – Basel Institut für angewandte Stadtforschung** (<https://bias.city/prepareaudio>). Sie fügt die WAV-Aufnahme-Teile, in die ein Audiorecorder lange Aufnahmen schneidet (338 MiB je Teil, bei 48 kHz / 32-bit float ca. 30 min 46 s), wieder zu ganzen Aufnahmen zusammen, synchronisiert zwei Audioquellen und mastert als MP3 auf −16 LUFS.
+Tauri-App (macOS) von **B/IAS – Basel Institut für angewandte Stadtforschung** (<https://bias.city/prepareaudio>). Sie fügt die WAV-Aufnahme-Teile, in die ein Audiorecorder lange Aufnahmen schneidet (338 MiB je Teil, bei 48 kHz / 32-bit float ca. 30 min 46 s), wieder zu ganzen Aufnahmen zusammen, synchronisiert zwei Audioquellen und mastert auf −16 LUFS, als MP3 oder als WAV.
 
 Die Oberfläche spricht Deutsch, Englisch, Französisch und Italienisch (`docs/I18N.md`); gewählt wird im Info-Feld, beim ersten Start gilt die Systemsprache.
 
@@ -62,11 +62,14 @@ Dritter Tab. Audiodateien oder Ordner hineinziehen (WAV auch RF64, MP3, M4A/AAC,
   - **Für Transkription** (Standard): nur feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik. An echten Interviews geprüft: Spracherkennung und Sprechertrennung arbeiten damit besser als mit der geregelten Fassung. Mehrkanalige Dateien werden auch hier nach L/M/R auf Stereo gemischt. Bitgleich zu den Fassungen vor 0.3.0.
   - **Fürs Hören**: gleicht die Lautstärken der Sprechenden aus. Je Kanal Hochpass bei 80 Hz, Spracherkennung über den Pegelverlauf, feste Anhebung leiser Sprechender (bis 15 dB), mitlaufende Regelung auf die Kurzzeitlautheit (±12 dB, in Pausen gehalten, vorwärts und rückwärts geglättet, reagiert also vor dem Sprung), Absenken eines Kanals, auf dem gerade nur das Übersprechen einer anderen Person zu hören ist (−12 dB, weich). Danach ein leichter Bus-Kompressor (2:1 ab 6 dB über dem Sprachpegel). Mehrkanalige Dateien werden dabei nach den Positionen L/M/R aus Schritt 2 auf Stereo gemischt (etwa 80 % der Leistung auf der eigenen Seite); Mono bleibt Mono.
 - Danach in beiden Profilen ein Look-ahead-Limiter (5 ms, Release 50 ms) bei −1,5 dBTP.
-- Ausgabe als MP3, CBR 192 kbit/s (LAME, Qualität 2), Mono bleibt Mono, 88,2/96/176,4/192 kHz werden auf 44,1 oder 48 kHz heruntergerechnet.
-- Verstärkung und Limiter werden zuerst ohne Kodieren auf dem begrenzten Signal eingestellt (schnell, mehrere Durchgänge), dann wird einmal kodiert. Der Limiter startet 0,5 dB unter −1,5 dBTP, weil MP3 auf stark begrenzten Aufnahmen Spitzen hinzufügt.
-- Das fertige MP3 wird nachgemessen. Liegt es mehr als 0,3 LU neben dem Ziel oder mit dem True Peak über −1,4 dBTP, wird nachgeregelt und neu kodiert.
-- Der Fortschrittsbalken zählt alle Durchgänge und nennt den aktuellen Schritt (Pegel einstellen, MP3 kodieren, Nachmessen). Mit `PA_MASTER_DEBUG=1` protokolliert der Test `real_master` jeden Durchgang.
-- Ergebnis im Ordner `master`. Vorhandene MP3s gleicher Länge werden erkannt und nicht neu geschrieben.
+- Zwei Ausgabeformate, ebenfalls unten im Tab, die Wahl bleibt gespeichert:
+  - **MP3** (Standard): CBR 192 kbit/s (LAME, Qualität 2). 88,2/96/176,4/192 kHz werden auf 44,1 oder 48 kHz heruntergerechnet. Abtastraten, die MP3 nicht kennt, werden je Datei vermerkt und nur hier übergangen.
+  - **WAV**: 24 Bit in der Abtastrate der Quelle, nichts wird umgerechnet. Der Header wird nach dem Schreiben mit der wirklichen Länge nachgetragen (ab 4 GiB wird der reservierte JUNK-Block zu `ds64`, also RF64).
+  - Mono bleibt in beiden Fällen Mono.
+- Verstärkung und Limiter werden zuerst ohne Kodieren auf dem begrenzten Signal eingestellt (schnell, mehrere Durchgänge), dann wird einmal geschrieben. Beim MP3 startet der Limiter 0,5 dB unter −1,5 dBTP, weil der Codec auf stark begrenzten Aufnahmen Spitzen hinzufügt; beim WAV entfällt dieser Abschlag.
+- Das fertige MP3 wird nachgemessen. Liegt es mehr als 0,3 LU neben dem Ziel oder mit dem True Peak über −1,4 dBTP, wird nachgeregelt und neu kodiert. Beim WAV entfällt die Nachmessung: die Lautheit wird beim Schreiben mitgemessen, denn in der Datei steht genau das gemessene Signal.
+- Der Fortschrittsbalken zählt alle Durchgänge und nennt den aktuellen Schritt (Pegel einstellen, MP3 kodieren oder WAV schreiben, Nachmessen). Mit `PA_MASTER_DEBUG=1` protokolliert der Test `real_master` jeden Durchgang.
+- Ergebnis im Ordner `master`. Vorhandene Dateien gleicher Länge im gewählten Format werden erkannt und nicht neu geschrieben (WAV zusätzlich an der Bittiefe 24, damit eine gleichnamige Quelle nicht für ein Ergebnis gehalten wird). Über eine Quelldatei schreibt die App nie.
 
 Das gewählte Profil steht im ID3-Kommentar des MP3. Gemeinsame Dateien aus Schritt 2 erkennt der Leveler an den Positionen im iXML, ältere an ihrem Namen (`…_stereo_L-4_R-5.wav`). Die App braucht keine installierten Programme: Symphonia liest die Formate, ebur128 misst, LAME 3.100 liegt als austauschbare Bibliothek im App-Paket (`Contents/Frameworks/libmp3lame.dylib`, Anbindung in `src-tauri/src/lame.rs`).
 

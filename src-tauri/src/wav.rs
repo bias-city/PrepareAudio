@@ -322,6 +322,27 @@ pub fn float_fmt(channels: u16, rate: u32) -> Vec<u8> {
     f
 }
 
+/// Integer PCM format block of `bits` bits: plain for one or two channels,
+/// WAVE_FORMAT_EXTENSIBLE (sub format PCM) from three channels on.
+pub fn int_fmt(channels: u16, rate: u32, bits: u16) -> Vec<u8> {
+    let bytes = (bits as u32 + 7) / 8;
+    let block = channels as u32 * bytes;
+    let mut f = Vec::with_capacity(40);
+    f.extend_from_slice(&(if channels > 2 { 0xFFFEu16 } else { 1u16 }).to_le_bytes());
+    f.extend_from_slice(&channels.to_le_bytes());
+    f.extend_from_slice(&rate.to_le_bytes());
+    f.extend_from_slice(&(rate * block).to_le_bytes());
+    f.extend_from_slice(&(block as u16).to_le_bytes());
+    f.extend_from_slice(&bits.to_le_bytes());
+    if channels > 2 {
+        f.extend_from_slice(&22u16.to_le_bytes()); // cbSize
+        f.extend_from_slice(&bits.to_le_bytes()); // valid bits
+        f.extend_from_slice(&0u32.to_le_bytes()); // channel mask: discrete channels
+        f.extend_from_slice(&[0x01, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71]);
+    }
+    f
+}
+
 /// One RIFF chunk with its padding byte.
 pub fn chunk(id: &[u8; 4], body: &[u8]) -> Vec<u8> {
     let mut c = Vec::with_capacity(8 + body.len() + 1);

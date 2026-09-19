@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PrepareAudio – Aufnahme-Teile zusammenfügen, Audioquellen synchronisieren, als MP3 mastern</title>
-<meta name="description" content="WAV-Aufnahme-Teile von Audiorecordern verlustfrei zusammenfügen, zwei Audioquellen synchron als Stereo ausgeben, in einer Timeline bearbeiten und als MP3 auf −16 LUFS mastern. Offline, kostenlos, Open Source unter AGPL. Von B/IAS.">
+<title>PrepareAudio – Aufnahme-Teile zusammenfügen, Audioquellen synchronisieren, mastern</title>
+<meta name="description" content="WAV-Aufnahme-Teile von Audiorecordern verlustfrei zusammenfügen, zwei Audioquellen synchron als Stereo ausgeben, in einer Timeline bearbeiten und als MP3 oder WAV auf −16 LUFS mastern. Offline, kostenlos, Open Source unter AGPL. Von B/IAS.">
 <link rel="canonical" href="https://bias.city/prepareaudio/">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 884 896%22%3E%3Cpath d=%22M870.833,227.083l0,437.5c0,118.432 -96.152,214.583 -214.583,214.583l-429.167,0c-118.432,0 -214.583,-96.152 -214.583,-214.583l0,-437.5c0,-118.432 96.152,-214.583 214.583,-214.583l429.167,0c118.432,0 214.583,96.152 214.583,214.583Z%22 style=%22fill:url(%23_Linear1);stroke:%23000;stroke-opacity:0;stroke-width:2.08px;%22/%3E%3Cpath d=%22M362.849,537.5l0,181.25c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-181.25c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M362.849,322.917l0,87.5c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-87.5c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M249.651,370.484l0,348.615c0,19.354 -15.713,35.068 -35.068,35.068c-19.354,0 -35.068,-15.713 -35.068,-35.068l0,-348.615c0,-19.354 15.713,-35.068 35.068,-35.068c19.354,0 35.068,15.713 35.068,35.068Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M478.487,435.779l0,281.568c0,20.322 -16.499,36.82 -36.82,36.82c-20.322,0 -36.82,-16.499 -36.82,-36.82l0,-281.568c0,-20.322 16.499,-36.82 36.82,-36.82c20.322,0 36.82,16.499 36.82,36.82Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M589.583,618.75l0,100c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-100c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M589.583,173.958l0,31.25c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-31.25c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M589.583,315.625l0,31.25c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-31.25c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M250,173.958l0,31.25c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-31.25c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M704.167,173.958l0,89.583c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-89.583c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cpath d=%22M704.167,366.667l0,352.083c0,19.547 -15.87,35.417 -35.417,35.417c-19.547,0 -35.417,-15.87 -35.417,-35.417l0,-352.083c0,-19.547 15.87,-35.417 35.417,-35.417c19.547,0 35.417,15.87 35.417,35.417Z%22 style=%22fill:%23fff;%22/%3E%3Cdefs%3E%3ClinearGradient id=%22_Linear1%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%220%22 gradientUnits=%22userSpaceOnUse%22 gradientTransform=%22matrix(2.083333,-556.25,556.25,2.083333,304.166667,879.166667)%22%3E%3Cstop offset=%220%22 style=%22stop-color:%23ff5300;stop-opacity:1%22/%3E%3Cstop offset=%221%22 style=%22stop-color:%234f0070;stop-opacity:1%22/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
@@ -349,7 +349,7 @@ const T = {
 de:{
   navGuide:"Anleitung", navDpo:"Datenschutz",
   h1:"Multi-Mic-Field-Recordings und zerteilte Audiodaten für Transkription und Podcast vorbereiten.",
-  lede:"Audiorecorder schneiden lange Aufnahmen in Stücke, Handys und Kameras liefern eigene Formate, und mehrere Mikrofone laufen nie ganz gleich. PrepareAudio zieht den Ton aus allem heraus, fügt Teile verlustfrei zusammen, legt beliebig viele Aufnahmen synchron übereinander und mastert das Ergebnis als MP3. Alles auf deinem Mac: kein Konto, keine Cloud, kein installiertes ffmpeg.",
+  lede:"Audiorecorder schneiden lange Aufnahmen in Stücke, Handys und Kameras liefern eigene Formate, und mehrere Mikrofone laufen nie ganz gleich. PrepareAudio zieht den Ton aus allem heraus, fügt Teile verlustfrei zusammen, legt beliebig viele Aufnahmen synchron übereinander und mastert das Ergebnis als MP3 oder WAV. Alles auf deinem Mac: kein Konto, keine Cloud, kein installiertes ffmpeg.",
   cta:"Herunterladen für macOS", ctaGuide:"Anleitung lesen",
   req:"Für Macs mit Apple Silicon ab macOS 12 · 10 MB · signiert und notarisiert · Deutsch, Englisch, Französisch, Italienisch · kostenlos und Open Source, AGPL-3.0",
   altHero:"Timeline von PrepareAudio: eine Bahn je Sender, gemeinsame Abschnitte in voller Farbe, einzelne heller",
@@ -383,12 +383,12 @@ de:{
   g4h:"Speichern",
   g4a:"«Erzeugen…» fragt nach dem Speicherort und schreibt den Ordner sync: je Gespräch eine gemeinsame Datei — bei zwei Sendern links und rechts, bei mehreren eine polyphone WAV mit Timecode und Spurnamen — dazu Mono-Dateien für alles, was allein lief. Solange gerechnet wird, dreht sich ein Rad, und die Prozente zählen nur erledigte Arbeit.",
   g4b:"Danach leert sich die Liste und meldet «x von x erledigt». Was nicht geklappt hat, bleibt stehen, mit «Wiederholen». So arbeiten alle drei Tabs.",
-  g5h:"Als MP3 mastern",
-  g5a:"Der dritte Tab nimmt WAV, auch RF64 und 32-bit float, dazu MP3, M4A, FLAC, ALAC, AIFF, CAF und OGG. Er zeigt Format, Bittiefe, Abtastrate und Kanäle, misst die Lautheit nach EBU R128 und bietet zwei Profile.",
+  g5h:"Als MP3 oder WAV mastern",
+  g5a:"Der dritte Tab nimmt WAV, auch RF64 und 32-bit float, dazu MP3, M4A, FLAC, ALAC, AIFF, CAF und OGG. Er zeigt Format, Bittiefe, Abtastrate und Kanäle, misst die Lautheit nach EBU R128 und bietet zwei Profile und zwei Ausgabeformate.",
   m1:"Für Transkription (Standard): feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik",
   m2:"Fürs Hören: gleicht zusätzlich die Lautstärken der Sprechenden aus und senkt Übersprechen",
-  m3:"beide: Limiter bei −1,5 dBTP, MP3 mit 192 kbit/s, mehrkanalige Dateien nach L/M/R auf Stereo gemischt",
-  m4:"das fertige MP3 wird nachgemessen und bei Abweichung neu kodiert",
+  m3:"beide: Limiter bei −1,5 dBTP, mehrkanalige Dateien nach L/M/R auf Stereo gemischt",
+  m4:"Ausgabe wahlweise als MP3 mit 192 kbit/s (nachgemessen und bei Abweichung neu kodiert) oder verlustfrei als WAV mit 24 Bit in der Abtastrate der Quelle",
   g5b:"Das Ergebnis liegt im Ordner master. Fürs Transkribieren ist das Standardprofil die bessere Wahl: An echten Interviews geprüft, arbeiten Spracherkennung und Sprechertrennung ohne Regelung besser.",
   g6h:"Handbuch, Sprache und Lizenzen",
   g6a:"Der Button «Hilfe» unten links öffnet das Handbuch: neun Kapitel mit Suche und Bildern, in allen vier Sprachen. Version, Herausgeber, Links zu bias.city und zum Quellcode und alle mitgelieferten Bausteine mit ihren Lizenztexten stehen im Menü unter «About PrepareAudio»; dort wählst du auch die Sprache. Installiert sein muss nichts: Symphonia liest die Formate, ebur128 misst, LAME liegt als austauschbare Bibliothek im App-Paket, cpal spielt die Vorschau.",
@@ -430,7 +430,7 @@ de:{
 en:{
   navGuide:"Guide", navDpo:"Privacy",
   h1:"Prepare multi-mic field recordings and split audio files for transcription and podcast.",
-  lede:"Audio recorders cut long recordings into pieces, phones and cameras deliver formats of their own, and several microphones never run quite alike. PrepareAudio pulls the sound out of all of it, merges chunks losslessly, lays any number of recordings on top of each other in sync and masters the result to MP3. All on your Mac: no account, no cloud, no ffmpeg to install.",
+  lede:"Audio recorders cut long recordings into pieces, phones and cameras deliver formats of their own, and several microphones never run quite alike. PrepareAudio pulls the sound out of all of it, merges chunks losslessly, lays any number of recordings on top of each other in sync and masters the result to MP3 or WAV. All on your Mac: no account, no cloud, no ffmpeg to install.",
   cta:"Download for macOS", ctaGuide:"Read the guide",
   req:"For Macs with Apple Silicon, macOS 12 or later · 10 MB · signed and notarised · German, English, French, Italian · free and open source, AGPL-3.0",
   altHero:"PrepareAudio timeline: one lane per transmitter, shared sections in full colour, separate ones lighter",
@@ -463,12 +463,12 @@ en:{
   g4h:"Saving",
   g4a:"“Create…” asks for a location and writes the folder sync: one shared file per conversation — left and right with two transmitters, a polyphonic WAV with timecode and track names with more — plus mono files for everything that ran alone. While the app computes, a wheel turns, and the percentage counts only finished work.",
   g4b:"Afterwards the list clears and reports “x of x done”. Anything that failed stays, with a retry button. All three tabs work this way.",
-  g5h:"Master to MP3",
-  g5a:"The third tab takes WAV, including RF64 and 32-bit float, plus MP3, M4A, FLAC, ALAC, AIFF, CAF and OGG. It shows format, bit depth, sample rate and channels, measures loudness to EBU R128 and offers two profiles.",
+  g5h:"Master to MP3 or WAV",
+  g5a:"The third tab takes WAV, including RF64 and 32-bit float, plus MP3, M4A, FLAC, ALAC, AIFF, CAF and OGG. It shows format, bit depth, sample rate and channels, measures loudness to EBU R128 and offers two profiles and two output formats.",
   m1:"For transcription (default): fixed gain to −16 LUFS, no intervention in the dynamics",
   m2:"For listening: additionally evens out the levels of the speakers and turns down bleed",
-  m3:"both: limiter at −1.5 dBTP, MP3 at 192 kbit/s, multichannel files mixed down to stereo by L/M/R",
-  m4:"the finished MP3 is measured again and re-encoded if it is off",
+  m3:"both: limiter at −1.5 dBTP, multichannel files mixed down to stereo by L/M/R",
+  m4:"output either as MP3 at 192 kbit/s (measured again and re-encoded if it is off) or lossless as 24-bit WAV in the sample rate of the source",
   g5b:"The result lands in the folder master. For transcription the default profile is the better choice: tested on real interviews, speech recognition and speaker separation work better without levelling.",
   g6h:"Handbook, language and licences",
   g6a:"The “Help” pill at the bottom left opens the handbook: nine chapters with search and images, in all four languages. Version, publisher, links to bias.city and the source code, and every bundled component with its licence text sit in the menu under “About PrepareAudio”; that is also where you pick the language. Nothing needs to be installed: Symphonia reads the formats, ebur128 measures, LAME sits in the app bundle as a replaceable library, cpal plays the preview.",
@@ -506,7 +506,7 @@ en:{
 fr:{
   navGuide:"Mode d'emploi", navDpo:"Protection des données",
   h1:"Prépare des field recordings multi-micros et des fichiers audio fragmentés pour la transcription et le podcast.",
-  lede:"Les enregistreurs audio découpent les longs enregistrements en morceaux, les téléphones et les caméras livrent leurs propres formats, et plusieurs micros ne tournent jamais tout à fait pareil. PrepareAudio en extrait le son, assemble les fragments sans perte, superpose en synchronie autant d’enregistrements que tu veux et masterise le résultat en MP3. Tout sur ton Mac : pas de compte, pas de cloud, pas de ffmpeg à installer.",
+  lede:"Les enregistreurs audio découpent les longs enregistrements en morceaux, les téléphones et les caméras livrent leurs propres formats, et plusieurs micros ne tournent jamais tout à fait pareil. PrepareAudio en extrait le son, assemble les fragments sans perte, superpose en synchronie autant d’enregistrements que tu veux et masterise le résultat en MP3 ou en WAV. Tout sur ton Mac : pas de compte, pas de cloud, pas de ffmpeg à installer.",
   cta:"Télécharger pour macOS", ctaGuide:"Lire le guide",
   req:"Pour Mac avec Apple Silicon, macOS 12 ou plus récent · 10 Mo · signé et notarisé · allemand, anglais, français, italien · gratuit et open source, AGPL-3.0",
   altHero:"Timeline de PrepareAudio : une voie par émetteur, les passages communs en couleur pleine, les passages séparés plus clairs",
@@ -539,12 +539,12 @@ fr:{
   g4h:"Enregistrer",
   g4a:"« Créer… » demande un emplacement et écrit le dossier sync : par conversation un fichier commun — à deux émetteurs, à gauche et à droite ; à plusieurs, un WAV polyphonique avec timecode et noms de pistes — plus des fichiers mono pour tout ce qui tournait seul. Pendant le calcul, une roue tourne, et le pourcentage ne compte que le travail terminé.",
   g4b:"Ensuite la liste se vide et indique « x sur x terminés ». Ce qui a échoué reste, avec un bouton pour réessayer. Les trois onglets fonctionnent ainsi.",
-  g5h:"Masteriser en MP3",
-  g5a:"Le troisième onglet accepte le WAV, y compris RF64 et 32 bits flottants, ainsi que MP3, M4A, FLAC, ALAC, AIFF, CAF et OGG. Il affiche format, profondeur, fréquence et canaux, mesure la loudness selon EBU R128 et propose deux profils.",
+  g5h:"Masteriser en MP3 ou en WAV",
+  g5a:"Le troisième onglet accepte le WAV, y compris RF64 et 32 bits flottants, ainsi que MP3, M4A, FLAC, ALAC, AIFF, CAF et OGG. Il affiche format, profondeur, fréquence et canaux, mesure la loudness selon EBU R128 et propose deux profils et deux formats de sortie.",
   m1:"Pour la transcription (par défaut) : gain fixe à −16 LUFS, aucune intervention sur la dynamique",
   m2:"Pour l’écoute : égalise en plus le niveau des personnes qui parlent et atténue la diaphonie",
-  m3:"les deux : limiteur à −1,5 dBTP, MP3 à 192 kbit/s, fichiers multicanaux mixés en stéréo selon L/M/R",
-  m4:"le MP3 terminé est remesuré et réencodé en cas d’écart",
+  m3:"les deux : limiteur à −1,5 dBTP, fichiers multicanaux mixés en stéréo selon L/M/R",
+  m4:"sortie au choix en MP3 à 192 kbit/s (remesuré et réencodé en cas d’écart) ou en WAV 24 bits sans perte, à la fréquence d’échantillonnage de la source",
   g5b:"Le résultat se trouve dans le dossier master. Pour la transcription, le profil par défaut est le meilleur choix : vérifié sur de vrais entretiens, la reconnaissance vocale et la séparation des locuteurs fonctionnent mieux sans régulation.",
   g6h:"Manuel, langue et licences",
   g6a:"La pastille « Aide » en bas à gauche ouvre le manuel : neuf chapitres avec recherche et images, dans les quatre langues. Version, éditeur, liens vers bias.city et le code source et tous les composants livrés avec leurs textes de licence figurent dans le menu sous « About PrepareAudio » ; c’est aussi là que tu choisis la langue. Rien n’est à installer : Symphonia lit les formats, ebur128 mesure, LAME est une bibliothèque remplaçable dans le paquet de l’app, cpal joue l’aperçu.",
@@ -582,7 +582,7 @@ fr:{
 it:{
   navGuide:"Guida", navDpo:"Protezione dei dati",
   h1:"Prepara field recording multi-microfono e file audio spezzati per trascrizione e podcast.",
-  lede:"I registratori audio tagliano le registrazioni lunghe in pezzi, telefoni e videocamere danno formati propri, e più microfoni non vanno mai esattamente uguali. PrepareAudio estrae il suono da tutto, unisce i frammenti senza perdite, sovrappone in sincrono un numero qualsiasi di registrazioni e masterizza il risultato in MP3. Tutto sul tuo Mac: nessun account, nessun cloud, nessun ffmpeg da installare.",
+  lede:"I registratori audio tagliano le registrazioni lunghe in pezzi, telefoni e videocamere danno formati propri, e più microfoni non vanno mai esattamente uguali. PrepareAudio estrae il suono da tutto, unisce i frammenti senza perdite, sovrappone in sincrono un numero qualsiasi di registrazioni e masterizza il risultato in MP3 o WAV. Tutto sul tuo Mac: nessun account, nessun cloud, nessun ffmpeg da installare.",
   cta:"Scarica per macOS", ctaGuide:"Leggi la guida",
   req:"Per Mac con Apple Silicon, macOS 12 o successivo · 10 MB · firmata e notarizzata · tedesco, inglese, francese, italiano · gratuita e open source, AGPL-3.0",
   altHero:"Timeline di PrepareAudio: una corsia per ogni trasmettitore, i segmenti comuni a colore pieno, quelli separati più chiari",
@@ -615,12 +615,12 @@ it:{
   g4h:"Salvare",
   g4a:"«Crea…» chiede dove salvare e scrive la cartella sync: per ogni conversazione un file comune — con due trasmettitori a sinistra e a destra, con più trasmettitori un WAV polifonico con timecode e nomi delle tracce — più file mono per tutto ciò che è andato da solo. Durante il calcolo gira una ruota, e la percentuale conta solo il lavoro concluso.",
   g4b:"Poi l'elenco si svuota e riporta «x di x completati». Ciò che non è riuscito resta, con un pulsante per riprovare. Le tre schede funzionano così.",
-  g5h:"Masterizzare in MP3",
-  g5a:"La terza scheda accetta WAV, anche RF64 e 32 bit float, oltre a MP3, M4A, FLAC, ALAC, AIFF, CAF e OGG. Mostra formato, profondità di bit, frequenza di campionamento e canali, misura la loudness secondo EBU R128 e offre due profili.",
+  g5h:"Masterizzare in MP3 o WAV",
+  g5a:"La terza scheda accetta WAV, anche RF64 e 32 bit float, oltre a MP3, M4A, FLAC, ALAC, AIFF, CAF e OGG. Mostra formato, profondità di bit, frequenza di campionamento e canali, misura la loudness secondo EBU R128 e offre due profili e due formati di uscita.",
   m1:"Per la trascrizione (predefinito): guadagno fisso a −16 LUFS, nessun intervento sulla dinamica",
   m2:"Per l’ascolto: pareggia inoltre i livelli di chi parla e attenua la diafonia",
-  m3:"entrambi: limiter a −1,5 dBTP, MP3 a 192 kbit/s, i file multicanale miscelati in stereo secondo L/M/R",
-  m4:"l’MP3 finito viene rimisurato e ricodificato se si discosta",
+  m3:"entrambi: limiter a −1,5 dBTP, i file multicanale miscelati in stereo secondo L/M/R",
+  m4:"uscita a scelta come MP3 a 192 kbit/s (rimisurato e ricodificato se si discosta) oppure senza perdite come WAV a 24 bit nella frequenza di campionamento della sorgente",
   g5b:"Il risultato si trova nella cartella master. Per la trascrizione il profilo predefinito è la scelta migliore: verificato su interviste reali, riconoscimento vocale e separazione dei parlanti funzionano meglio senza regolazione.",
   g6h:"Manuale, lingua e licenze",
   g6a:"Il pulsante «Aiuto» in basso a sinistra apre il manuale: nove capitoli con ricerca e immagini, in tutte e quattro le lingue. Versione, editore, link a bias.city e al codice sorgente e tutti i componenti inclusi con i loro testi di licenza stanno nel menu sotto «About PrepareAudio»; lì scegli anche la lingua. Non serve installare nulla: Symphonia legge i formati, ebur128 misura, LAME sta nel pacchetto dell’app come libreria sostituibile, cpal riproduce l’anteprima.",

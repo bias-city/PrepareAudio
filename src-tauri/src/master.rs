@@ -1,7 +1,8 @@
 //! Dritte Funktion „Mastern“: Format jeder Audiodatei erkennen, Lautheit nach
 //! EBU R128 messen, mit einer festen Verstärkung auf −16 LUFS bringen (ein
 //! Look-ahead-Limiter fängt nur die Spitzen bei −1,5 dBTP, die Dynamik bleibt)
-//! und als MP3 mit 192 kbit/s ausgeben.
+//! und ausgeben — wahlweise als MP3 mit 192 kbit/s oder als WAV mit 24 Bit in
+//! der Abtastrate der Quelle (verlustfrei, ohne Umrechnen).
 //!
 //! Alles läuft in der App selbst, ohne installierte Werkzeuge:
 //! WAV (auch RF64) über den eigenen Leser, MP3, AAC/M4A, FLAC, ALAC, AIFF, CAF
@@ -9,6 +10,8 @@
 //! ebur128; der Limiter ist hier implementiert; MP3 kodiert LAME 3.100, das fest
 //! einkompiliert ist. Nach dem Kodieren wird das MP3 nachgemessen und die
 //! Verstärkung notfalls nachgeregelt, bis es höchstens 0,3 LU vom Ziel abweicht.
+//! WAV braucht das nicht: dort steht genau das PCM in der Datei, das gemessen
+//! wurde, und die Lautheit wird beim Schreiben mitgemessen.
 
 use crate::decode::{container, extension, open_reader, Details, SymReader, AUDIO_EXT};
 use crate::i18n::{self, t, tf, Lang, Msg};
@@ -19,10 +22,10 @@ use crate::wav;
 use ebur128::{EbuR128, Mode as R128};
 use crate::lame;
 use crate::level::{Prep, Profile};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
 use std::fs::{self, File};
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::Mutex;
@@ -31,6 +34,9 @@ pub const OUTPUT_DIR_NAME: &str = "master";
 pub const TARGET_LUFS: f64 = -16.0;
 pub const CEILING_DBTP: f64 = -1.5;
 pub const BITRATE_KBPS: u32 = 192;
+/// Bit depth of the WAV output. 24 bit is the usual delivery depth: lossless for every
+/// microphone (its noise floor lies far above the quantisation) and readable everywhere.
+pub const WAV_BITS: u16 = 24;
 const MAX_GAIN_DB: f64 = 40.0;
 const LUFS_TOLERANCE: f64 = 0.3;
 /// MP3 encoding can push true peaks above the PCM ceiling; the result may exceed it by this much at most.
@@ -52,6 +58,27 @@ const W_PREP: f64 = 0.3;
 const ATTACK_S: f64 = 0.005;
 const RELEASE_S: f64 = 0.05;
 const MP3_RATES: [u32; 9] = [8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000];
+
+/// What the master is written as. The choice belongs to the writing step, not to the
+/// analysis: the same measured plan can be written as MP3 or as WAV.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum Format {
+    /// MP3 192 kbit/s: small, plays everywhere, the usual choice for passing on and uploading.
+    #[default]
+    Mp3,
+    /// 24-bit WAV in the sample rate of the source: lossless, nothing is resampled.
+    Wav,
+}
+
+impl Format {
+    pub fn ext(self) -> &'static str {
+        match self {
+            Format::Mp3 => "mp3",
+            Format::Wav => "wav",
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Loudness {
@@ -83,9 +110,12 @@ pub struct AudioFile {
     /// How far peaks would exceed the ceiling after the gain, i.e. what the limiter catches.
     pub limited_db: f64,
     pub note: Option<String>,
+    /// Why this file cannot become an MP3 (sample rate); WAV still works.
+    pub mp3_note: Option<String>,
     /// Raw DJI part (usually already contained in a track).
     pub dji_part: bool,
-    pub out_name: String,
+    /// Output name without extension; the chosen format adds it.
+    pub out_stem: String,
     #[serde(skip)]
     pub path_buf: PathBuf,
 }
@@ -97,6 +127,7 @@ pub struct MasterPlan {
     pub target_lufs: f64,
     pub ceiling_dbtp: f64,
     pub bitrate_kbps: u32,
+    pub wav_bits: u16,
     pub files: Vec<AudioFile>,
     pub ignored: Vec<Skipped>,
     pub engine: String,
@@ -546,15 +577,13 @@ pub fn analyze(inputs: &[PathBuf], cancel: &AtomicBool, progress: &mut dyn FnMut
         } else {
             note = Some(t(Msg::NoteSilence).into());
         }
-        if let Err(e) = mp3_rate(m.rate) {
-            note = Some(e);
-            gain_db = None;
-        }
+        // A rate MP3 cannot take does not block the file: as WAV it is written unchanged.
+        let mp3_note = mp3_rate(m.rate).err();
         let stem = path.file_stem().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-        let mut out_name = format!("{stem}.mp3");
+        let mut out_stem = stem.clone();
         let mut n = 2;
-        while !names.insert(out_name.to_lowercase()) {
-            out_name = format!("{stem}_{n}.mp3");
+        while !names.insert(out_stem.to_lowercase()) {
+            out_stem = format!("{stem}_{n}");
             n += 1;
         }
         out.push(AudioFile {
@@ -577,7 +606,8 @@ pub fn analyze(inputs: &[PathBuf], cancel: &AtomicBool, progress: &mut dyn FnMut
             gain_db,
             limited_db,
             note,
-            out_name,
+            mp3_note,
+            out_stem,
             path_buf: path,
         });
     }
@@ -590,6 +620,7 @@ pub fn analyze(inputs: &[PathBuf], cancel: &AtomicBool, progress: &mut dyn FnMut
         target_lufs: TARGET_LUFS,
         ceiling_dbtp: CEILING_DBTP,
         bitrate_kbps: BITRATE_KBPS,
+        wav_bits: WAV_BITS,
         files: out,
         ignored,
         engine: format!("Symphonia · ebur128 · LAME {}", lame::version()),
@@ -617,9 +648,9 @@ struct Work {
 }
 
 impl Work {
-    fn new(duration: f64) -> Self {
+    fn new(duration: f64, check: f64) -> Self {
         let dur_ms = (duration * 1000.0) as u64;
-        let expected = dur_ms as f64 * (W_PREP + 2.0 * W_SEARCH + W_ENCODE + W_CHECK);
+        let expected = dur_ms as f64 * (W_PREP + 2.0 * W_SEARCH + W_ENCODE + check);
         Work { done: AtomicU64::new(0), total: AtomicU64::new(expected as u64), base: AtomicU64::new(0), dur_ms }
     }
     /// Starts a pass of `weight`; `after` is the weight of the passes that must still follow.
@@ -640,9 +671,13 @@ impl Work {
     }
 }
 
-fn layout(f: &AudioFile, prep: &Prep) -> Result<(usize, u32), String> {
-    let (rate, _) = mp3_rate(f.sample_rate)?;
-    Ok((prep.out_ch, rate))
+/// Channels and sample rate of the output. WAV keeps the rate of the source; MP3 only
+/// knows a fixed set of rates, so a high-resolution source is downsampled by a whole factor.
+fn layout(f: &AudioFile, prep: &Prep, format: Format) -> Result<(usize, u32), String> {
+    match format {
+        Format::Mp3 => Ok((prep.out_ch, mp3_rate(f.sample_rate)?.0)),
+        Format::Wav => Ok((prep.out_ch, f.sample_rate)),
+    }
 }
 
 /// Analysis pass of the chosen profile: gain curves of the leveller and the positions of the
@@ -663,6 +698,7 @@ fn prepare(f: &AudioFile, profile: Profile, cancel: &AtomicBool, on_secs: &mut d
 fn render(
     f: &AudioFile,
     prep: &Prep,
+    format: Format,
     gain_db: f64,
     ceiling_db: f64,
     cancel: &AtomicBool,
@@ -674,7 +710,10 @@ fn render(
     let (ch_in, rate) = (reader.channels(), reader.rate());
     let out_ch = prep.out_ch;
     let mut mixer = prep.mixer();
-    let (_, factor) = mp3_rate(rate)?;
+    let factor = match format {
+        Format::Mp3 => mp3_rate(rate)?.1,
+        Format::Wav => 1,
+    };
     let gain = 10f32.powf(gain_db as f32 / 20.0);
     let mut limiter = Limiter::new(out_ch, rate, 10f32.powf(ceiling_db as f32 / 20.0));
     let mut decimator = (factor > 1).then(|| Decimator::new(out_ch, factor));
@@ -720,10 +759,10 @@ fn render(
 
 /// Integrated loudness of the limited signal as it would go into the encoder
 /// (loudness only: the true peak is judged on the finished MP3).
-fn measure_render(f: &AudioFile, prep: &Prep, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<f64, String> {
-    let (ch, rate) = layout(f, prep)?;
+fn measure_render(f: &AudioFile, prep: &Prep, format: Format, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<f64, String> {
+    let (ch, rate) = layout(f, prep, format)?;
     let mut meter = EbuR128::new(ch as u32, rate, R128::I).map_err(|e| loudness_err(e))?;
-    render(f, prep, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| meter.add_frames_f32(pcm).map_err(|e| loudness_err(e)))?;
+    render(f, prep, format, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| meter.add_frames_f32(pcm).map_err(|e| loudness_err(e)))?;
     Ok(meter.loudness_global().unwrap_or(f64::NEG_INFINITY))
 }
 
@@ -733,19 +772,38 @@ fn debug(f: &AudioFile, msg: String) {
     }
 }
 
-fn encode(f: &AudioFile, prep: &Prep, profile: Profile, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<(), String> {
-    let (out_ch, out_rate) = layout(f, prep)?;
-    let stem = Path::new(&f.out_name).file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+/// Writes the finished file. MP3 has to be measured again afterwards — the encoder shifts
+/// loudness and peaks a little. A WAV holds exactly the PCM that was rendered, so its loudness
+/// is taken while writing (the 24-bit quantisation lies about 140 dB below the signal).
+fn write_out(
+    f: &AudioFile,
+    prep: &Prep,
+    profile: Profile,
+    format: Format,
+    out_path: &Path,
+    gain_db: f64,
+    ceiling_db: f64,
+    cancel: &AtomicBool,
+    on_secs: &mut dyn FnMut(f64),
+) -> Result<Option<Loudness>, String> {
+    match format {
+        Format::Mp3 => encode_mp3(f, prep, profile, out_path, gain_db, ceiling_db, cancel, on_secs).map(|()| None),
+        Format::Wav => write_wav(f, prep, out_path, gain_db, ceiling_db, cancel, on_secs).map(Some),
+    }
+}
+
+fn encode_mp3(f: &AudioFile, prep: &Prep, profile: Profile, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<(), String> {
+    let (out_ch, out_rate) = layout(f, prep, Format::Mp3)?;
     // The documentary profile writes exactly what earlier versions wrote (the byte comparison in
     // the tests rests on it); the leveller names itself.
     let comment = match profile {
         Profile::Documentary => format!("PrepareAudio: {TARGET_LUFS} LUFS"),
         Profile::Leveler => format!("PrepareAudio: {TARGET_LUFS} LUFS, speech levelled for listening"),
     };
-    let mut encoder = lame::Encoder::new(out_ch, out_rate, &stem, &comment).map_err(lame_err)?;
+    let mut encoder = lame::Encoder::new(out_ch, out_rate, &f.out_stem, &comment).map_err(lame_err)?;
     let mut file = BufWriter::with_capacity(1 << 20, File::create(out_path).map_err(|e| e.to_string())?);
     let mut mp3 = Vec::new();
-    render(f, prep, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| {
+    render(f, prep, Format::Mp3, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| {
         encoder.encode(pcm, &mut mp3).map_err(lame_err)?;
         file.write_all(&mp3).map_err(|e| e.to_string())
     })?;
@@ -756,33 +814,83 @@ fn encode(f: &AudioFile, prep: &Prep, profile: Profile, out_path: &Path, gain_db
     Ok(())
 }
 
+/// 24-bit WAV in the sample rate of the source, with the loudness measured on the way.
+fn write_wav(f: &AudioFile, prep: &Prep, out_path: &Path, gain_db: f64, ceiling_db: f64, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<Loudness, String> {
+    let (out_ch, out_rate) = layout(f, prep, Format::Wav)?;
+    let bytes_per_sample = (WAV_BITS / 8) as usize;
+    let fmt = wav::int_fmt(out_ch as u16, out_rate, WAV_BITS);
+    let mut meter = EbuR128::new(out_ch as u32, out_rate, R128::I | R128::LRA | R128::TRUE_PEAK).map_err(|e| loudness_err(e))?;
+    let mut file = BufWriter::with_capacity(1 << 20, File::create(out_path).map_err(|e| e.to_string())?);
+    wav::write_header(&mut file, &fmt, 0, 0, wav::RIFF_LIMIT).map_err(|e| e.to_string())?;
+    let (mut data_len, mut bytes) = (0u64, Vec::new());
+    render(f, prep, Format::Wav, gain_db, ceiling_db, cancel, on_secs, &mut |pcm| {
+        meter.add_frames_f32(pcm).map_err(|e| loudness_err(e))?;
+        bytes.clear();
+        bytes.reserve(pcm.len() * bytes_per_sample);
+        for s in pcm {
+            let v = (*s as f64 * 8_388_608.0).round().clamp(-8_388_608.0, 8_388_607.0) as i32;
+            bytes.extend_from_slice(&v.to_le_bytes()[..bytes_per_sample]);
+        }
+        data_len += bytes.len() as u64;
+        file.write_all(&bytes).map_err(|e| e.to_string())
+    })?;
+    if data_len % 2 == 1 {
+        file.write_all(&[0]).map_err(|e| e.to_string())?;
+    }
+    // Only now is the length known. The header is rewritten in place; the JUNK block reserved
+    // at the start becomes a ds64 block if the file passed the 4 GiB mark of plain RIFF.
+    let mut file = file.into_inner().map_err(|e| e.to_string())?;
+    file.flush().map_err(|e| e.to_string())?;
+    file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let frames = data_len / (out_ch * bytes_per_sample) as u64;
+    wav::write_header(&mut file, &fmt, data_len, frames, wav::RIFF_LIMIT).map_err(|e| e.to_string())?;
+    file.sync_all().map_err(|e| e.to_string())?;
+    let peak = (0..out_ch as u32).filter_map(|c| meter.true_peak(c).ok()).fold(0.0f64, f64::max);
+    Ok(Loudness {
+        lufs: meter.loudness_global().unwrap_or(f64::NEG_INFINITY),
+        true_peak: if peak > 0.0 { 20.0 * peak.log10() } else { f64::NEG_INFINITY },
+        lra: meter.loudness_range().unwrap_or(0.0).max(0.0),
+    })
+}
+
 /// Finds gain and limiter ceiling on the limited PCM first (fast, no encoding;
 /// heavy limiting swallows part of every extra dB, so the step uses the slope
-/// between the last two tries), then encodes once and measures the MP3. Only
-/// if the MP3 is still off (more than 0.3 LU, or MP3 peaks above −1.5 dBTP
-/// + 0.1 dB) the search repeats with the correction and encodes again.
-fn encode_to_target(f: &AudioFile, profile: Profile, part: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
+/// between the last two tries), then writes the file once and measures the
+/// result. Only if an MP3 is still off (more than 0.3 LU, or peaks above
+/// −1,5 dBTP + 0,1 dB) the search repeats with the correction and encodes again.
+/// A WAV holds exactly what was searched for, so one round is normally enough.
+fn encode_to_target(f: &AudioFile, profile: Profile, format: Format, part: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
     let mut gain = f.gain_db.ok_or(t(Msg::NoMeasurableLoudness))?;
+    let w_check = if format == Format::Wav { 0.0 } else { W_CHECK };
     stage(i18n::t(Msg::StageAnalyse));
-    work.begin(W_PREP, 2.0 * W_SEARCH + W_ENCODE + W_CHECK);
+    work.begin(W_PREP, 2.0 * W_SEARCH + W_ENCODE + w_check);
     let prep = prepare(f, profile, cancel, &mut |secs| work.advance(secs, W_PREP))?;
     work.end(W_PREP);
     debug(f, format!("profile {}: static {:?} dB, active {:?}", profile.code(), prep.static_db, prep.active_share));
     let prep = &prep;
-    let mut ceiling = CEILING_DBTP - CODEC_MARGIN_DB;
-    // Loudness the PCM must reach so that the MP3 lands on the target; MP3's
+    // A codec needs headroom and loses a little treble energy; PCM in a WAV needs neither.
+    let (margin, loss) = match format {
+        Format::Mp3 => (CODEC_MARGIN_DB, CODEC_LOUDNESS_LOSS),
+        Format::Wav => (0.0, 0.0),
+    };
+    let mut ceiling = CEILING_DBTP - margin;
+    // Loudness the PCM must reach so that the file lands on the target; MP3's
     // low-pass can take away a little of the (K-weighted) treble energy.
-    let mut pcm_target = TARGET_LUFS + CODEC_LOUDNESS_LOSS;
+    let mut pcm_target = TARGET_LUFS + loss;
     let mut last = None;
     // A levelled signal is dense: the MP3 adds more overshoot and may need more corrections.
-    let rounds = if profile == Profile::Leveler { 5 } else { 3 };
+    let rounds = match (format, profile) {
+        (Format::Wav, _) => 2,
+        (Format::Mp3, Profile::Leveler) => 5,
+        (Format::Mp3, Profile::Documentary) => 3,
+    };
     for round in 0..rounds {
         let mut tries: Vec<(f64, f64)> = Vec::new();
         for _ in 0..5 {
             stage(i18n::t(Msg::StageLevel));
-            work.begin(W_SEARCH, W_ENCODE + W_CHECK);
+            work.begin(W_SEARCH, W_ENCODE + w_check);
             let t = std::time::Instant::now();
-            let lufs = measure_render(f, prep, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_SEARCH))?;
+            let lufs = measure_render(f, prep, format, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_SEARCH))?;
             work.end(W_SEARCH);
             debug(f, format!("search gain {gain:+.2} ceiling {ceiling:.2}: {lufs:.2} LUFS ({:.1?})", t.elapsed()));
             let err = pcm_target - lufs;
@@ -800,19 +908,26 @@ fn encode_to_target(f: &AudioFile, profile: Profile, part: &Path, cancel: &Atomi
             }
             gain = next;
         }
-        stage(i18n::t(Msg::StageEncode));
-        work.begin(W_ENCODE, W_CHECK);
+        stage(i18n::t(if format == Format::Wav { Msg::StageWrite } else { Msg::StageEncode }));
+        work.begin(W_ENCODE, w_check);
         let t = std::time::Instant::now();
-        encode(f, prep, profile, part, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_ENCODE))?;
+        let written = write_out(f, prep, profile, format, part, gain, ceiling, cancel, &mut |secs| work.advance(secs, W_ENCODE))?;
         work.end(W_ENCODE);
-        debug(f, format!("encode ({:.1?})", t.elapsed()));
-        stage(i18n::t(Msg::StageCheck));
-        work.begin(W_CHECK, 0.0);
-        let rate = f.sample_rate as f64;
-        let t = std::time::Instant::now();
-        let result = measure(part, "mp3", cancel, &mut |frames| work.advance(frames as f64 / rate, W_CHECK))?.loudness;
-        work.end(W_CHECK);
-        debug(f, format!("check: {:.2} LUFS, TP {:.2} ({:.1?})", result.lufs, result.true_peak, t.elapsed()));
+        debug(f, format!("write ({:.1?})", t.elapsed()));
+        let result = match written {
+            Some(l) => l,
+            None => {
+                stage(i18n::t(Msg::StageCheck));
+                work.begin(W_CHECK, 0.0);
+                let rate = f.sample_rate as f64;
+                let t = std::time::Instant::now();
+                let l = measure(part, format.ext(), cancel, &mut |frames| work.advance(frames as f64 / rate, W_CHECK))?.loudness;
+                work.end(W_CHECK);
+                debug(f, format!("check ({:.1?})", t.elapsed()));
+                l
+            }
+        };
+        debug(f, format!("result: {:.2} LUFS, TP {:.2}", result.lufs, result.true_peak));
         let err = TARGET_LUFS - result.lufs;
         let over = result.true_peak - CEILING_DBTP;
         let loud_ok = !err.is_finite() || err.abs() <= LUFS_TOLERANCE;
@@ -822,7 +937,7 @@ fn encode_to_target(f: &AudioFile, profile: Profile, part: &Path, cancel: &Atomi
             break;
         }
         if !peak_ok {
-            ceiling -= if profile == Profile::Leveler { 1.3 * over + 0.1 } else { over + 0.05 };
+            ceiling -= if profile == Profile::Leveler && format == Format::Mp3 { 1.3 * over + 0.1 } else { over + 0.05 };
         }
         if !loud_ok {
             pcm_target += err;
@@ -831,10 +946,10 @@ fn encode_to_target(f: &AudioFile, profile: Profile, part: &Path, cancel: &Atomi
     last.ok_or_else(|| t(Msg::NoMeasurement).to_string())
 }
 
-fn master_one(f: &AudioFile, profile: Profile, target: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
+fn master_one(f: &AudioFile, profile: Profile, format: Format, target: &Path, cancel: &AtomicBool, work: &Work, stage: &dyn Fn(&str)) -> Result<Loudness, String> {
     let name = target.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
     let part = target.with_file_name(format!(".{name}.part"));
-    let result = encode_to_target(f, profile, &part, cancel, work, stage).and_then(|l| {
+    let result = encode_to_target(f, profile, format, &part, cancel, work, stage).and_then(|l| {
         if target.exists() {
             return Err(tf(Msg::ExistsMeanwhile, &[("path", &target.display())]));
         }
@@ -847,28 +962,39 @@ fn master_one(f: &AudioFile, profile: Profile, target: &Path, cancel: &AtomicBoo
     result
 }
 
-/// An MP3 of about the same length at the target path counts as an earlier result.
-fn same_mp3(path: &Path, duration: f64) -> bool {
-    let Ok((_, details)) = SymReader::open(path, "mp3", false) else { return false };
-    if details.codec != "mp3" {
-        return false;
+/// A file of the chosen format and about the same length at the target path counts as an
+/// earlier result of this app: MP3 by its bit rate, WAV by its header (24 bit, the depth we
+/// write — a 32-bit float source of the same name is therefore not mistaken for a result).
+fn same_output(path: &Path, duration: f64, format: Format) -> bool {
+    match format {
+        Format::Mp3 => {
+            let Ok((_, details)) = SymReader::open(path, "mp3", false) else { return false };
+            if details.codec != "mp3" {
+                return false;
+            }
+            let estimate = fs::metadata(path).map_or(0.0, |m| m.len() as f64 * 8.0 / (BITRATE_KBPS as f64 * 1000.0));
+            (estimate - duration).abs() <= (duration * 0.02).max(1.0)
+        }
+        Format::Wav => {
+            let Ok(info) = wav::read_info(path) else { return false };
+            info.bits_per_sample == WAV_BITS && (info.duration() - duration).abs() <= (duration * 0.02).max(1.0)
+        }
     }
-    let estimate = fs::metadata(path).map_or(0.0, |m| m.len() as f64 * 8.0 / (BITRATE_KBPS as f64 * 1000.0));
-    (estimate - duration).abs() <= (duration * 0.02).max(1.0)
 }
 
-fn resolve(out_dir: &Path, f: &AudioFile, reserved: &mut HashSet<PathBuf>) -> Option<(PathBuf, bool)> {
-    let stem = f.out_name.trim_end_matches(".mp3");
+fn resolve(out_dir: &Path, f: &AudioFile, format: Format, reserved: &mut HashSet<PathBuf>) -> Option<(PathBuf, bool)> {
+    let (stem, ext) = (&f.out_stem, format.ext());
     for n in 1..1000 {
-        let path = out_dir.join(if n == 1 { format!("{stem}.mp3") } else { format!("{stem}_{n}.mp3") });
-        if reserved.contains(&path) {
+        let path = out_dir.join(if n == 1 { format!("{stem}.{ext}") } else { format!("{stem}_{n}.{ext}") });
+        // Never write over the source, even if it sits in the chosen output folder.
+        if reserved.contains(&path) || path == f.path_buf {
             continue;
         }
         if !path.exists() {
             reserved.insert(path.clone());
             return Some((path, false));
         }
-        if same_mp3(&path, f.duration) {
+        if same_output(&path, f.duration, format) {
             reserved.insert(path.clone());
             return Some((path, true));
         }
@@ -876,30 +1002,43 @@ fn resolve(out_dir: &Path, f: &AudioFile, reserved: &mut HashSet<PathBuf>) -> Op
     None
 }
 
-pub fn write<F: FnMut(&Progress)>(plan: &MasterPlan, ids: &[usize], out_dir: &Path, profile: Profile, cancel: &AtomicBool, mut progress: F) -> Result<MasterSummary, String> {
+pub fn write<F: FnMut(&Progress)>(plan: &MasterPlan, ids: &[usize], out_dir: &Path, profile: Profile, format: Format, cancel: &AtomicBool, mut progress: F) -> Result<MasterSummary, String> {
     fs::create_dir_all(out_dir).map_err(|e| tf(Msg::CannotCreateDir, &[("path", &out_dir.display()), ("e", &e)]))?;
     let mut outcomes = Vec::new();
     let mut todo: Vec<(usize, &AudioFile, PathBuf)> = Vec::new();
     let mut reserved = HashSet::new();
     for f in plan.files.iter().filter(|f| ids.contains(&f.id)) {
-        if f.gain_db.is_none() {
-            let msg = f.note.clone().unwrap_or_else(|| t(Msg::NoMeasurableLoudness).into());
+        // A rate MP3 cannot take only blocks the MP3; the same file goes through as WAV.
+        let blocked = match format {
+            Format::Mp3 => f.mp3_note.clone().or_else(|| f.gain_db.is_none().then(|| f.note.clone().unwrap_or_else(|| t(Msg::NoMeasurableLoudness).into()))),
+            Format::Wav => f.gain_db.is_none().then(|| f.note.clone().unwrap_or_else(|| t(Msg::NoMeasurableLoudness).into())),
+        };
+        if let Some(msg) = blocked {
             outcomes.push(MasterOutcome { id: f.id, status: Status::Failed, path: None, message: Some(msg), result: None });
             continue;
         }
-        match resolve(out_dir, f, &mut reserved) {
+        match resolve(out_dir, f, format, &mut reserved) {
             Some((p, true)) => outcomes.push(MasterOutcome { id: f.id, status: Status::Existing, path: Some(p.display().to_string()), message: None, result: None }),
             Some((p, false)) => todo.push((todo.len(), f, p)),
             None => outcomes.push(MasterOutcome { id: f.id, status: Status::Failed, path: None, message: Some(t(Msg::NoFreeName).into()), result: None }),
         }
     }
-    let need: u64 = todo.iter().map(|(_, f, _)| (f.duration * BITRATE_KBPS as f64 * 125.0) as u64 + 65_536).sum();
+    // Rough upper bound for the space check: MP3 by its bit rate, WAV by rate × channels × 3
+    // bytes (a mixdown never has more than two channels).
+    let need: u64 = todo
+        .iter()
+        .map(|(_, f, _)| match format {
+            Format::Mp3 => (f.duration * BITRATE_KBPS as f64 * 125.0) as u64 + 65_536,
+            Format::Wav => (f.duration * f.sample_rate as f64 * f.channels.clamp(1, 2) as f64 * (WAV_BITS / 8) as f64) as u64 + 65_536,
+        })
+        .sum();
     if let Some(free) = available_bytes(out_dir) {
         if !todo.is_empty() && free < need + (64 << 20) {
             return Err(low_space(need, free));
         }
     }
-    let works: Vec<Work> = todo.iter().map(|(_, f, _)| Work::new(f.duration)).collect();
+    let check = if format == Format::Wav { 0.0 } else { W_CHECK };
+    let works: Vec<Work> = todo.iter().map(|(_, f, _)| Work::new(f.duration, check)).collect();
     let durations: Vec<u64> = todo.iter().map(|(_, f, _)| (f.duration * 1000.0) as u64).collect();
     let finished = AtomicUsize::new(0);
     let finished_ms = AtomicU64::new(0);
@@ -926,7 +1065,7 @@ pub fn write<F: FnMut(&Progress)>(plan: &MasterPlan, ids: &[usize], out_dir: &Pa
                         }
                     }
                 };
-                let r = master_one(f, profile, target, cancel, &works[*i], &stage);
+                let r = master_one(f, profile, format, target, cancel, &works[*i], &stage);
                 if let Ok(mut s) = stages.lock() {
                     s.retain(|a| a.id != f.id);
                 }
@@ -1135,7 +1274,7 @@ mod tests {
         let ids: Vec<usize> = plan.files.iter().map(|f| f.id).collect();
         let mut diff = Vec::new();
         for (profile, out) in [(Profile::Documentary, "doc"), (Profile::Leveler, "lev")] {
-            let sum = write(&plan, &ids, &dir.join(out), profile, &cancel, |_| {}).unwrap();
+            let sum = write(&plan, &ids, &dir.join(out), profile, Format::Mp3, &cancel, |_| {}).unwrap();
             assert_eq!(sum.outcomes[0].status, Status::Written, "{:?}", sum.outcomes[0]);
             let (y, ch, rate) = decoded(&dir.join(out).join("talk.mp3"));
             assert_eq!(ch, 1, "mono stays mono");
@@ -1179,7 +1318,7 @@ mod tests {
         let cancel = AtomicBool::new(false);
         let plan = analyze(&[dir.join("in")], &cancel, &mut |_| {}).unwrap();
         let ids: Vec<usize> = plan.files.iter().map(|f| f.id).collect();
-        let sum = write(&plan, &ids, &dir.join("out"), Profile::Leveler, &cancel, |_| {}).unwrap();
+        let sum = write(&plan, &ids, &dir.join("out"), Profile::Leveler, Format::Mp3, &cancel, |_| {}).unwrap();
         assert_eq!(sum.outcomes[0].status, Status::Written, "{:?}", sum.outcomes[0]);
         let (y, ch, rate) = decoded(&sum.outcomes[0].path.as_ref().map(PathBuf::from).unwrap());
         assert_eq!(ch, 2);
@@ -1225,7 +1364,7 @@ mod tests {
         let out = PathBuf::from(&plan.default_out_dir);
         let mut events: Vec<(usize, u64, u64)> = Vec::new();
         // The reference bytes belong to the documentary profile: fixed gain and limiter only.
-        let sum = write(&plan, &ids, &out, Profile::Documentary, &cancel, |p| events.push((p.index, p.done, p.total))).unwrap();
+        let sum = write(&plan, &ids, &out, Profile::Documentary, Format::Mp3, &cancel, |p| events.push((p.index, p.done, p.total))).unwrap();
         assert!(!events.is_empty());
         for (index, done, total) in &events {
             assert!(done <= total);
@@ -1262,7 +1401,60 @@ mod tests {
             assert!((l.lufs - TARGET_LUFS).abs() <= 0.5, "{} {l:?}", f.name);
         }
 
-        let again = write(&plan, &ids, &out, Profile::Documentary, &cancel, |_| {}).unwrap();
+        let again = write(&plan, &ids, &out, Profile::Documentary, Format::Mp3, &cancel, |_| {}).unwrap();
         assert!(again.outcomes.iter().all(|o| o.status == Status::Existing), "{:?}", again.outcomes);
+    }
+
+    /// The interface sends the format as the plain word it shows; an older interface sends none.
+    #[test]
+    fn the_format_arrives_from_the_interface() {
+        let read = |s: &str| serde_json::from_str::<Option<Format>>(s).unwrap();
+        assert_eq!(read("\"wav\""), Some(Format::Wav));
+        assert_eq!(read("\"mp3\""), Some(Format::Mp3));
+        assert_eq!(read("null").unwrap_or_default(), Format::Mp3);
+        assert!(serde_json::from_str::<Format>("\"flac\"").is_err());
+    }
+
+    /// WAV output: 24 bit, the rate of the source untouched (no downsampling), loudness on
+    /// target, a second run recognises the result, and a rate MP3 cannot take goes through.
+    #[test]
+    fn wav_output_keeps_the_rate_and_takes_any_source() {
+        let dir = tempdir("master-wav");
+        write_float_wav(&dir.join("in/hires.wav"), 96_000, &speechy(11, 96_000, 12, 0.05));
+        // 33 kHz is neither an MP3 rate nor a whole multiple of one.
+        write_float_wav(&dir.join("in/odd.wav"), 33_000, &speechy(12, 33_000, 10, 0.2));
+
+        let cancel = AtomicBool::new(false);
+        let plan = analyze(&[dir.join("in")], &cancel, &mut |_| {}).unwrap();
+        let ids: Vec<usize> = plan.files.iter().map(|f| f.id).collect();
+        let by = |n: &str| plan.files.iter().find(|f| f.name == n).unwrap();
+        assert!(by("odd.wav").mp3_note.is_some(), "the odd rate is noted for MP3");
+        assert!(by("odd.wav").gain_db.is_some(), "but it does not block the file");
+        assert!(by("hires.wav").mp3_note.is_none());
+
+        let out = dir.join("out");
+        let sum = write(&plan, &ids, &out, Profile::Documentary, Format::Wav, &cancel, |_| {}).unwrap();
+        for o in &sum.outcomes {
+            assert_eq!(o.status, Status::Written, "{o:?}");
+            let r = o.result.as_ref().unwrap();
+            assert!((r.lufs - TARGET_LUFS).abs() <= 0.5 && r.true_peak <= CEILING_DBTP + 0.01, "{o:?}");
+        }
+        for (name, rate, secs) in [("hires.wav", 96_000u32, 12.0), ("odd.wav", 33_000, 10.0)] {
+            let info = wav::read_info(&out.join(name)).unwrap();
+            assert_eq!((info.sample_rate, info.bits_per_sample, info.channels), (rate, 24, 1), "{name}");
+            assert!((info.duration() - secs).abs() < 0.01, "{name}: {}", info.duration());
+            let m = measure(&out.join(name), "wav", &cancel, &mut |_| {}).unwrap();
+            assert!((m.loudness.lufs - TARGET_LUFS).abs() <= 0.5, "{name}: {:?}", m.loudness);
+        }
+
+        let again = write(&plan, &ids, &out, Profile::Documentary, Format::Wav, &cancel, |_| {}).unwrap();
+        assert!(again.outcomes.iter().all(|o| o.status == Status::Existing), "{:?}", again.outcomes);
+
+        // As MP3 the odd rate is refused with its note, the other file is written.
+        let mp3 = write(&plan, &ids, &dir.join("mp3"), Profile::Documentary, Format::Mp3, &cancel, |_| {}).unwrap();
+        let of = |n: &str| mp3.outcomes.iter().find(|o| o.id == by(n).id).unwrap();
+        assert_eq!(of("odd.wav").status, Status::Failed);
+        assert!(of("odd.wav").message.as_deref().unwrap_or_default().contains("33000"), "{:?}", of("odd.wav"));
+        assert_eq!(of("hires.wav").status, Status::Written);
     }
 }

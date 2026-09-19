@@ -181,6 +181,10 @@
       <button class="btn small on" data-profile="documentary" data-i18n="master.profile.documentary">Für Transkription</button>
       <button class="btn small" data-profile="leveler" data-i18n="master.profile.leveler">Fürs Hören</button>
     </span>
+    <span class="pillgroup" id="master-format" title="Format der Ausgabe" data-i18n-title="master.format.title">
+      <button class="btn small on" data-format="mp3" data-i18n="master.format.mp3">MP3</button>
+      <button class="btn small" data-format="wav" data-i18n="master.format.wav">WAV</button>
+    </span>
     <div class="go">
       <span class="sel" id="master-sel"></span>
       <button class="btn" id="master-cancel" hidden data-i18n="common.cancel">Abbrechen</button>
@@ -228,7 +232,7 @@
           <ol class="steps">
             <li data-i18n-html="page.info.step1"><b>Zusammenfügen:</b> setzt die Aufnahme-Teile eines Audiorecorders bitgenau zu ganzen WAV-Aufnahmen zusammen.</li>
             <li data-i18n-html="page.info.step2"><b>Synchronisieren:</b> findet gemeinsame Ereignisse mit gleichbleibendem Zeitversatz und schreibt gemeinsame Abschnitte als Stereo, parallele verschiedene Gespräche als Mono.</li>
-            <li data-i18n-html="page.info.step3"><b>Mastern:</b> misst die Lautheit nach EBU R128 (ITU-R BS.1770-4), bringt sie mit fester Verstärkung auf −16 LUFS, begrenzt Spitzen bei −1,5 dBTP und schreibt MP3 mit 192 kbit/s.</li>
+            <li data-i18n-html="page.info.step3"><b>Mastern:</b> misst die Lautheit nach EBU R128 (ITU-R BS.1770-4), bringt sie mit fester Verstärkung auf −16 LUFS, begrenzt Spitzen bei −1,5 dBTP und schreibt MP3 mit 192 kbit/s oder WAV mit 24 Bit.</li>
           </ol>
           <p class="fine-left" data-i18n="page.info.selfContained">Alles läuft in der App selbst, ohne installierte Zusatzprogramme. Originaldateien werden nie verändert oder überschrieben.</p>
         </section>

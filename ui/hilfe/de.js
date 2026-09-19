@@ -12,7 +12,7 @@
       { art: 'schritte', punkte: [
         '**Zusammenfügen**: Der Ton wird aus allem herausgezogen, was du hineinziehst, und Teile derselben Aufnahme werden wieder aneinandergehängt. Ergebnis: ganze Aufnahmen als WAV im Ordner `tracks`.',
         '**Synchronisieren**: Mehrere Mikrofone werden auf eine gemeinsame Zeitachse gelegt. Ergebnis: eine gemeinsame Datei je Gespräch im Ordner `sync`, dazu Mono-Dateien für alles, was allein lief.',
-        '**Mastern**: Alles wird gleich laut und gut hörbar. Ergebnis: MP3-Dateien im Ordner `master`.',
+        '**Mastern**: Alles wird gleich laut und gut hörbar. Ergebnis: MP3- oder WAV-Dateien im Ordner `master`.',
       ] },
       { art: 'p', text: 'Alles läuft auf deinem Mac. Es gibt kein Konto, keinen Server, keine Telemetrie, und die App öffnet keine Netzverbindung.' },
       { art: 'hinweis', text: 'Deine Originale bleiben unangetastet. Die App verändert oder überschreibt nie eine Quelldatei, und schon vorhandene Ergebnisse erkennt sie und überspringt sie.' },
@@ -127,21 +127,27 @@
     kurz: 'Lautheit und Profile',
     bloecke: [
       { art: 'p', text: 'Zieh Dateien oder Ordner hinein, zum Beispiel den Ordner `sync` aus Schritt 2. Die App zeigt je Datei Format, Bittiefe, Abtastrate und Kanäle und misst die Lautheit nach EBU R128 mit True Peak und Lautheitsumfang.' },
-      { art: 'bild', datei: 'master', text: 'Gemessene Lautheit je Datei, unten die Wahl des Profils.' },
+      { art: 'bild', datei: 'master', text: 'Gemessene Lautheit je Datei, unten die Wahl von Profil und Format.' },
       { art: 'h', text: 'Die beiden Profile' },
       { art: 'tabelle', kopf: ['Profil', 'Was es tut', 'Wofür'], zeilen: [
         ['Für Transkription', 'Feste Verstärkung auf −16 LUFS, kein Eingriff in die Dynamik.', 'Spracherkennung und Sprechertrennung. An echten Interviews geprüft: sie arbeiten damit besser.'],
         ['Fürs Hören', 'Gleicht zusätzlich die Lautstärken der Sprechenden aus, hebt leise Passagen an und senkt Übersprechen.', 'Anhören, Weitergeben, Veröffentlichen.'],
       ] },
       { art: 'p', text: 'Mehrkanalige Dateien werden in beiden Profilen nach den Positionen L, M und R aus Schritt 2 auf Stereo gemischt. Mono bleibt Mono und in der Mitte.' },
+      { art: 'h', text: 'MP3 oder WAV' },
+      { art: 'p', text: 'Unten rechts neben dem Profil wählst du das Format. Die Wahl bleibt gespeichert.' },
+      { art: 'tabelle', kopf: ['Format', 'Was du bekommst', 'Wofür'], zeilen: [
+        ['MP3', '192 kbit/s. Hohe Abtastraten werden auf 44,1 oder 48 kHz heruntergerechnet.', 'Weitergeben, hochladen, Transkriptionsdienste. Rund ein Zehntel der Grösse.'],
+        ['WAV', '24 Bit in der Abtastrate der Quelle. Nichts wird umgerechnet, nichts geht verloren.', 'Archiv, Schnitt, Weiterbearbeitung. Auch Abtastraten, die MP3 nicht kennt.'],
+      ] },
       { art: 'h', text: 'Wie die Lautheit gesetzt wird' },
       { art: 'liste', punkte: [
         'Ziel ist −16 LUFS, danach fängt ein Limiter mit Vorausschau die Spitzen bei −1,5 dBTP.',
         'Die Verstärkung wird zuerst ohne Kodieren eingestellt, dann wird einmal kodiert.',
-        'Das fertige MP3 wird nachgemessen. Liegt es daneben, regelt die App nach und kodiert neu.',
-        'Ausgabe als MP3 mit 192 kbit/s. Mono bleibt Mono, hohe Abtastraten werden auf 44,1 oder 48 kHz heruntergerechnet.',
+        'Beim MP3 wird die fertige Datei nachgemessen. Liegt sie daneben, regelt die App nach und kodiert neu.',
+        'Beim WAV entfällt das: dort steht genau das Signal in der Datei, das gemessen wurde. Mono bleibt in beiden Fällen Mono.',
       ] },
-      { art: 'hinweis', text: 'Der Fortschritt zählt nur erledigte Arbeit. Er nennt auch den Schritt: Sprache analysieren, Pegel einstellen, MP3 kodieren, Nachmessen.' },
+      { art: 'hinweis', text: 'Der Fortschritt zählt nur erledigte Arbeit. Er nennt auch den Schritt: Sprache analysieren, Pegel einstellen, MP3 kodieren oder WAV schreiben, Nachmessen.' },
     ],
   },
   {

@@ -12,7 +12,7 @@
       { art: 'schritte', punkte: [
         '**Unire**: il suono viene estratto da tutto ciò che trascini dentro, e i frammenti della stessa registrazione vengono riattaccati l’uno all’altro. Risultato: registrazioni complete in WAV nella cartella `tracks`.',
         '**Sincronizzare**: più microfoni vengono messi su un asse temporale comune. Risultato: un file comune per ogni conversazione nella cartella `sync`, più i file mono per tutto ciò che è andato da solo.',
-        '**Masterizzare**: tutto diventa ugualmente forte e ben udibile. Risultato: file MP3 nella cartella `master`.',
+        '**Masterizzare**: tutto diventa ugualmente forte e ben udibile. Risultato: file MP3 o WAV nella cartella `master`.',
       ] },
       { art: 'p', text: 'Tutto avviene sul tuo Mac. Non c’è nessun account, nessun server, nessuna telemetria, e l’app non apre alcuna connessione di rete.' },
       { art: 'hinweis', text: 'I tuoi originali restano intatti. L’app non modifica né sovrascrive mai un file di origine, e i risultati già presenti li riconosce e li salta.' },
@@ -127,21 +127,27 @@
     kurz: 'Loudness e profili',
     bloecke: [
       { art: 'p', text: 'Trascina dentro file o cartelle, per esempio la cartella `sync` del passo 2. L’app mostra per ogni file formato, profondità di bit, frequenza di campionamento e canali, e misura la loudness secondo EBU R128 con True Peak e gamma di loudness.' },
-      { art: 'bild', datei: 'master', text: 'La loudness misurata di ogni file, sotto la scelta del profilo.' },
+      { art: 'bild', datei: 'master', text: 'La loudness misurata di ogni file, sotto la scelta del profilo e del formato.' },
       { art: 'h', text: 'I due profili' },
       { art: 'tabelle', kopf: ['Profilo', 'Che cosa fa', 'Per che cosa'], zeilen: [
         ['Per la trascrizione', 'Guadagno fisso a −16 LUFS, nessun intervento sulla dinamica.', 'Riconoscimento vocale e separazione dei parlanti. Verificato su interviste reali: così funzionano meglio.'],
         ['Per l’ascolto', 'Pareggia inoltre i livelli di chi parla, alza i passaggi deboli e attenua la diafonia.', 'Ascoltare, passare ad altri, pubblicare.'],
       ] },
       { art: 'p', text: 'In entrambi i profili i file multicanale vengono miscelati in stereo secondo le posizioni L, M e R del passo 2. Il mono resta mono e al centro.' },
+      { art: 'h', text: 'MP3 o WAV' },
+      { art: 'p', text: 'Il formato lo scegli in basso a destra, accanto al profilo. La scelta resta memorizzata.' },
+      { art: 'tabelle', kopf: ['Formato', 'Che cosa ottieni', 'Per che cosa'], zeilen: [
+        ['MP3', '192 kbit/s. Le frequenze di campionamento alte vengono ricalcolate a 44,1 o 48 kHz.', 'Trasmettere, caricare, servizi di trascrizione. Circa un decimo della dimensione.'],
+        ['WAV', '24 bit nella frequenza di campionamento della sorgente. Nulla viene ricampionato, nulla va perso.', 'Archivio, montaggio, lavorazione successiva. Anche frequenze che l’MP3 non conosce.'],
+      ] },
       { art: 'h', text: 'Come viene impostata la loudness' },
       { art: 'liste', punkte: [
         'L’obiettivo è −16 LUFS, poi un limiter con look-ahead intercetta i picchi a −1,5 dBTP.',
         'Il guadagno viene prima impostato senza codificare, poi si codifica una volta sola.',
-        'L’MP3 finito viene rimisurato. Se è fuori bersaglio, l’app corregge e ricodifica.',
-        'Uscita come MP3 a 192 kbit/s. Il mono resta mono, le frequenze di campionamento alte vengono ricalcolate a 44,1 o 48 kHz.',
+        'Per l’MP3 il file finito viene rimisurato. Se è fuori bersaglio, l’app corregge e ricodifica.',
+        'Il WAV non ne ha bisogno: contiene esattamente il segnale misurato. In entrambi i casi il mono resta mono.',
       ] },
-      { art: 'hinweis', text: 'L’avanzamento conta solo il lavoro già svolto. Nomina anche il passo: analisi del parlato, impostazione del livello, codifica MP3, rimisurazione.' },
+      { art: 'hinweis', text: 'L’avanzamento conta solo il lavoro già svolto. Nomina anche il passo: analisi del parlato, impostazione del livello, codifica MP3 o scrittura del WAV, rimisurazione.' },
     ],
   },
   {

@@ -292,7 +292,7 @@ async fn write_sync(
     result.map_err(|e| e.to_string())?
 }
 
-/// Third function: measure loudness, master to -16 LUFS as MP3.
+/// Third function: measure loudness, master to -16 LUFS as MP3 or WAV.
 #[tauri::command]
 async fn analyze_master(app: AppHandle, state: State<'_, AppState>, paths: Vec<String>) -> Result<master::MasterPlan, String> {
     if state.busy.swap(true, Ordering::SeqCst) {
@@ -326,6 +326,7 @@ async fn write_master(
     ids: Vec<usize>,
     out_dir: String,
     profile: Option<level::Profile>,
+    format: Option<master::Format>,
 ) -> Result<master::MasterSummary, String> {
     let plan = state
         .master_plan
@@ -347,7 +348,7 @@ async fn write_master(
     let cancel = state.cancel.clone();
     let busy = state.busy.clone();
     let result = tauri::async_runtime::spawn_blocking(move || {
-        master::write(&plan, &ids, Path::new(&out_dir), profile.unwrap_or_default(), &cancel, |p| {
+        master::write(&plan, &ids, Path::new(&out_dir), profile.unwrap_or_default(), format.unwrap_or_default(), &cancel, |p| {
             let _ = app.emit("master-write-progress", p);
         })
     })

@@ -1,6 +1,6 @@
 'use strict';
 
-/* Third function: measure loudness, master to -16 LUFS, MP3 192 kbit/s.
+/* Third function: measure loudness, master to -16 LUFS, as MP3 192 kbit/s or 24-bit WAV.
    Shares esc, fmtDur, fmtBytes, toast and setMode with app.js. Texts: ui/i18n/master.js. */
 (() => {
   const { invoke } = window.__TAURI__.core;
@@ -16,14 +16,22 @@
     analyzing: q('#master-analyzing'), abar: q('#master-abar'), atext: q('#master-atext'), topActions: q('#master-top-actions'),
   };
   const PROFILE_KEY = 'prepareaudio.master.profile';
+  const FORMAT_KEY = 'prepareaudio.master.format';
   // Default: the profile for transcription — speech recognition and speaker separation work
   // measurably better without levelling (tested on real interviews, 19.9.2026).
   const storedProfile = () => { try { return localStorage.getItem(PROFILE_KEY) === 'leveler' ? 'leveler' : 'documentary'; } catch (e) { return 'documentary'; } };
-  const ms = { inputs: [], plan: null, outDir: '', selected: new Set(), outcomes: new Map(), busy: false, activeId: null, stages: new Map(), profile: storedProfile() };
+  // Default MP3: small enough to pass on and to upload. WAV is the lossless choice.
+  const storedFormat = () => { try { return localStorage.getItem(FORMAT_KEY) === 'wav' ? 'wav' : 'mp3'; } catch (e) { return 'mp3'; } };
+  const ms = {
+    inputs: [], plan: null, outDir: '', selected: new Set(), outcomes: new Map(), busy: false,
+    activeId: null, stages: new Map(), profile: storedProfile(), format: storedFormat(),
+  };
   window.masterState = ms;
   // Remembered so a language switch can redraw texts that are not part of render().
   const ui = { finishedSum: null, partial: null, analyzeP: null, writeP: null, cancelling: false };
 
+  const canMaster = (f) => f.gain_db != null && !(ms.format === 'mp3' && f.mp3_note);
+  const outName = (f) => `${f.out_stem}.${ms.format}`;
   const busyAny = () => ms.busy || !!(window.mergeState && window.mergeState.busy) || !!(window.syncState && window.syncState.busy);
   const dec = (v, d = 1) => v.toLocaleString(I18N.locale(), { minimumFractionDigits: d, maximumFractionDigits: d });
   const signed = (v, d = 1) => `${v < 0 ? '−' : '+'}${dec(Math.abs(v), d)}`;
@@ -84,7 +92,7 @@
 
   async function runWrite(retryIds) {
     if (!ms.plan || busyAny()) return;
-    const ids = retryIds || ms.plan.files.filter((f) => ms.selected.has(f.id)).map((f) => f.id);
+    const ids = retryIds || ms.plan.files.filter((f) => ms.selected.has(f.id) && canMaster(f)).map((f) => f.id);
     if (!ids.length) return;
     if (!retryIds) {
       let out = null;
@@ -108,7 +116,7 @@
     E.ptext.textContent = tr('master.preparing');
     render();
     try {
-      const sum = await invoke('write_master', { ids, outDir: ms.outDir, profile: ms.profile });
+      const sum = await invoke('write_master', { ids, outDir: ms.outDir, profile: ms.profile, format: ms.format });
       for (const o of sum.outcomes) ms.outcomes.set(o.id, o);
       finishRun(sum);
     } catch (e) {
@@ -125,7 +133,7 @@
 
   function showFinished(sum) {
     window.finishedCard(E.finished, sum, {
-      noun: [tr('master.noun.one'), tr('master.noun.other')],
+      noun: [tr(`master.noun.${ms.format}.one`), tr(`master.noun.${ms.format}.other`)],
       openLabel: tr('master.openLabel'),
       newLabel: tr('master.newLabel'),
       onNew: () => { ui.finishedSum = null; render(); },
@@ -183,8 +191,26 @@
     renderProfile();
   });
 
+  /* Output format: MP3 to pass on, WAV lossless. Also kept per computer. */
+  const formatGroup = q('#master-format');
+  function renderFormat() {
+    formatGroup.querySelectorAll('[data-format]').forEach((b) => {
+      b.classList.toggle('on', b.dataset.format === ms.format);
+      b.disabled = ms.busy;
+    });
+  }
+  formatGroup.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-format]');
+    if (!b || ms.busy || b.dataset.format === ms.format) return;
+    ms.format = b.dataset.format;
+    try { localStorage.setItem(FORMAT_KEY, ms.format); } catch (err) { /* storage unavailable */ }
+    // The names, the target line and what can be written all depend on the format.
+    render();
+  });
+
   function render() {
     renderProfile();
+    renderFormat();
     const P = ms.plan;
     E.empty.hidden = !!P || !E.finished.hidden;
     E.results.hidden = !P;
@@ -201,7 +227,7 @@
       })
       : '–';
     E.summary.innerHTML = `
-      <div class="stat lead"><div class="n">${signed(P.target_lufs, 0)}</div><div class="l">${esc(tr('master.stat.target', { kbps: P.bitrate_kbps, peak: signed(P.ceiling_dbtp) }))}</div></div>
+      <div class="stat lead"><div class="n">${signed(P.target_lufs, 0)}</div><div class="l">${esc(tr(`master.stat.target.${ms.format}`, { kbps: P.bitrate_kbps, bits: P.wav_bits, peak: signed(P.ceiling_dbtp) }))}</div></div>
       <div class="stat"><div class="n">${P.files.length}</div><div class="l">${esc(trn('master.stat.files', P.files.length, { dur: fmtDur(total) }))}</div></div>
       <div class="stat"><div class="n">${esc(range)}</div><div class="l">${esc(tr('master.stat.range'))}</div></div>
       <div class="roots" title="${esc(P.roots.join('\n'))}">${esc(tr('master.analysed', { roots: P.roots.join(' · ') }))}</div>`;
@@ -240,11 +266,11 @@
     } else if (ms.busy && on) {
       status = `<div class="status existing">${esc(tr('master.waiting'))}</div>`;
     }
-    const canMaster = f.gain_db != null;
+    const writable = canMaster(f);
     const measuredText = l && Number.isFinite(l.lufs)
       ? tr('master.measured', { lufs: lufs(l.lufs), tp: dbtp(l.true_peak), lra: dec(l.lra) })
       : tr('master.noLoudness');
-    const gainText = canMaster
+    const gainText = writable
       ? ` · ${tr('master.gain', { gain: signed(f.gain_db) })}${f.limited_db >= 0.5 ? ` · ${tr('master.limiter', { db: dec(f.limited_db) })}` : ''}`
       : '';
     const result = o && o.result
@@ -253,9 +279,11 @@
     const meter = l && Number.isFinite(l.lufs)
       ? `<div class="meter" title="${esc(tr('master.meterTitle'))}"><i class="m-target" style="left:${meterX(P.target_lufs)}"></i><i class="m-in" style="left:${meterX(l.lufs)}"></i>${o && o.result ? `<i class="m-out" style="left:${meterX(o.result.lufs)}"></i>` : ''}</div>`
       : '';
+    // The MP3 note only matters while MP3 is chosen; as WAV the file goes through unchanged.
+    const note = [f.note, ms.format === 'mp3' ? f.mp3_note : null].filter(Boolean).join(' · ') || null;
     return `
     <div class="rec${on ? '' : ' off'}" data-id="${f.id}">
-      <input type="checkbox" data-mid="${f.id}" ${on ? 'checked' : ''} ${ms.busy || !canMaster ? 'disabled' : ''} aria-label="${esc(tr('master.selectFile'))}">
+      <input type="checkbox" data-mid="${f.id}" ${on ? 'checked' : ''} ${ms.busy || !writable ? 'disabled' : ''} aria-label="${esc(tr('master.selectFile'))}">
       <div class="when">
         <span class="time">${esc(f.name)}</span>
         <span class="dur">${fmtDur(f.duration)}</span>
@@ -263,9 +291,9 @@
         ${f.dji_part ? `<span class="tag" title="${esc(tr('master.partTitle'))}">${esc(tr('master.partTag'))}</span>` : ''}
       </div>
       ${status}
-      <div class="meta"><span>${fmtBytes(f.size)}</span><span class="out">${esc(f.out_name)}</span></div>
+      <div class="meta"><span>${fmtBytes(f.size)}</span><span class="out">${esc(outName(f))}</span></div>
       <div class="loud">${meter}<span>${esc(measuredText + gainText)}</span>${result}</div>
-      ${f.note ? `<div class="note">${esc(f.note)}</div>` : ''}
+      ${note ? `<div class="note">${esc(note)}</div>` : ''}
       ${o && o.message ? `<div class="errmsg">${esc(o.message)}</div>` : ''}
     </div>`;
   }
@@ -273,7 +301,7 @@
   function updateSelection() {
     const P = ms.plan;
     if (!P) return;
-    const chosen = P.files.filter((f) => ms.selected.has(f.id));
+    const chosen = P.files.filter((f) => ms.selected.has(f.id) && canMaster(f));
     const secs = chosen.reduce((s, f) => s + f.duration, 0);
     E.sel.textContent = chosen.length ? trn('master.sel', chosen.length, { dur: fmtDur(secs) }) : tr('master.nothingSelected');
     E.go.disabled = !chosen.length || ms.busy;
