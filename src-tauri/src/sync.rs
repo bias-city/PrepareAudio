@@ -1461,7 +1461,14 @@ fn analyze_pair(ta: &Track, tb: &Track, ea: &Env, eb: &Env, cancel: &AtomicBool)
                 p.ok = true;
                 p.offset = fit.offset;
                 p.drift = fit.drift;
-                p.drift_ppm = fit.drift * 1e6;
+                // Over a short overlap the slope is measurement noise (a few ms across the
+                // windows read as tens of ppm): keep the offset of the middle, assume no drift.
+                let (ov0, ov1) = span(&p, ta, tb);
+                if ov1 - ov0 < SHORT_OVERLAP_S {
+                    p.offset = fit.offset + fit.drift * (ov0 + ov1) / 2.0;
+                    p.drift = 0.0;
+                }
+                p.drift_ppm = p.drift * 1e6;
             }
         }
     }

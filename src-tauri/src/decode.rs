@@ -501,3 +501,36 @@ fn find_box(f: &mut File, from: u64, to: u64, kind: &[u8; 4]) -> Option<(u64, u6
     }
     None
 }
+
+#[cfg(test)]
+mod probe {
+    /// Reads every file in PA_PROBE_DIR and reports what the decoder makes of it (not run by default):
+    ///   PA_PROBE_DIR=/path cargo test --release --lib probe_files -- --ignored --nocapture
+    #[test]
+    #[ignore]
+    fn probe_files() {
+        let dir = std::env::var("PA_PROBE_DIR").expect("PA_PROBE_DIR");
+        let mut files: Vec<_> = std::fs::read_dir(dir).unwrap().filter_map(|e| e.ok()).map(|e| e.path()).collect();
+        files.sort();
+        for f in files {
+            let ext = super::extension(&f);
+            let hint = if ext == "mov" || ext == "m4v" { "mp4".to_string() } else { ext.clone() };
+            match super::open_reader(&f, &hint) {
+                Ok((mut r, _)) => {
+                    let (mut buf, mut n) = (Vec::new(), 0usize);
+                    let res = loop {
+                        buf.clear();
+                        match r.read(&mut buf) {
+                            Ok(true) => n += buf.len(),
+                            Ok(false) => break Ok(()),
+                            Err(e) => break Err(e),
+                        }
+                    };
+                    let secs = n as f64 / r.channels().max(1) as f64 / r.rate().max(1) as f64;
+                    println!("PROBE {:<14} ok  {} ch  {} Hz  {:.2} s  {:?}", f.file_name().unwrap().to_string_lossy(), r.channels(), r.rate(), secs, res);
+                }
+                Err(e) => println!("PROBE {:<14} FEHLER {e}", f.file_name().unwrap().to_string_lossy()),
+            }
+        }
+    }
+}
