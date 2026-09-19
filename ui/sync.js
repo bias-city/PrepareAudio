@@ -49,9 +49,35 @@
   const colorOf = (label) => COLORS[Math.max(0, P().labels.indexOf(label)) % COLORS.length];
   const keyOf = (c) => `${c.track}:${c.t0.toFixed(3)}`;
   const day = () => ed.days[ed.dayIndex];
+  /* Display time: stretches of the day in which no sender recorded anything are taken out of
+     the timeline (a day with a few sessions would otherwise be mostly empty). `ed.view.t0` and
+     every span on screen are display seconds `u`; U() and Tu() translate from and to timeline
+     seconds. A session boundary is drawn where a gap was removed. */
+  const SESSION_GAP = 60, SESSION_PAD = 4;
+  const sessions = () => (day() ? day().sessions : []);
+  function U(t) {
+    const ss = sessions();
+    if (!ss.length) return t;
+    if (t <= ss[0].t0) return t - ss[0].t0;
+    for (const s of ss) {
+      if (t < s.t0) return s.u0;               // inside a removed gap: the boundary
+      if (t <= s.t1) return s.u0 + (t - s.t0);
+    }
+    const last = ss[ss.length - 1];
+    return last.u0 + (t - last.t0);
+  }
+  function Tu(u) {
+    const ss = sessions();
+    if (!ss.length) return u;
+    if (u <= 0) return ss[0].t0 + u;
+    for (const s of ss) if (u <= s.u0 + (s.t1 - s.t0)) return s.t0 + (u - s.u0);
+    const last = ss[ss.length - 1];
+    return last.t0 + (u - last.u0);
+  }
+  const daySpan = () => (day() ? day().total : 0);
   const visibleSpan = () => (ed.width - LABEL_W) * ed.view.spp;
-  const X = (t) => LABEL_W + (t - ed.view.t0) / ed.view.spp;
-  const T = (x) => ed.view.t0 + (x - LABEL_W) * ed.view.spp;
+  const X = (t) => LABEL_W + (U(t) - ed.view.t0) / ed.view.spp;
+  const T = (x) => Tu(ed.view.t0 + (x - LABEL_W) * ed.view.spp);
   const playheadNow = () => (ed.playing ? ed.posT + (performance.now() - ed.posAt) / 1000 : ed.playhead);
 
   /** Colour mixed towards white: mono clips are the pale version of their sender colour. */
@@ -79,6 +105,13 @@
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${ss}`;
   }
 
+  /** "3 h 12 min", "47 min", "90 s": how much empty time a session boundary stands for. */
+  function gapText(secs) {
+    if (secs < 120) return `${Math.round(secs)} s`;
+    const m = Math.round(secs / 60);
+    return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`;
+  }
+
   function buildDays() {
     const plan = P();
     const groups = new Map();
@@ -89,8 +122,25 @@
     ed.days = [...groups.entries()].map(([key, ids]) => {
       const ext = ids.map((i) => [toTimeline(i, 0), toTimeline(i, plan.tracks[i].duration)]);
       const anchor = ids.find((i) => place(i).s === 1) ?? ids[0];
+      // Sessions: merged extents of all tracks; a gap of a minute or more separates two.
+      const sessions = [];
+      for (const [a, b] of ext.slice().sort((x, y) => x[0] - y[0])) {
+        const last = sessions[sessions.length - 1];
+        if (last && a - last.t1 < SESSION_GAP) last.t1 = Math.max(last.t1, b);
+        else sessions.push({ t0: a, t1: b });
+      }
+      let u = 0;
+      sessions.forEach((s, i) => {
+        const before = i ? (s.t0 - sessions[i - 1].t1) / 2 : SESSION_PAD;
+        const after = i + 1 < sessions.length ? (sessions[i + 1].t0 - s.t1) / 2 : SESSION_PAD;
+        s.gap = i ? s.t0 - sessions[i - 1].t1 : 0;   // removed time before this session
+        s.t0 -= Math.min(SESSION_PAD, before);
+        s.t1 += Math.min(SESSION_PAD, after);
+        s.u0 = u;
+        u += s.t1 - s.t0;
+      });
       return {
-        key, tracks: ids,
+        key, tracks: ids, sessions, total: u,
         t0: Math.min(...ext.map((e) => e[0])), t1: Math.max(...ext.map((e) => e[1])),
         midnight: place(anchor).p - plan.tracks[anchor].clock0,
       };
@@ -122,25 +172,24 @@
   function fitDay() {
     const d = day();
     if (!d) return;
-    const pad = Math.max(30, (d.t1 - d.t0) * 0.01);
-    ed.view.spp = Math.max(MIN_SPP, (d.t1 - d.t0 + 2 * pad) / Math.max(100, ed.width - LABEL_W));
-    ed.view.t0 = d.t0 - pad;
+    const pad = Math.max(2, daySpan() * 0.01);
+    ed.view.spp = Math.max(MIN_SPP, (daySpan() + 2 * pad) / Math.max(100, ed.width - LABEL_W));
+    ed.view.t0 = -pad;
   }
 
   function clampView() {
-    const d = day();
-    const span = d.t1 - d.t0;
+    const span = daySpan();
     const maxSpp = (span * 1.1 + 60) / Math.max(100, ed.width - LABEL_W);
     ed.view.spp = Math.min(Math.max(ed.view.spp, MIN_SPP), maxSpp);
     const vis = visibleSpan();
-    ed.view.t0 = Math.min(Math.max(ed.view.t0, d.t0 - vis * 0.5), d.t1 - vis * 0.5);
+    ed.view.t0 = Math.min(Math.max(ed.view.t0, -vis * 0.5), span - vis * 0.5);
   }
 
   function zoomAt(factor, x) {
-    const t = T(x);
+    const u = ed.view.t0 + (x - LABEL_W) * ed.view.spp;
     ed.view.spp *= factor;
     clampView();
-    ed.view.t0 = t - (x - LABEL_W) * ed.view.spp;
+    ed.view.t0 = u - (x - LABEL_W) * ed.view.spp;
     clampView();
     schedulePeaks();
     draw();
@@ -157,11 +206,12 @@
     const plan = P();
     const d = day();
     if (!plan || !d) return;
-    const vt0 = ed.view.t0, vt1 = ed.view.t0 + visibleSpan();
-    const buckets = Math.max(50, Math.round(ed.width - LABEL_W));
+    const vt0 = T(LABEL_W), vt1 = T(ed.width);
     await Promise.all(d.tracks.map(async (t) => {
-      const a = toTrack(t, vt0), b = toTrack(t, vt1);
-      if (b < 0 || a > plan.tracks[t].duration) return;
+      // Only the visible part of the track, at one value per pixel it covers.
+      const a = Math.max(0, toTrack(t, vt0)), b = Math.min(plan.tracks[t].duration, toTrack(t, vt1));
+      if (b <= a) return;
+      const buckets = Math.max(50, Math.round(X(toTimeline(t, b)) - X(toTimeline(t, a))));
       try {
         const data = await invoke('sync_peaks', { track: t, t0: a, t1: b, buckets });
         ed.peaks.set(t, { t0: a, t1: b, data });
@@ -337,10 +387,39 @@
     ctx.fillStyle = v('--faint'); ctx.strokeStyle = v('--line');
     ctx.font = '10.5px -apple-system, system-ui, sans-serif';
     const mid = day().midnight;
-    for (let t = Math.ceil((ed.view.t0 - mid) / step) * step + mid; t < ed.view.t0 + visibleSpan(); t += step) {
-      const x = X(t);
-      ctx.beginPath(); ctx.moveTo(x + 0.5, RULER_H - 7); ctx.lineTo(x + 0.5, RULER_H); ctx.stroke();
-      ctx.fillText(clockText(t, step < 1), x + 3, 13);
+    const [seenFrom, seenTo] = [T(LABEL_W), T(W)];
+    for (const s of sessions()) {
+      const [from, to] = [Math.max(s.t0, seenFrom), Math.min(s.t1, seenTo)];
+      if (to <= from) continue;
+      for (let t = Math.ceil((from - mid) / step) * step + mid; t < to; t += step) {
+        const x = X(t);
+        if (X(s.t1) - x < 46 && s !== sessions()[sessions().length - 1]) continue; // label would cross the boundary
+        ctx.beginPath(); ctx.moveTo(x + 0.5, RULER_H - 7); ctx.lineTo(x + 0.5, RULER_H); ctx.stroke();
+        ctx.fillText(clockText(t, step < 1), x + 3, 13);
+      }
+    }
+    // session boundaries: where empty time was taken out
+    let pillEnd = [-Infinity, -Infinity]; // right edge of the last label per row: close boundaries stack
+    for (const s of sessions()) {
+      if (!s.gap) continue;
+      const x = Math.round(X(s.t0)) + 0.5;
+      if (x < LABEL_W || x > W) continue;
+      ctx.save();
+      ctx.strokeStyle = v('--ink'); ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ed.height); ctx.stroke();
+      ctx.setLineDash([]);
+      const text = `⋯ ${gapText(s.gap)}`;
+      ctx.font = '600 10px -apple-system, system-ui, sans-serif';
+      const tw = ctx.measureText(text).width + 10;
+      const cx = Math.min(Math.max(x, LABEL_W + tw / 2 + 2), W - tw / 2 - 2);   // never under the header or off the edge
+      const row = cx - tw / 2 > pillEnd[0] + 3 ? 0 : 1;
+      pillEnd[row] = cx + tw / 2;
+      const py = RULER_H - 1 + row * 16;
+      ctx.fillStyle = v('--ink');
+      ctx.beginPath(); ctx.roundRect(cx - tw / 2, py, tw, 14, 7); ctx.fill();
+      ctx.fillStyle = v('--bg'); ctx.textAlign = 'center';
+      ctx.fillText(text, cx, py + 10.5);
+      ctx.restore();
     }
 
     // headers
@@ -414,9 +493,10 @@
     const ctx = c.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
-    const pad = (d.t1 - d.t0) * 0.02 + 30;
-    const o0 = d.t0 - pad, o1 = d.t1 + pad;
-    const ox = (t) => ((t - o0) / (o1 - o0)) * W;
+    const pad = daySpan() * 0.02 + 2;
+    const o0 = -pad, o1 = daySpan() + pad;                 // display seconds, like the timeline
+    const ou = (u) => ((u - o0) / (o1 - o0)) * W;
+    const ox = (t) => ou(U(t));
     ed.overviewMap = { o0, o1, W };
     const labels = P().labels.filter((l) => d.tracks.some((t) => labelOf(t) === l));
     const laneH = (H - 6) / Math.max(1, labels.length);
@@ -428,7 +508,9 @@
       ctx.fillRect(a, 3 + li * laneH, Math.max(1, b - a), laneH - 1);
     }
     ctx.strokeStyle = v('--ink'); ctx.lineWidth = 1.5;
-    const va = ox(ed.view.t0), vb = ox(ed.view.t0 + visibleSpan());
+    ctx.fillStyle = v('--ink');
+    for (const s of sessions()) if (s.gap) ctx.fillRect(Math.round(ox(s.t0)) - 0.5, 0, 1, H);
+    const va = ou(ed.view.t0), vb = ou(ed.view.t0 + visibleSpan());
     ctx.strokeRect(Math.max(0.75, va), 0.75, Math.min(W - 1.5, vb - va), H - 1.5);
     const p = ox(playheadNow());
     ctx.fillStyle = v('--ink');
@@ -619,8 +701,8 @@
     const m = ed.overviewMap;
     if (!m) return;
     const r = E.overview.getBoundingClientRect();
-    const t = m.o0 + ((e.clientX - r.left) / m.W) * (m.o1 - m.o0);
-    ed.view.t0 = t - visibleSpan() / 2;
+    const u = m.o0 + ((e.clientX - r.left) / m.W) * (m.o1 - m.o0);
+    ed.view.t0 = u - visibleSpan() / 2;
     clampView();
     schedulePeaks();
     draw();
@@ -801,7 +883,7 @@
   function followPlayhead() {
     const x = X(playheadNow());
     if (x > ed.width - 30 || x < LABEL_W) {
-      ed.view.t0 = playheadNow() - visibleSpan() * 0.1;
+      ed.view.t0 = U(playheadNow()) - visibleSpan() * 0.1;
       clampView();
       schedulePeaks();
     }
@@ -819,6 +901,12 @@
     ed.posT = p.t;
     ed.posAt = performance.now();
     ed.playhead = p.t;
+    // Nothing was recorded between two sessions: playback jumps to the next one.
+    if (p.playing) {
+      const ss = sessions();
+      const next = ss.find((s, i) => i > 0 && p.t > ss[i - 1].t1 && p.t < s.t0);
+      if (next) invoke('player_seek', { t: next.t0 }).catch(() => {});
+    }
     E.play.textContent = p.playing ? '❚❚' : '▶';
     if (p.playing && !was) requestAnimationFrame(loop);
     if (!p.playing) draw();
@@ -1145,7 +1233,7 @@
     if (di >= 0 && di !== ed.dayIndex) { ed.dayIndex = di; ed.peaks.clear(); render(); fitDay(); }
     const span = it.kind === 'stereo' ? it.t1 - it.t0 : it.duration;
     ed.view.spp = Math.max(MIN_SPP, (span * 1.2) / Math.max(100, ed.width - LABEL_W));
-    ed.view.t0 = t - span * 0.1;
+    ed.view.t0 = U(t) - span * 0.1;
     clampView();
     seek(t);
     schedulePeaks();

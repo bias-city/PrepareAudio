@@ -3,6 +3,7 @@
 
   python3 scripts/demo-material.py <zielordner>            klein (82 MB), für die App-Prüfung
   python3 scripts/demo-material.py <zielordner> --kurz     je Sender eine Datei von 100 s, Mastern 20 s
+  … --kurz --start 14:05 --seed 2                          weitere Session in denselben Ordner
   python3 scripts/demo-material.py <zielordner> --gross    Teile über 100 MiB (ca. 560 MB): so
       gelten sie der App als «volle Teile» und die Liste zeigt keinen Hinweis — für Bildschirmfotos
 
@@ -32,7 +33,13 @@ GROSS = "--gross" in sys.argv
 KURZ = "--kurz" in sys.argv  # je Sender EINE Datei von 100 s: Test mit kurzen Aufnahmen
 SR = 48_000 if GROSS else 24_000
 DATUM = "2026-05-12"
-START = (10, 15, 0)  # Uhrzeit Sender 1
+def _option(name, default):
+    return sys.argv[sys.argv.index(name) + 1] if name in sys.argv else default
+
+
+# --start HH:MM und --seed N: mehrere Sessions in denselben Ordner erzeugen (mehrfach aufrufen)
+START = (*map(int, _option("--start", "10:15").split(":")), 0)  # Uhrzeit Sender 1
+SEED = int(_option("--seed", "20260512"))
 MIN = 60 * SR
 # gross: 32-bit float, 9,5 min je Teil = 104 MiB; klein: 16 bit, 4,5 min je Teil
 TEILE = [int(9.5 * MIN), int(9.5 * MIN), 6 * MIN] if GROSS else [int(4.5 * MIN), int(4.5 * MIN), 3 * MIN]
@@ -132,10 +139,10 @@ def sender(ziel: Path, name: str, x: np.ndarray, start_s: float) -> None:
 
 
 def main() -> None:
-    if len([a for a in sys.argv[1:] if not a.startswith('--')]) != 1:
+    if not sys.argv[1:] or sys.argv[1].startswith('--'):
         sys.exit(__doc__)
-    ziel = Path([a for a in sys.argv[1:] if not a.startswith('--')][0])
-    rng = np.random.default_rng(20260512)
+    ziel = Path(sys.argv[1])
+    rng = np.random.default_rng(SEED)
     n = sum(TEILE)
     extra = int((VERSATZ_S + 1) * SR)
     N = n + extra  # gemeinsame Szene, etwas länger als eine Aufnahme

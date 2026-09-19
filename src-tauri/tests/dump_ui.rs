@@ -16,7 +16,9 @@ fn dump_ui_data_in_every_language() {
     let sync_dirs: Vec<PathBuf> = std::env::var("PA_DUMP_SYNC").expect("PA_DUMP_SYNC").split('|').map(PathBuf::from).collect();
     let out = PathBuf::from(std::env::var("PA_DUMP_DIR").expect("PA_DUMP_DIR"));
     std::fs::create_dir_all(&out).unwrap();
-    for lang in ["de", "en", "fr", "it"] {
+    // PA_DUMP_LANGS=de limits the run to one language (real recordings take minutes each).
+    let langs = std::env::var("PA_DUMP_LANGS").unwrap_or_else(|_| "de,en,fr,it".into());
+    for lang in langs.split(',') {
         assert!(i18n::set(lang));
         let s = scan::scan(&scan_dirs, &scan::Options::default()).unwrap();
         std::fs::write(out.join(format!("scan-{lang}.json")), serde_json::to_string(&s).unwrap()).unwrap();
