@@ -106,14 +106,15 @@ async function lauf(lang, dunkel, motive, groesse) {
 }
 for (const g of GROESSEN) { await lauf(SPRACHEN[0], DUNKEL, ["leer", "merge", "sync", "master", "info"], g); console.log("✓", g.join("x")); }
 /** Das Handbuch ist eine eigene Seite: eigener Aufruf, gleiche Grösse wie die übrigen Motive. */
-async function handbuchSeite(lang) {
-  const page = await browser.newPage({ viewport: { width: B, height: H }, deviceScaleFactor: F });
+async function handbuchSeite(lang, groesse) {
+  const [b, h] = groesse || [B, H];
+  const page = await browser.newPage({ viewport: { width: b, height: h }, deviceScaleFactor: F });
   await page.addInitScript(`localStorage.setItem("prepareaudio.lang", ${JSON.stringify(lang)}); localStorage.setItem("prepareaudio.hilfe.kapitel", "timeline");`);
   await page.goto(BASIS + "hilfe.html");
   await page.waitForTimeout(400);
-  const datei = path.join(ZIEL, lang, `${String(REIHE.indexOf("handbuch") + 1).padStart(2, "0")}-handbuch.jpg`);
+  const datei = SITE ? path.join(ZIEL, `handbuch-${lang}.png`) : path.join(ZIEL, lang, `${String(REIHE.indexOf("handbuch") + 1).padStart(2, "0")}-handbuch.jpg`);
   fs.mkdirSync(path.dirname(datei), { recursive: true });
-  await page.screenshot({ path: datei, type: "jpeg", quality: 92 });
+  await page.screenshot(SITE ? { path: datei } : { path: datei, type: "jpeg", quality: 92 });
   await page.close();
 }
 
@@ -121,6 +122,7 @@ for (const lang of GROESSEN.length ? [] : SPRACHEN) {
   if (SITE) {
     await lauf(lang, false, ["hero"], [1600, 1000]);
     await lauf(lang, false, ["merge", "sync", "edit", "done", "master", "info"], [1200, 750]);
+    await handbuchSeite(lang, [1200, 750]);
   } else if (STORE) {
     await lauf(lang, false, ["leer", "merge", "sync", "master", "info"]);
     await lauf(lang, true, ["sync"]);
