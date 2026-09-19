@@ -737,7 +737,7 @@ fn encode(f: &AudioFile, prep: &Prep, profile: Profile, out_path: &Path, gain_db
     // the tests rests on it); the leveller names itself.
     let comment = match profile {
         Profile::Documentary => format!("PrepareAudio: {TARGET_LUFS} LUFS"),
-        Profile::Leveler => format!("PrepareAudio: {TARGET_LUFS} LUFS, speech leveller"),
+        Profile::Leveler => format!("PrepareAudio: {TARGET_LUFS} LUFS, speech levelled for listening"),
     };
     let mut encoder = lame::Encoder::new(out_ch, out_rate, &stem, &comment).map_err(lame_err)?;
     let mut file = BufWriter::with_capacity(1 << 20, File::create(out_path).map_err(|e| e.to_string())?);

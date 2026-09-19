@@ -40,11 +40,13 @@ const PAN_MID: f32 = std::f32::consts::FRAC_1_SQRT_2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Profile {
-    /// Speech leveller with stereo mixdown (default).
+    /// Fixed gain only, no intervention in the dynamics. The default: speech recognition and
+    /// speaker separation work measurably better on it (tested on real interviews, 19.9.2026).
+    /// Multichannel files are still mixed down to stereo by their positions.
     #[default]
-    Leveler,
-    /// Fixed gain only, no intervention in the dynamics.
     Documentary,
+    /// Additionally levels the speakers and turns down bleed: for listening and passing on.
+    Leveler,
 }
 
 impl Profile {

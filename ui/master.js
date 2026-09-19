@@ -16,7 +16,9 @@
     analyzing: q('#master-analyzing'), abar: q('#master-abar'), atext: q('#master-atext'), topActions: q('#master-top-actions'),
   };
   const PROFILE_KEY = 'prepareaudio.master.profile';
-  const storedProfile = () => { try { return localStorage.getItem(PROFILE_KEY) === 'documentary' ? 'documentary' : 'leveler'; } catch (e) { return 'leveler'; } };
+  // Default: the profile for transcription — speech recognition and speaker separation work
+  // measurably better without levelling (tested on real interviews, 19.9.2026).
+  const storedProfile = () => { try { return localStorage.getItem(PROFILE_KEY) === 'leveler' ? 'leveler' : 'documentary'; } catch (e) { return 'documentary'; } };
   const ms = { inputs: [], plan: null, outDir: '', selected: new Set(), outcomes: new Map(), busy: false, activeId: null, stages: new Map(), profile: storedProfile() };
   window.masterState = ms;
   // Remembered so a language switch can redraw texts that are not part of render().

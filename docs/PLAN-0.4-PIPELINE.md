@@ -64,8 +64,10 @@ beim Mastern in der Mitte.
 ### P3 — Mastern als Sprach-Leveler mit Stereo-Mixdown ✔ (19.9., Hörtest durch den User offen)
 
 Gebaut in `src-tauri/src/level.rs` (Voranalyse in 10-ms-Schritten, Gain-Kurven, Mixdown) und
-angebunden in `master.rs` (`Profile`, ein zusätzlicher Lesedurchgang `W_PREP`). Der Leveler ist
-Standard, «Dokumentarisch» bleibt bitgleich zu 0.2.0 (Test `MP3_GOLDEN`). VAD ist vorerst eine
+angebunden in `master.rs` (`Profile`, ein zusätzlicher Lesedurchgang `W_PREP`). **Standard ist «Für Transkription»** (der frühere
+«Dokumentarisch», bitgleich zu 0.2.0, Test `MP3_GOLDEN`): der Hörtest des Users an echten
+Interviews vom 19.9. zeigte, dass Whisper und die Sprechertrennung damit besser arbeiten.
+«Fürs Hören» ist der Leveler. VAD ist vorerst eine
 Pegel-Schwelle mit Nachlauf, nicht `webrtc-vad`.
 
 Je Kanal: DC weg, Hochpass 80 Hz → Sprache erkennen (zuerst Energie-Schwelle, später

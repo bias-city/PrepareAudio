@@ -10,10 +10,12 @@ notarisiertes DMG. Plan: `docs/PLAN-APPSTORE.md`.
 
 ### Neu
 
-- **Mastern mit zwei Profilen:** «Hörfassung» (neuer Standard) gleicht die Lautstärken der
-  Sprechenden aus, senkt Übersprechen und mischt mehrkanalige Dateien nach den Positionen L/M/R
-  aus Schritt 2 auf Stereo; «Dokumentarisch» arbeitet wie bisher mit fester Verstärkung
-  (bitgleich zu 0.2.0). Umschaltbar unten im Reiter, die Wahl bleibt gespeichert.
+- **Mastern mit zwei Profilen**, benannt nach ihrem Zweck: «Für Transkription» (Standard)
+  arbeitet wie bisher mit fester Verstärkung und lässt die Dynamik unangetastet — an echten
+  Interviews geprüft, Spracherkennung und Sprechertrennung arbeiten damit besser. «Fürs Hören»
+  gleicht zusätzlich die Lautstärken der Sprechenden aus und senkt Übersprechen. Mehrkanalige
+  Dateien werden in beiden Fällen nach den Positionen L/M/R aus Schritt 2 auf Stereo gemischt.
+  Umschaltbar unten im Reiter, die Wahl bleibt gespeichert.
 - **Beliebig viele Mikrofone:** gemeinsame Abschnitte werden eine polyphone WAV mit einem Kanal
   je Sender, Timecode (bext) und Spurnamen (iXML). Jedes Segment hat eine Position L, M oder R
   für den Stereo-Mixdown beim Mastern; die Timeline zeigt eine Bahn je Sender.

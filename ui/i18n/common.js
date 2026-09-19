@@ -142,10 +142,10 @@ I18N.add({
   /* ---------- 3 master ---------- */
   'page.master.drop': { de: 'Audiodateien hierher ziehen', en: 'Drag audio files here', fr: 'Glissez des fichiers audio ici', it: 'Trascina qui i file audio' },
   'page.master.text': {
-    de: 'Die App erkennt Format und Bittiefe jeder Datei, misst die Lautheit nach EBU R128 und bringt sie mit einer festen Verstärkung auf −16 LUFS. Ein Limiter fängt nur die Spitzen bei −1,5 dBTP ab, die Sprachdynamik bleibt.',
-    en: 'The app detects the format and bit depth of every file, measures loudness according to EBU R128 and brings it to −16 LUFS with a fixed gain. A limiter only catches the peaks at −1.5 dBTP; the dynamics of speech remain.',
-    fr: 'L’app reconnaît le format et la profondeur de bits de chaque fichier, mesure la loudness selon EBU R128 et l’amène à −16 LUFS avec un gain fixe. Un limiteur n’intercepte que les crêtes à −1,5 dBTP, la dynamique de la parole est préservée.',
-    it: 'L’app riconosce formato e profondità di bit di ogni file, misura la loudness secondo EBU R128 e la porta a −16 LUFS con un guadagno fisso. Un limiter intercetta solo i picchi a −1,5 dBTP, la dinamica del parlato resta.',
+    de: 'Die App erkennt Format und Bittiefe jeder Datei, misst die Lautheit nach EBU R128 und bringt sie auf −16 LUFS. Ein Limiter fängt nur die Spitzen bei −1,5 dBTP. Zwei Profile: <b>Für Transkription</b> lässt die Dynamik unangetastet — so arbeiten Spracherkennung und Sprechertrennung am besten. <b>Fürs Hören</b> gleicht die Lautstärken der Sprechenden aus und senkt Übersprechen.',
+    en: 'The app detects the format and bit depth of every file, measures loudness according to EBU R128 and brings it to −16 LUFS. A limiter only catches the peaks at −1.5 dBTP. Two profiles: <b>For transcription</b> leaves the dynamics untouched — speech recognition and speaker separation work best that way. <b>For listening</b> evens out the levels of the speakers and turns down bleed.',
+    fr: 'L’app reconnaît le format et la profondeur de bits de chaque fichier, mesure la loudness selon EBU R128 et l’amène à −16 LUFS. Un limiteur n’intercepte que les crêtes à −1,5 dBTP. Deux profils : <b>Pour la transcription</b> laisse la dynamique intacte — c’est ainsi que la reconnaissance vocale et la séparation des locuteurs fonctionnent le mieux. <b>Pour l’écoute</b> égalise le niveau des personnes qui parlent et atténue la diaphonie.',
+    it: 'L’app riconosce formato e profondità di bit di ogni file, misura la loudness secondo EBU R128 e la porta a −16 LUFS. Un limiter intercetta solo i picchi a −1,5 dBTP. Due profili: <b>Per la trascrizione</b> lascia intatta la dinamica — così riconoscimento vocale e separazione dei parlanti funzionano al meglio. <b>Per l’ascolto</b> pareggia i livelli di chi parla e attenua la diafonia.',
   },
   'page.master.fine': {
     de: 'Nimmt WAV (auch RF64 und 32-bit float), MP3, M4A/AAC, FLAC, ALAC, AIFF, CAF und OGG Vorbis, zum Beispiel den Ordner <b>sync</b> aus Schritt 2. Beim Start fragt die App, wo der Ordner <b>master</b> entstehen soll, MP3 mit 192 kbit/s.',
@@ -177,10 +177,10 @@ I18N.add({
     it: '<b>Sincronizzare:</b> trova eventi comuni con uno sfasamento costante e scrive le parti comuni in stereo, le conversazioni diverse in parallelo in mono.',
   },
   'page.info.step3': {
-    de: '<b>Mastern:</b> misst die Lautheit nach EBU R128 (ITU-R BS.1770-4), bringt sie mit fester Verstärkung auf −16 LUFS, begrenzt Spitzen bei −1,5 dBTP und schreibt MP3 mit 192 kbit/s.',
-    en: '<b>Master:</b> measures loudness according to EBU R128 (ITU-R BS.1770-4), brings it to −16 LUFS with a fixed gain, limits peaks at −1.5 dBTP and writes MP3 at 192 kbit/s.',
-    fr: '<b>Masteriser :</b> mesure la loudness selon EBU R128 (ITU-R BS.1770-4), l’amène à −16 LUFS avec un gain fixe, limite les crêtes à −1,5 dBTP et écrit du MP3 à 192 kbit/s.',
-    it: '<b>Masterizzare:</b> misura la loudness secondo EBU R128 (ITU-R BS.1770-4), la porta a −16 LUFS con un guadagno fisso, limita i picchi a −1,5 dBTP e scrive MP3 a 192 kbit/s.',
+    de: '<b>Mastern:</b> misst die Lautheit nach EBU R128 (ITU-R BS.1770-4), bringt sie auf −16 LUFS, begrenzt Spitzen bei −1,5 dBTP und schreibt MP3 mit 192 kbit/s. Wahlweise für die Transkription (ohne Eingriff in die Dynamik) oder fürs Hören (Lautstärken der Sprechenden ausgeglichen).',
+    en: '<b>Master:</b> measures loudness according to EBU R128 (ITU-R BS.1770-4), brings it to −16 LUFS, limits peaks at −1.5 dBTP and writes MP3 at 192 kbit/s. Either for transcription (no intervention in the dynamics) or for listening (levels of the speakers evened out).',
+    fr: '<b>Masteriser :</b> mesure la loudness selon EBU R128 (ITU-R BS.1770-4), l’amène à −16 LUFS, limite les crêtes à −1,5 dBTP et écrit du MP3 à 192 kbit/s. Au choix pour la transcription (sans intervention sur la dynamique) ou pour l’écoute (niveaux des personnes qui parlent égalisés).',
+    it: '<b>Masterizzare:</b> misura la loudness secondo EBU R128 (ITU-R BS.1770-4), la porta a −16 LUFS, limita i picchi a −1,5 dBTP e scrive MP3 a 192 kbit/s. A scelta per la trascrizione (nessun intervento sulla dinamica) o per l’ascolto (livelli di chi parla pareggiati).',
   },
   'page.info.selfContained': {
     de: 'Alles läuft in der App selbst, ohne installierte Zusatzprogramme. Originaldateien werden nie verändert oder überschrieben.',
