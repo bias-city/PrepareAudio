@@ -647,7 +647,11 @@ fn layout(f: &AudioFile, prep: &Prep) -> Result<(usize, u32), String> {
 fn prepare(f: &AudioFile, profile: Profile, cancel: &AtomicBool, on_secs: &mut dyn FnMut(f64)) -> Result<Prep, String> {
     let ext = extension(&f.path_buf);
     let (mut reader, _) = open_reader(&f.path_buf, &ext)?;
-    let pans = if ext == "wav" || ext == "wave" { crate::wav::read_pan_segments(&f.path_buf) } else { Vec::new() };
+    let mut pans = if ext == "wav" || ext == "wave" { crate::wav::read_pan_segments(&f.path_buf) } else { Vec::new() };
+    // Shared files written before 0.3.0 carry no positions; their name says left and right.
+    if pans.is_empty() && f.channels == 2 && f.name.contains("_stereo_L-") && f.name.contains("_R-") {
+        pans = vec![(1, 0.0, f.duration, 'L'), (2, 0.0, f.duration, 'R')];
+    }
     Prep::analyze(reader.as_mut(), &pans, profile, cancel, on_secs)
 }
 
