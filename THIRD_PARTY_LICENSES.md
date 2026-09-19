@@ -1,6 +1,6 @@
 # Drittanbieter-Lizenzen · PrepareAudio
 
-PrepareAudio 0.2.0 ist freie Software unter der GNU AGPL, Version 3 oder später (siehe LICENSE). Die App enthält die folgenden 250 Softwarepakete (Stand dieses Builds, Ziel aarch64-apple-darwin). Die macOS-WebView wird vom System gestellt und ist nicht Teil der App.
+PrepareAudio 0.3.0 ist freie Software unter der GNU AGPL, Version 3 oder später (siehe LICENSE). Die App enthält die folgenden 250 Softwarepakete (Stand dieses Builds, Ziel aarch64-apple-darwin). Die macOS-WebView wird vom System gestellt und ist nicht Teil der App.
 
 | Paket | Version | Lizenz | Quelle |
 |---|---|---|---|

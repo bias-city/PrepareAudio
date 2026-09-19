@@ -1,6 +1,6 @@
 [package]
 name = "prepare-audio"
-version = "0.2.0"
+version = "0.3.0"
 description = "PrepareAudio: Aufnahme-Teile zusammenfuegen, Audioquellen synchronisieren und mastern"
 authors = ["B/IAS – Basel Institut für angewandte Stadtforschung"]
 license = "AGPL-3.0-or-later"

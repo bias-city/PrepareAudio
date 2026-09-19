@@ -394,9 +394,63 @@ fn channel() -> &'static str {
     }
 }
 
+/// The menu, cut down to what this app really offers: no File, no View — it opens nothing and
+/// prints nothing. English like the predefined items (About/Hide/Quit, Undo/Cut/Copy come from
+/// the system in English); the menu therefore does not follow the interface language.
+///
+/// The About entry is our own instead of `PredefinedMenuItem::about`: the macOS panel shows only
+/// name, version and credits — licence, website and the notices would be dropped, and links in it
+/// could not be clicked. The item sends an event to the interface, which opens its own info panel.
+fn menue(handle: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wry>> {
+    use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+    let app = Submenu::with_items(
+        handle,
+        "PrepareAudio",
+        true,
+        &[
+            &MenuItem::with_id(handle, "ueber", "About PrepareAudio", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::hide(handle, None)?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::quit(handle, None)?,
+        ],
+    )?;
+    // Edit: the app has one text field (the licence search), but copying paths and messages out
+    // of the lists is what people really need here.
+    let text = Submenu::with_items(
+        handle,
+        "Edit",
+        true,
+        &[
+            &PredefinedMenuItem::cut(handle, None)?,
+            &PredefinedMenuItem::copy(handle, None)?,
+            &PredefinedMenuItem::paste(handle, None)?,
+            &PredefinedMenuItem::select_all(handle, None)?,
+        ],
+    )?;
+    let fenster = Submenu::with_items(
+        handle,
+        "Window",
+        true,
+        &[
+            &PredefinedMenuItem::minimize(handle, None)?,
+            &PredefinedMenuItem::fullscreen(handle, None)?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::close_window(handle, None)?,
+        ],
+    )?;
+    Menu::with_items(handle, &[&app, &text, &fenster])
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .menu(menue)
+        .on_menu_event(|handle, event| {
+            if event.id() == "ueber" {
+                let _ = handle.emit("ueber", ());
+            }
+        })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .manage(AppState::default())

@@ -36,12 +36,6 @@ button { font: inherit; color: inherit; }
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   min-height: 40px; padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line); background: var(--panel-2);
 }
-.brand { display: flex; align-items: center; gap: var(--s2); min-width: 0; flex: 1; }
-.brand > div { min-width: 0; }
-.mark { width: 22px; height: 22px; flex: none; }
-.brand h1 { margin: 0; font-size: var(--fs-2); font-weight: 650; letter-spacing: -.01em; }
-/* Unterzeile: nur noch für Vorleseprogramme, die Leerzustände erklären jeden Schritt */
-.brand p { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
 .top-actions { display: flex; gap: 8px; flex: none; }
 
 main { flex: 1; overflow: auto; }
@@ -338,13 +332,12 @@ body[data-mode="master"] .merge-only, body[data-mode="master"] .sync-only { disp
 
 /* Werkzeugleiste: eine Zeile, nie umbrechen */
 .top { flex-wrap: nowrap; gap: var(--s3); }
-.brand { flex: 0 1 auto; }
 /* Rahmen statt innerem Schatten: die Fläche des aktiven Segments würde den Schatten überdecken */
-.tabs { gap: 0; margin-left: auto; height: var(--pill-h); box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 9999px; overflow: hidden; background: var(--panel); color: var(--ink); box-shadow: none; }
+.tabs { gap: 0; height: var(--pill-h); box-sizing: border-box; border: 1.5px solid var(--ink); border-radius: 9999px; overflow: hidden; background: var(--panel); color: var(--ink); box-shadow: none; }
 .tabs button { box-shadow: none; border-radius: 0; background: transparent; padding: 0 12px 0 6px; min-width: 0; height: 100%; }
 .tabs button + button { border-left: 1.5px solid var(--ink); }
 .tabs button span:last-child { overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
-.top-actions { gap: 6px; }
+.top-actions { gap: 6px; margin-left: auto; }
 .top-actions .btn::before { content: ""; width: 13px; height: 13px; flex: none; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
 .top-actions .btn[id$="rescan"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36L21 8'/%3E%3Cpath d='M21 3v5h-5'/%3E%3C/svg%3E"); }
 .top-actions .btn[id$="pick-again"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E"); }
@@ -352,11 +345,9 @@ body[data-mode="master"] .merge-only, body[data-mode="master"] .sync-only { disp
   .top-actions .btn { font-size: 0; gap: 0; width: 32px; padding: 0; }
 }
 @media (max-width: 720px) {
-  .brand h1 { display: none; }
-}
+  }
 @media (max-width: 600px) {
-  .brand { display: none; }
-  .tabs { margin-left: 0; }
+    .tabs { margin-left: 0; }
 }
 
 /* Inhalt über die ganze Fensterbreite */
@@ -419,3 +410,6 @@ button svg { pointer-events: none; flex: none; width: 14px; height: 14px; }
 .ed-menu kbd { margin-left: auto; padding-left: 18px; }
 .ed-menu hr { border: 0; border-top: 1px solid var(--line); margin: 4px 8px; }
 .ed-menu .head { padding: 5px 10px 2px 10px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+
+/* Der Fenstertitel nennt die App: im Fenster selbst steht der Name nur für Vorleseprogramme. */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

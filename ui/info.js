@@ -95,6 +95,9 @@
   }
 
   q('#info-open').addEventListener('click', open);
+  // Menu entry "About PrepareAudio" (src-tauri/src/lib.rs) opens this panel.
+  const ev = window.__TAURI__ && window.__TAURI__.event;
+  if (ev) ev.listen('ueber', () => { if (modal.hidden) open(); }).catch(() => {});
   q('#info-close').addEventListener('click', () => { modal.hidden = true; });
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.hidden = true;
