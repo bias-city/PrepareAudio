@@ -165,7 +165,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
     </div>
     <div class="window">
       <div class="chrome" aria-hidden="true"><i></i><i></i><i></i></div>
-      <img data-img="hero" src="img/hero-de.png" width="1600" height="1000" alt="PrepareAudio" data-alt="altHero">
+      <img data-img="hero" src="img/hero-de.png?v=0.4.0" width="1600" height="1000" alt="PrepareAudio" data-alt="altHero">
     </div>
   </div>
 </section>
@@ -183,7 +183,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g1b"></p>
         <p data-t="g1c"></p>
       </div>
-      <div class="shot"><img data-img="merge" src="img/merge-de.png" width="1200" height="750" alt="" data-alt="altMerge"></div>
+      <div class="shot"><img data-img="merge" src="img/merge-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altMerge"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -191,7 +191,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g2a"></p>
         <p data-t="g2b"></p>
       </div>
-      <div class="shot"><img data-img="sync" src="img/sync-de.png" width="1200" height="750" alt="" data-alt="altSync"></div>
+      <div class="shot"><img data-img="sync" src="img/sync-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altSync"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -208,7 +208,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         </ul>
         <p data-t="g3c"></p>
       </div>
-      <div class="shot"><img data-img="edit" src="img/edit-de.png" width="1200" height="750" alt="" data-alt="altEdit"></div>
+      <div class="shot"><img data-img="edit" src="img/edit-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altEdit"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -216,7 +216,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g4a"></p>
         <p data-t="g4b"></p>
       </div>
-      <div class="shot"><img data-img="done" src="img/done-de.png" width="1200" height="750" alt="" data-alt="altDone"></div>
+      <div class="shot"><img data-img="done" src="img/done-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altDone"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -228,7 +228,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         </ul>
         <p data-t="g5b"></p>
       </div>
-      <div class="shot"><img data-img="master" src="img/master-de.png" width="1200" height="750" alt="" data-alt="altMaster"></div>
+      <div class="shot"><img data-img="master" src="img/master-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altMaster"></div>
     </div>
     <div class="row gross">
       <div><h3 data-t="nameH"></h3></div>
@@ -247,8 +247,8 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <h3><span class="nr">6</span><span data-t="g6h"></span></h3>
         <p data-t="g6a"></p>
       </div>
-      <div class="shot"><img data-img="handbuch" src="img/handbuch-de.png" width="1200" height="750" alt="" data-alt="altHandbuch"></div>
-      <div class="shot"><img data-img="info" src="img/info-de.png" width="1200" height="750" alt="" data-alt="altInfo"></div>
+      <div class="shot"><img data-img="handbuch" src="img/handbuch-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altHandbuch"></div>
+      <div class="shot"><img data-img="info" src="img/info-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altInfo"></div>
     </div>
   </div>
 </section>
@@ -356,6 +356,8 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
 
 <script>
 const VERSION = "0.4.0";
+// Bildmarke: die Dateinamen bleiben gleich, Hostpoint schickt keine Cache-Anweisung.
+const IMGV = "0.4.0";
 document.querySelectorAll('[data-v]').forEach(e => e.textContent = 'PrepareAudio ' + VERSION);
 
 const T = {
@@ -716,7 +718,7 @@ function setLang(l, inDieUrl){
   });
   /* Bildschirmfotos gibt es je Sprache: img/<name>-<lang>.png */
   document.querySelectorAll('img[data-img], img[data-alt]').forEach(im=>{
-    if(im.dataset.img) im.src = 'img/' + im.dataset.img + '-' + l + '.png';
+    if(im.dataset.img) im.src = 'img/' + im.dataset.img + '-' + l + '.png?v=' + IMGV;
     const a = im.dataset.alt;
     if(a) im.alt = (a in t) ? t[a] : (T.de[a] || im.alt);
   });
