@@ -165,7 +165,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
     </div>
     <div class="window">
       <div class="chrome" aria-hidden="true"><i></i><i></i><i></i></div>
-      <img data-img="hero" src="img/hero-de.png?v=0.4.0" width="1600" height="1000" alt="PrepareAudio" data-alt="altHero">
+      <img data-img="hero" src="img/hero-de.png?v=0.4.0-2" width="1600" height="1000" alt="PrepareAudio" data-alt="altHero">
     </div>
   </div>
 </section>
@@ -183,7 +183,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g1b"></p>
         <p data-t="g1c"></p>
       </div>
-      <div class="shot"><img data-img="merge" src="img/merge-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altMerge"></div>
+      <div class="shot"><img data-img="merge" src="img/merge-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altMerge"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -191,7 +191,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g2a"></p>
         <p data-t="g2b"></p>
       </div>
-      <div class="shot"><img data-img="sync" src="img/sync-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altSync"></div>
+      <div class="shot"><img data-img="sync" src="img/sync-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altSync"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -208,7 +208,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         </ul>
         <p data-t="g3c"></p>
       </div>
-      <div class="shot"><img data-img="edit" src="img/edit-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altEdit"></div>
+      <div class="shot"><img data-img="edit" src="img/edit-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altEdit"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -216,7 +216,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g4a"></p>
         <p data-t="g4b"></p>
       </div>
-      <div class="shot"><img data-img="done" src="img/done-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altDone"></div>
+      <div class="shot"><img data-img="done" src="img/done-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altDone"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -228,12 +228,14 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         </ul>
         <p data-t="g5b"></p>
       </div>
-      <div class="shot"><img data-img="master" src="img/master-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altMaster"></div>
+      <div class="shot"><img data-img="master" src="img/master-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altMaster"></div>
     </div>
-    <div class="row gross">
-      <div><h3 data-t="nameH"></h3></div>
+    <div class="row schritt gross">
       <div class="t">
+        <h3><span class="nr">6</span><span data-t="nameH"></span></h3>
         <p data-t="nameA"></p>
+        <p class="schema"><code data-t="nameForm"></code></p>
+        <p data-t="nameA2"></p>
         <ul>
           <li data-t="n1"></li><li data-t="n2"></li>
           <li data-t="n3"></li><li data-t="n4"></li>
@@ -241,14 +243,15 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         </ul>
         <p data-t="nameB"></p>
       </div>
+      <div class="shot"><img data-img="namen" src="img/namen-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altNamen"></div>
     </div>
     <div class="row schritt gross">
       <div class="t">
-        <h3><span class="nr">6</span><span data-t="g6h"></span></h3>
+        <h3><span class="nr">7</span><span data-t="g6h"></span></h3>
         <p data-t="g6a"></p>
       </div>
-      <div class="shot"><img data-img="handbuch" src="img/handbuch-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altHandbuch"></div>
-      <div class="shot"><img data-img="info" src="img/info-de.png?v=0.4.0" width="1200" height="750" alt="" data-alt="altInfo"></div>
+      <div class="shot"><img data-img="handbuch" src="img/handbuch-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altHandbuch"></div>
+      <div class="shot"><img data-img="info" src="img/info-de.png?v=0.4.0-2" width="1200" height="750" alt="" data-alt="altInfo"></div>
     </div>
   </div>
 </section>
@@ -357,7 +360,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
 <script>
 const VERSION = "0.4.0";
 // Bildmarke: die Dateinamen bleiben gleich, Hostpoint schickt keine Cache-Anweisung.
-const IMGV = "0.4.0";
+const IMGV = "0.4.0-2";
 document.querySelectorAll('[data-v]').forEach(e => e.textContent = 'PrepareAudio ' + VERSION);
 
 const T = {
@@ -377,7 +380,10 @@ de:{
   altHandbuch:"Handbuch in der App mit Kapiteln, Suche und Bildern",
 
   nameH:"Wie die Dateien heissen",
-  nameA:"Alle erzeugten Dateien folgen derselben Form: <code>JJMMTT_S&lt;Start&gt;-E&lt;Ende&gt;_D&lt;Dauer&gt;_&lt;Inhalt&gt;</code>. Datum und Zeiten sind die der Aufnahme, Start, Ende und Dauer jeweils sechsstellig als hhmmss. Der Inhalt sagt, wer in der Datei steckt; ein Sender heisst immer wie sein Quellordner.",
+  nameA:"Alle erzeugten Dateien folgen derselben Form:",
+  nameForm:"JJMMTT_S&lt;Start&gt;-E&lt;Ende&gt;_D&lt;Dauer&gt;_&lt;Inhalt&gt;",
+  nameA2:"Datum und Zeiten sind die der Aufnahme, Start, Ende und Dauer jeweils sechsstellig als hhmmss. Der Inhalt sagt, wer in der Datei steckt; ein Sender heisst immer wie sein Quellordner.",
+  altNamen:"Handbuch der App, Kapitel «Ordner und Namen» mit dem Namensschema",
   n1:"<code>260512_S101500-E104000_D002500_1.wav</code> — Schritt 1: eine ganze Aufnahme des Senders 1, aufgenommen am 12. Mai 2026 von 10:15:00 bis 10:40:00, 25 Minuten lang",
   n2:"<code>…_stereo_L-4_R-5.wav</code> — Schritt 2: zwei Sender gemeinsam, 4 links, 5 rechts",
   n3:"<code>…_poly_1-2-3.wav</code> — Schritt 2: ein Kanal je Sender, in dieser Reihenfolge",
@@ -465,7 +471,10 @@ en:{
   altInfo:"Info panel with version, links, language switch and all licences",
   altHandbuch:"The handbook in the app with chapters, search and images",
   nameH:"How the files are named",
-  nameA:"Every file the app writes has the same shape: <code>YYMMDD_S&lt;start&gt;-E&lt;end&gt;_D&lt;duration&gt;_&lt;content&gt;</code>. Date and times are those of the recording; start, end and duration are six digits each, hhmmss. The content says who is in the file; a transmitter is always named after its source folder.",
+  nameA:"Every file the app writes has the same shape:",
+  nameForm:"YYMMDD_S&lt;start&gt;-E&lt;end&gt;_D&lt;duration&gt;_&lt;content&gt;",
+  nameA2:"Date and times are those of the recording; start, end and duration are six digits each, hhmmss. The content says who is in the file; a transmitter is always named after its source folder.",
+  altNamen:"The app’s handbook, chapter “Folders and names”, showing the naming scheme",
   n1:"<code>260512_S101500-E104000_D002500_1.wav</code> — step 1: one whole recording of transmitter 1, recorded on 12 May 2026 from 10:15:00 to 10:40:00, 25 minutes long",
   n2:"<code>…_stereo_L-4_R-5.wav</code> — step 2: two transmitters together, 4 on the left, 5 on the right",
   n3:"<code>…_poly_1-2-3.wav</code> — step 2: one channel per transmitter, in that order",
@@ -549,7 +558,10 @@ fr:{
   altInfo:"Champ Infos avec version, liens, choix de la langue et toutes les licences",
   altHandbuch:"Le manuel dans l’app avec chapitres, recherche et images",
   nameH:"Comment les fichiers sont nommés",
-  nameA:"Tous les fichiers produits ont la même forme : <code>AAMMJJ_S&lt;début&gt;-E&lt;fin&gt;_D&lt;durée&gt;_&lt;contenu&gt;</code>. La date et les heures sont celles de l’enregistrement ; début, fin et durée tiennent chacun sur six chiffres, hhmmss. Le contenu dit qui se trouve dans le fichier ; un émetteur porte toujours le nom de son dossier d’origine.",
+  nameA:"Tous les fichiers produits ont la même forme :",
+  nameForm:"AAMMJJ_S&lt;début&gt;-E&lt;fin&gt;_D&lt;durée&gt;_&lt;contenu&gt;",
+  nameA2:"La date et les heures sont celles de l’enregistrement ; début, fin et durée tiennent chacun sur six chiffres, hhmmss. Le contenu dit qui se trouve dans le fichier ; un émetteur porte toujours le nom de son dossier d’origine.",
+  altNamen:"Le manuel de l’app, chapitre « Dossiers et noms », avec le schéma des noms",
   n1:"<code>260512_S101500-E104000_D002500_1.wav</code> — étape 1 : un enregistrement entier de l’émetteur 1, enregistré le 12 mai 2026 de 10:15:00 à 10:40:00, d’une durée de 25 minutes",
   n2:"<code>…_stereo_L-4_R-5.wav</code> — étape 2 : deux émetteurs ensemble, 4 à gauche, 5 à droite",
   n3:"<code>…_poly_1-2-3.wav</code> — étape 2 : un canal par émetteur, dans cet ordre",
@@ -633,7 +645,10 @@ it:{
   altInfo:"Campo Info con versione, link, scelta della lingua e tutte le licenze",
   altHandbuch:"Il manuale nell’app con capitoli, ricerca e immagini",
   nameH:"Come si chiamano i file",
-  nameA:"Tutti i file prodotti hanno la stessa forma: <code>AAMMGG_S&lt;inizio&gt;-E&lt;fine&gt;_D&lt;durata&gt;_&lt;contenuto&gt;</code>. Data e orari sono quelli della registrazione; inizio, fine e durata stanno ciascuno in sei cifre, hhmmss. Il contenuto dice chi c’è nel file; un trasmettitore prende sempre il nome della sua cartella di origine.",
+  nameA:"Tutti i file prodotti hanno la stessa forma:",
+  nameForm:"AAMMGG_S&lt;inizio&gt;-E&lt;fine&gt;_D&lt;durata&gt;_&lt;contenuto&gt;",
+  nameA2:"Data e orari sono quelli della registrazione; inizio, fine e durata stanno ciascuno in sei cifre, hhmmss. Il contenuto dice chi c’è nel file; un trasmettitore prende sempre il nome della sua cartella di origine.",
+  altNamen:"Il manuale dell’app, capitolo «Cartelle e nomi», con lo schema dei nomi",
   n1:"<code>260512_S101500-E104000_D002500_1.wav</code> — passo 1: un’intera registrazione del trasmettitore 1, registrata il 12 maggio 2026 dalle 10:15:00 alle 10:40:00, lunga 25 minuti",
   n2:"<code>…_stereo_L-4_R-5.wav</code> — passo 2: due trasmettitori insieme, 4 a sinistra, 5 a destra",
   n3:"<code>…_poly_1-2-3.wav</code> — passo 2: un canale per trasmettitore, in quest’ordine",
@@ -705,7 +720,7 @@ it:{
 };
 
 /* Schlüssel, deren Text Auszeichnung enthält — nur diese als HTML. */
-const HTML_KEYS = new Set(['d1','d2','d3','d4','d5','nameA','nameB','n1','n2','n3','n4','n5']);
+const HTML_KEYS = new Set(['d1','d2','d3','d4','d5','nameA','nameA2','nameForm','nameB','n1','n2','n3','n4','n5']);
 
 function setLang(l, inDieUrl){
   const t = T[l] || T.de;

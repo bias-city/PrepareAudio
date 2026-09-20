@@ -105,14 +105,15 @@ async function lauf(lang, dunkel, motive, groesse) {
   await page.close();
 }
 for (const g of GROESSEN) { await lauf(SPRACHEN[0], DUNKEL, ["leer", "merge", "sync", "master", "info"], g); console.log("✓", g.join("x")); }
-/** Das Handbuch ist eine eigene Seite: eigener Aufruf, gleiche Grösse wie die übrigen Motive. */
-async function handbuchSeite(lang, groesse) {
+/** Das Handbuch ist eine eigene Seite: eigener Aufruf, gleiche Grösse wie die übrigen Motive.
+    `kapitel` wählt, welches Kapitel offen steht (Motiv "handbuch": Timeline, "namen": Ordner und Namen). */
+async function handbuchSeite(lang, groesse, motiv = "handbuch", kapitel = "timeline") {
   const [b, h] = groesse || [B, H];
   const page = await browser.newPage({ viewport: { width: b, height: h }, deviceScaleFactor: F });
-  await page.addInitScript(`localStorage.setItem("prepareaudio.lang", ${JSON.stringify(lang)}); localStorage.setItem("prepareaudio.hilfe.kapitel", "timeline");`);
+  await page.addInitScript(`localStorage.setItem("prepareaudio.lang", ${JSON.stringify(lang)}); localStorage.setItem("prepareaudio.hilfe.kapitel", ${JSON.stringify(kapitel)});`);
   await page.goto(BASIS + "hilfe.html");
   await page.waitForTimeout(400);
-  const datei = SITE ? path.join(ZIEL, `handbuch-${lang}.png`) : path.join(ZIEL, lang, `${String(REIHE.indexOf("handbuch") + 1).padStart(2, "0")}-handbuch.jpg`);
+  const datei = SITE ? path.join(ZIEL, `${motiv}-${lang}.png`) : path.join(ZIEL, lang, `${String(REIHE.indexOf(motiv) + 1).padStart(2, "0")}-${motiv}.jpg`);
   fs.mkdirSync(path.dirname(datei), { recursive: true });
   await page.screenshot(SITE ? { path: datei } : { path: datei, type: "jpeg", quality: 92 });
   await page.close();
@@ -123,6 +124,7 @@ for (const lang of GROESSEN.length ? [] : SPRACHEN) {
     await lauf(lang, false, ["hero"], [1600, 1000]);
     await lauf(lang, false, ["merge", "sync", "edit", "done", "master", "info"], [1200, 750]);
     await handbuchSeite(lang, [1200, 750]);
+    await handbuchSeite(lang, [1200, 750], "namen", "ergebnisse");
   } else if (STORE) {
     await lauf(lang, false, ["leer", "merge", "sync", "master", "info"]);
     await lauf(lang, true, ["sync"]);
