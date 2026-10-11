@@ -9,6 +9,8 @@
 //
 //   node scripts/release-mas.mjs [--build 2]      Store-Paket (CFBundleVersion = --build)
 //   … --ab-signatur                             ohne Neubau: nur versiegeln, prüfen, paketieren
+//   … --pruefen                                 Paket bei App Store Connect prüfen (altool)
+//   … --hochladen                               prüfen und hochladen (ersetzt Transporter)
 //   node scripts/release-mas.mjs --probe          Sandbox-Probe OHNE Profil: mit Developer ID
 //                                                 versiegelt, lokal startbar (Phase 2 des Plans)
 import { execFileSync } from "node:child_process";
@@ -90,5 +92,36 @@ if (probe) {
   fs.rmSync(PKG, { force: true });
   sh("/usr/bin/xcrun", ["productbuild", "--sign", identitaet("3rd Party Mac Developer Installer", false).name, "--component", APP, "/Applications", PKG]);
   sh("/usr/sbin/pkgutil", ["--check-signature", PKG]);
-  console.log(`Paket: ${PKG} — mit Transporter.app hochladen.`);
+  console.log(`Paket: ${PKG}`);
+
+  // --pruefen / --hochladen: App Store Connect ohne Transporter.
+  // Zugang entweder über einen API-Schlüssel (Users and Access › Integrations):
+  //   ~/.appstoreconnect/private_keys/AuthKey_<ID>.p8 plus APPLE_API_KEY_ID und APPLE_API_ISSUER
+  // oder über Apple-ID und App-spezifisches Passwort im Schlüsselbund:
+  //   APPLE_ID=… und einmalig: xcrun notarytool store-credentials … bzw.
+  //   security add-generic-password -s PrepareAudio-ASC -a "$APPLE_ID" -w <app-spezifisches-Passwort>
+  const pruefen = process.argv.includes("--pruefen");
+  const hochladen = process.argv.includes("--hochladen");
+  if (pruefen || hochladen) {
+    let zugang;
+    if (process.env.APPLE_API_KEY_ID && process.env.APPLE_API_ISSUER) {
+      zugang = ["--apiKey", process.env.APPLE_API_KEY_ID, "--apiIssuer", process.env.APPLE_API_ISSUER];
+    } else if (process.env.APPLE_ID) {
+      zugang = ["-u", process.env.APPLE_ID, "-p", "@keychain:PrepareAudio-ASC"];
+    } else {
+      abbruch("Zugang fehlt: APPLE_API_KEY_ID + APPLE_API_ISSUER (Schlüssel in ~/.appstoreconnect/private_keys/)\n" +
+              "         oder APPLE_ID mit App-spezifischem Passwort im Schlüsselbund unter «PrepareAudio-ASC».\n" +
+              `         Ohne Zugang: ${PKG} in Transporter.app ziehen und senden.`);
+    }
+    const altool = (was) => sh("/usr/bin/xcrun", ["altool", was, "-f", PKG, "-t", "macos", ...zugang]);
+    console.log("5/5 Prüfen bei App Store Connect (altool --validate-app)");
+    altool("--validate-app");
+    if (hochladen) {
+      console.log("5/5 Hochladen (altool --upload-app) — dauert einige Minuten");
+      altool("--upload-app");
+      console.log("Gesendet. Nach etwa 15 Minuten steht der Build in App Store Connect bereit (zuerst TestFlight).");
+    }
+  } else {
+    console.log("Hochladen: node scripts/release-mas.mjs --ab-signatur --hochladen (oder das Paket in Transporter.app ziehen).");
+  }
 }

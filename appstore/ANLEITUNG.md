@@ -52,8 +52,22 @@ Support-URL, Marketing-URL, Datenschutz-URL und Copyright: `appstore/texte/urls.
 ## E. Paket bauen und hochladen
 
 ```bash
-npm run release:mas            # optional: node scripts/release-mas.mjs --build 2
+npm run release:mas                               # bauen, versiegeln, prüfen, paketieren
+node scripts/release-mas.mjs --ab-signatur --pruefen    # Paket bei App Store Connect prüfen
+npm run upload:mas                                # prüfen und senden (ohne Transporter)
+# weitere Fassung derselben Version: node scripts/release-mas.mjs --build 2
 ```
+
+Für `--pruefen` und `--hochladen` braucht es einen Zugang, sonst bricht das Skript mit
+Hinweis ab. Entweder ein **API-Schlüssel** (App Store Connect › Users and Access ›
+Integrations › App Store Connect API › +): die `.p8` nach
+`~/.appstoreconnect/private_keys/`, dazu `APPLE_API_KEY_ID` und `APPLE_API_ISSUER` in der
+Umgebung. Oder **Apple-ID mit App-spezifischem Passwort**: `APPLE_ID` setzen und das
+Passwort einmalig im Schlüsselbund ablegen —
+`security add-generic-password -s PrepareAudio-ASC -a "$APPLE_ID" -w <Passwort>`.
+Ohne beides bleibt der Weg über **Transporter.app**: das Paket hineinziehen und senden.
+
+Geprüft am 11.10.2026: Tests grün, Sandbox-Probe läuft (`docs/APPSTORE-PRUEFUNG-0.4.0.md`).
 
 Das Skript baut mit dem Feature `mas`, versiegelt mit «Apple Distribution» und den
 Store-Entitlements, prüft (Sandbox auf jedem Programm, keine Rechnerpfade, LAME über `@rpath`)

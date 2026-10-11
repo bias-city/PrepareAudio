@@ -242,7 +242,7 @@ https://bias.city/prepareaudio/demo/prepareaudio-demo.zip
 How to test (about 4 minutes):
 1. Unzip. Tab "1 Merge": drag the folder "aufnahmen" into the window. Three recordings of three chunks each appear. Click "Merge…", choose any folder; the app creates "tracks" there.
 2. Tab "2 Synchronise": drag the folder "aufnahmen" (or the new "tracks") in. After the analysis a timeline shows one lane per transmitter; space bar plays. Click a segment to open its options (shared file or mono file, and the position left/middle/right). Click "Create…" and choose a folder; the app writes one shared file per conversation — with three transmitters a polyphonic WAV — plus mono files into "sync".
-3. Tab "3 Master": drag the folder "mastern" in, pick a profile at the bottom ("For transcription" or "For listening") and click "Master…"; the app writes MP3 files at -16 LUFS into "master".
+3. Tab "3 Master": drag the folder "mastern" in, pick a profile at the bottom ("For transcription" or "For listening"), choose MP3 or WAV as the output format and click "Master…"; the app writes the files at -16 LUFS into "master".
 The pill "Help" at the bottom left opens the built-in handbook (searchable, four languages).
 
 The source code is public (AGPL-3.0-or-later with an additional permission under section 7 for App Store distribution): https://github.com/bias-city/PrepareAudio
