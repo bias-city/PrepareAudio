@@ -16,5 +16,8 @@ appstore/demo/
 docs/entwurf-layout/
 # Store-Material (erzeugt, nicht im Repo)
 appstore/upload/
+appstore/upload-png/
+appstore/roh/
+appstore/store/
 appstore/demo/
 appstore/app-icon-1024.png

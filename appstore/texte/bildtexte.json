@@ -1,0 +1,105 @@
+{
+  "_hinweis": "Beschriftungen der Store-Bilder — EINZIGE Textquelle, das Montageskript liest sie hier. Haltung, Gestaltung und Masse: bildtexte.md. Reihenfolge der Liste = Reihenfolge im Store. `quelle` ist das Motiv aus scripts/screenshots.mjs; die Rohaufnahme liegt als appstore/roh/<quelle>-<sprache>.png. `grund` steuert nur den Schatten (helles oder dunkles Fenster).",
+  "bilder": [
+    {
+      "quelle": "sync",
+      "grund": "hell",
+      "de": {
+        "titel": "Mehrere Mikrofone,\neine Zeitachse.",
+        "unter": "Die App findet gemeinsame Ereignisse, misst den Versatz und legt die Aufnahmen übereinander."
+      },
+      "en": {
+        "titel": "Several microphones,\none timeline.",
+        "unter": "The app finds shared events, measures the offset and lays the recordings over each other."
+      },
+      "fr": {
+        "titel": "Plusieurs micros,\nune seule timeline.",
+        "unter": "L’app repère les événements communs, mesure le décalage et superpose les enregistrements."
+      },
+      "it": {
+        "titel": "Più microfoni,\nuna sola timeline.",
+        "unter": "L’app trova gli eventi comuni, misura lo sfasamento e sovrappone le registrazioni."
+      }
+    },
+    {
+      "quelle": "merge",
+      "grund": "hell",
+      "de": {
+        "titel": "Zerteilte Aufnahmen,\nwieder ganz.",
+        "unter": "Aufnahme-Teile werden an ihrer Aufnahmezeit erkannt und verlustfrei zusammengefügt."
+      },
+      "en": {
+        "titel": "Split recordings,\nwhole again.",
+        "unter": "Recording chunks are recognised by their recording time and merged losslessly."
+      },
+      "fr": {
+        "titel": "Des enregistrements fragmentés,\nde nouveau entiers.",
+        "unter": "Les fragments sont reconnus à leur heure d’enregistrement et assemblés sans perte."
+      },
+      "it": {
+        "titel": "Registrazioni spezzate,\ndi nuovo intere.",
+        "unter": "I frammenti vengono riconosciuti dall’ora di registrazione e uniti senza perdita."
+      }
+    },
+    {
+      "quelle": "edit-dunkel",
+      "grund": "dunkel",
+      "de": {
+        "titel": "Bearbeiten,\nohne zu verschieben.",
+        "unter": "Ziel und Position je Abschnitt wählen — die gemessene Lage jeder Spur bleibt fest."
+      },
+      "en": {
+        "titel": "Edit without\nmoving anything.",
+        "unter": "Choose target and position per section — the measured position of every track stays fixed."
+      },
+      "fr": {
+        "titel": "Modifier sans\nrien déplacer.",
+        "unter": "Choisis la destination et la position de chaque section — la position mesurée de chaque piste reste fixe."
+      },
+      "it": {
+        "titel": "Modifica senza\nspostare nulla.",
+        "unter": "Scegli destinazione e posizione per ogni sezione — la posizione misurata di ogni traccia resta fissa."
+      }
+    },
+    {
+      "quelle": "master",
+      "grund": "hell",
+      "de": {
+        "titel": "Gemastert\nauf −16 LUFS.",
+        "unter": "Gemessen nach EBU R128, Limiter bei −1,5 dBTP, Ausgabe als MP3 oder WAV."
+      },
+      "en": {
+        "titel": "Mastered\nto −16 LUFS.",
+        "unter": "Measured per EBU R128, limiter at −1.5 dBTP, output as MP3 or WAV."
+      },
+      "fr": {
+        "titel": "Masterisé\nà −16 LUFS.",
+        "unter": "Mesuré selon EBU R128, limiteur à −1,5 dBTP, sortie en MP3 ou WAV."
+      },
+      "it": {
+        "titel": "Masterizzato\na −16 LUFS.",
+        "unter": "Misurato secondo EBU R128, limiter a −1,5 dBTP, uscita in MP3 o WAV."
+      }
+    },
+    {
+      "quelle": "info",
+      "grund": "hell",
+      "de": {
+        "titel": "Alles bleibt\nauf deinem Mac.",
+        "unter": "Kein Konto, keine Cloud, nichts zu installieren. Offener Quellcode, alle Lizenzen in der App."
+      },
+      "en": {
+        "titel": "Everything stays\non your Mac.",
+        "unter": "No account, no cloud, nothing to install. Open source, every licence inside the app."
+      },
+      "fr": {
+        "titel": "Tout reste\nsur ton Mac.",
+        "unter": "Pas de compte, pas de cloud, rien à installer. Code ouvert, toutes les licences dans l’app."
+      },
+      "it": {
+        "titel": "Tutto resta\nsul tuo Mac.",
+        "unter": "Nessun account, nessun cloud, niente da installare. Codice aperto, tutte le licenze nell’app."
+      }
+    }
+  ]
+}

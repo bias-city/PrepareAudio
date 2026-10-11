@@ -26,6 +26,11 @@ const SITE = process.argv.includes("--site");
 const B = STORE ? 1440 : +arg("breite", 1200), H = STORE ? 900 : +arg("hoehe", 750), F = HANDBUCH || SITE ? 1 : +arg("faktor", 2);
 const SPRACHEN = arg("sprachen", "de,en,fr,it").split(",");
 const DUNKEL = process.argv.includes("--dunkel");
+// Welche Motive der freie Lauf aufnimmt (die Store-Montage braucht auch "edit": Timeline
+// mit geöffnetem Menü am Abschnitt). Möglich: leer, merge, sync, hero, edit, done, master, info.
+const MOTIVE = arg("motive", "leer,merge,sync,master,info").split(",");
+// Vertriebsweg für das Info-Feld: "mas" zeigt die Lizenzfassung der Store-App.
+const KANAL = arg("kanal", "dmg");
 const require = createRequire(process.env.PLAYWRIGHT_FROM || import.meta.url);
 const { webkit } = require("playwright");
 
@@ -55,7 +60,7 @@ const browser = await webkit.launch();
 const REIHE = ["sync", "merge", "master", "sync-dunkel", "handbuch", "leer", "info"]; // Reihenfolge im Store
 async function lauf(lang, dunkel, motive, groesse) {
   const p = lies(`plan-${lang}.json`);
-  const demo = { scan: lies(`scan-${lang}.json`), plan: p.plan, peaks: p.peaks, master: lies(`master-${lang}.json`) };
+  const demo = { scan: lies(`scan-${lang}.json`), plan: p.plan, peaks: p.peaks, master: lies(`master-${lang}.json`), channel: KANAL };
   const [b, h] = groesse || [B, H];
   const page = await browser.newPage({ viewport: { width: b, height: h }, deviceScaleFactor: groesse ? 1 : F, colorScheme: dunkel ? "dark" : "light" });
   page.on("pageerror", (e) => { if (!/licenses\.json/.test(e.message)) console.log(`[${lang}] FEHLER`, e.message); });
@@ -130,7 +135,7 @@ for (const lang of GROESSEN.length ? [] : SPRACHEN) {
     await lauf(lang, true, ["sync"]);
     await handbuchSeite(lang);
   } else if (HANDBUCH) { for (const d of [false, true]) await lauf(lang, d, ["leer", "merge", "sync", "master"]); }
-  else await lauf(lang, DUNKEL, ["leer", "merge", "sync", "master", "info"]);
+  else await lauf(lang, DUNKEL, MOTIVE);
   console.log("✓", lang);
 }
 await browser.close();

@@ -1,10 +1,11 @@
 # PrepareAudio 0.4.0 im Mac App Store — Anleitung fürs Apple-Portal
 
 Alles Nötige liegt bereit. Texte: `appstore/texte/<sprache>/` (erzeugt von
-`scripts/appstore-texte.py`, Längen werden geprüft). Bilder: `appstore/upload/<sprache>/`
-(erzeugt von `node scripts/screenshots.mjs appstore/upload --store`, 2880 × 1800, JPEG ohne
-Alpha, in der Reihenfolge nummeriert). App-Symbol: `appstore/app-icon-1024.png`. Beides lässt
-sich jederzeit neu erzeugen.
+`scripts/appstore-texte.py`, Längen werden geprüft). Bilder: `appstore/store/<sprache>/`
+— fünf beschriftete Motive, 2880 × 1800, PNG, in der Reihenfolge nummeriert; erzeugt von
+`scripts/screenshots.mjs` und `scripts/appstore-montage.mjs`, Beschriftungen und Gestaltung
+in `appstore/texte/bildtexte.json` und `bildtexte.md`. App-Symbol:
+`appstore/app-icon-1024.png`. Alles lässt sich jederzeit neu erzeugen.
 
 ## A. developer.apple.com › Certificates, Identifiers & Profiles
 
@@ -31,10 +32,11 @@ Plattform macOS · Name `PrepareAudio` · Hauptsprache wie bei ResearchTranscrip
 | Schlagwörter | `schlagwoerter.txt` |
 | Neuerungen | `neu.txt` |
 | Untertitel (unter App-Informationen) | `untertitel.txt` |
-| Bildschirmfotos | `appstore/upload/<sprache>/01…07` in dieser Reihenfolge |
+| Bildschirmfotos | `appstore/store/<sprache>/01…05` in dieser Reihenfolge |
 
-Die sieben Motive: Synchronisieren, Zusammenfügen, Mastern, Synchronisieren dunkel, Handbuch,
-Leerzustand, Info-Feld mit Lizenzen.
+Die fünf Motive: Synchronisieren, Zusammenfügen, Timeline dunkel mit offenem Menü, Mastern,
+Info-Feld mit Lizenzen. Jedes trägt eine Schlagzeile auf hellem Aubergine-Grund; das Fenster
+ist ganz zu sehen. Der alte Satz ohne Beschriftung liegt als Rückfall in `appstore/upload/`.
 
 Support-URL, Marketing-URL, Datenschutz-URL und Copyright: `appstore/texte/urls.txt`.
 

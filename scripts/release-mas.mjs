@@ -31,6 +31,11 @@ const sh = (cmd, args, opts = {}) => execFileSync(cmd, args, { stdio: "inherit",
 const out = (cmd, args) => execFileSync(cmd, args, { encoding: "utf8", cwd: ROOT });
 const abbruch = (text) => { console.error("ABBRUCH: " + text); process.exit(1); };
 
+// Cargo liegt in ~/.cargo/bin und steht nicht in jeder Umgebung im PATH (tauri ruft
+// `cargo metadata` auf und bricht sonst mit «No such file or directory» ab).
+const CARGO = path.join(os.homedir(), ".cargo/bin");
+if (fs.existsSync(CARGO) && !process.env.PATH.split(":").includes(CARGO)) process.env.PATH = `${CARGO}:${process.env.PATH}`;
+
 function identitaet(name, nurCodesign = true) {
   const liste = out("/usr/bin/security", ["find-identity", "-v", ...(nurCodesign ? ["-p", "codesigning"] : [])]);
   const z = liste.split("\n").find((l) => l.includes(name));

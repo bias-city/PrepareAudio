@@ -9,6 +9,8 @@
   const emit = (name, payload) => (listeners.get(name) || []).forEach((f) => f({ payload }));
   const clipsUpdate = (clips) => ({ clips, items: D.plan.items, edited: false });
   const handlers = {
+    // Vertriebsweg: das Info-Feld formuliert die Lizenz je Kanal anders.
+    channel: () => D.channel || 'dmg',
     scan_paths: () => D.scan,
     analyze_tracks: () => D.plan,
     analyze_master: () => D.master,
